@@ -1,0 +1,178 @@
+body {
+    background-image: url('../assets/image copy.png'); /* Background image */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat; /* Avoid unwanted repetition */
+    background-attachment: fixed; /* Optional for a cleaner scroll effect */
+    height: 100vh;
+    width: 100vw;
+    margin: 0;
+    padding: 0;
+}
+
+.login-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.6); /* Dark overlay to improve readability */
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.top-bar {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #13f0e5;
+    padding: 15px 30px;
+    color: rgb(22, 11, 11);
+    font-size: 20px;
+    font-weight: bold;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.nav-links a {
+    color: rgb(17, 5, 5);
+    margin-left: 20px;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 100px;
+    background-color: rgba(134, 219, 208, 0.9); /* Semi-transparent background */
+    padding: 30px;
+    width: 500px;
+    height: auto; /* Auto height for better flexibility */
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.text {
+    color: rgb(245, 12, 194);
+    font-size: 36px;
+    font-weight: 600;
+}
+
+.underline {
+    width: 50px;
+    height: 3px;
+    background-color: rgb(245, 12, 194);
+    margin: 0 auto;
+}
+
+.input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Neater spacing between inputs */
+    width: 95%;
+    margin-top: 30px;
+}
+
+.input-field {
+    display: flex;
+    align-items: center;
+    background-color: rgb(225, 229, 235);
+    border-radius: 10px;
+    padding: 10px 15px;
+    width: 100%;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Light shadow for focus */
+}
+
+.icon {
+    width: 30px;
+    margin-right: 10px;
+    color: #333;
+}
+
+input {
+    flex: 1;
+    height: 50px;
+    border: none;
+    background: transparent;
+    font-size: 18px;
+    outline: none;
+    padding-left: 10px;
+}
+
+.role-select {
+    flex: 1;
+    height: 50px;
+    border: none;
+    background: transparent;
+    font-size: 18px;
+    outline: none;
+    background-color: rgb(225, 229, 235);
+    border-radius: 10px;
+    padding: 10px;
+    cursor: pointer;
+    appearance: none;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.role-select:focus {
+    border: 2px solid #e22b86; /* Highlight color when focused */
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    margin-top: 10px;
+}
+
+.forgot-password {
+    text-align: center;
+    margin-top: 25px;
+    font-size: 18px;
+}
+
+.forgot-password span {
+    color: black;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.submit-container {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.submit {
+    padding: 12px 30px;
+    color: #fff;
+    background-color: #e22b86;
+    border: none;
+    border-radius: 50px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.submit:hover {
+    background-color: #a8557c;
+}
+
+.signup-redirect {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 18px;
+}
+
+.signup-redirect span {
+    color: #e22b86;
+    cursor: pointer;
+    font-weight: bold;
+}
