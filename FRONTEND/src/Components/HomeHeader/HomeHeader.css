@@ -1,0 +1,104 @@
+.header {
+  position: sticky;
+  z-index: 1;
+  top: 0;
+}
+
+/*---------- header upper------------ */
+.header .upper {
+  padding: 0 8px;
+  background-color: rgba(128, 128, 128, 0.628);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.call-us {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(0.7rem, 1vw, 0.8rem);
+}
+.call-us a {
+  color: black;
+}
+
+
+.links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(0.7rem, 2vw, 1.2rem);
+}
+.links p{
+  font-size: clamp(0.7rem, 1vw, 0.8rem);
+
+}
+.link a {
+  margin: 3px;
+}
+
+/*----------- header lower---------------- */
+
+.header .lower {
+  padding: 0 8px;
+  background-color: rgba(9, 70, 42, 0.74);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.4rem, 2vw, 1rem);
+}
+.logo img {
+  width: clamp(2rem, 5vw, 4rem);
+  height: clamp(1.8rem, 4vw, 3.5rem);
+}
+.logo h2 {
+  font-size: clamp(0.7rem, 2vw, 1rem);
+}
+.logo h2 span {
+  display: block;
+}
+
+.page-links {
+  display: flex;
+  gap: 2rem;
+}
+.page-links a {
+  color: whitesmoke;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+.page-links a:hover {
+  border-bottom: 2px solid whitesmoke;
+  color: black;
+}
+@media (max-width: 542px) {
+  .page-links {
+    display: none;
+  }
+}
+.btns{
+    display: flex;
+    gap: 8px;
+}
+.btns .login {
+  padding: 3px 5px;
+  border-radius: 5px;
+  border: none;
+  background-color: lightcyan;
+}
+.btns .signup {
+  padding: 4px 5px;
+  border-radius: 5px;
+  border: none;
+  color: whitesmoke;
+  background-color: rgb(23, 36, 37);
+}
