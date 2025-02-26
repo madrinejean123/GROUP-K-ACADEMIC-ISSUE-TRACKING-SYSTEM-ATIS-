@@ -1,21 +1,19 @@
+
 body {
-    background-image: url('../assets/image copy.png'); /* Background image */
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat; /* Avoid unwanted repetition */
-    background-attachment: fixed; /* Optional for a cleaner scroll effect */
+    background: none; /* Removes both background color and image */
     height: 100vh;
-    width: 100vw;
+    width: 65vw;
     margin: 0;
     padding: 0;
 }
+
 
 .login-page {
     display: flex;
     flex-direction: column;
     align-items: center;
     background-color: rgba(0, 0, 0, 0.6); /* Dark overlay to improve readability */
-    min-height: 100vh;
+    min-height: calc(100vh - 50px); /* Adjust to leave space for the footer */
     padding: 20px;
 }
 
@@ -47,7 +45,7 @@ body {
     background-color: rgba(134, 219, 208, 0.9); /* Semi-transparent background */
     padding: 30px;
     width: 500px;
-    height: auto; /* Auto height for better flexibility */
+    height: 800px;
     border-radius: 12px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
@@ -63,19 +61,11 @@ body {
     font-weight: 600;
 }
 
-.underline {
-    width: 50px;
-    height: 3px;
-    background-color: rgb(245, 12, 194);
-    margin: 0 auto;
-}
-
 .input-container {
     display: flex;
     flex-direction: column;
-    gap: 20px; /* Neater spacing between inputs */
+    gap: 40px;
     width: 95%;
-    margin-top: 30px;
 }
 
 .input-field {
@@ -83,15 +73,13 @@ body {
     align-items: center;
     background-color: rgb(225, 229, 235);
     border-radius: 10px;
-    padding: 10px 15px;
+    padding: 10px;
     width: 100%;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Light shadow for focus */
 }
 
 .icon {
     width: 30px;
     margin-right: 10px;
-    color: #333;
 }
 
 input {
@@ -101,33 +89,6 @@ input {
     background: transparent;
     font-size: 18px;
     outline: none;
-    padding-left: 10px;
-}
-
-.role-select {
-    flex: 1;
-    height: 50px;
-    border: none;
-    background: transparent;
-    font-size: 18px;
-    outline: none;
-    background-color: rgb(225, 229, 235);
-    border-radius: 10px;
-    padding: 10px;
-    cursor: pointer;
-    appearance: none;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.role-select:focus {
-    border: 2px solid #e22b86; /* Highlight color when focused */
-}
-
-.remember-me {
-    display: flex;
-    align-items: center;
-    font-size: 18px;
-    margin-top: 10px;
 }
 
 .forgot-password {
@@ -165,14 +126,23 @@ input {
     background-color: #a8557c;
 }
 
-.signup-redirect {
+.footer-bar {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: #0b91df;
+    color: rgb(8, 1, 1);
     text-align: center;
-    margin-top: 30px;
-    font-size: 18px;
+    padding: 10px 0;
+    font-size: 14px;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.signup-redirect span {
-    color: #e22b86;
-    cursor: pointer;
-    font-weight: bold;
+.footer-bar a {
+    color: #011c25; /* Baby Blue */
+    text-decoration: none;
+}
+
+.footer-bar a:hover {
+    text-decoration: underline;
 }
