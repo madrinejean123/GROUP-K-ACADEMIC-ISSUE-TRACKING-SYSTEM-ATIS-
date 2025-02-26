@@ -14,8 +14,8 @@ import "../WelcomePage/HeroPage.css";
 // import LandingImg from "../../Assets/landing-page.jpg";
 // import LandingImg from "../components/Assets/landing-page.jpg";
 import { FaArrowRightLong } from "react-icons/fa6";
-import HomeHeader from "../../components/HomeHeader/HomeHeader";
-import Footer from "../../components/Footer/Footer";
+import HomeHeader from "../../Components/HomeHeader/HomeHeader";
+import Footer from "../../Components/Footer/Footer";
 
 const HeroPage = () => {
   return (
