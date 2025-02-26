@@ -4,7 +4,12 @@ from django.db import models
 class Issues(models.Model):
     email = models.EmailField(max_length=225, unique=True)
     category = models.CharField(max_length=50)
-    #status = 
+    STATUS_CHOICE = [
+        ('pending', 'Pending'),
+        ('resolved', 'Resolved'),
+        ('rejected', 'Rejected'),
+    ]
+    status = models.CharField(max_length=20, choices=STATUS_CHOICE, default='pending')
     description = models.TextField()
     attachment = models.ImageField(upload_to='insert tab/', blank=True, null=True)
     assigned_lecturer = models.CharField(max_length=100)
