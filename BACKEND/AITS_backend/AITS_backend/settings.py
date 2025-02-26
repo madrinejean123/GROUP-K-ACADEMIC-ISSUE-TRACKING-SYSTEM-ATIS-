@@ -37,10 +37,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'corsheader',
+    'corsheaders',
     'rest_framework',
     'AITS_app',
     'student',
+    'lecturer',
+    'registrar',
 ]
 
 MIDDLEWARE = [
@@ -55,9 +57,10 @@ MIDDLEWARE = [
 ]
 
 
-REST_FRAMEWORK = {'DEFAULT_PERMISSION_CLASSES':[
-    'rest_framework.permission.AllowAny'
-]}
+REST_FRAMEWORK = {'DEFAULT_PERMISSION_CLASSES': [
+    'rest_framework.permissions.AllowAny',
+]
+}
 
 CORS_ORIGIN_ALLOW_ALL = True
 

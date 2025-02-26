@@ -1,15 +1,14 @@
 from django.db import models
 
 
-class Student(models.Model):
+class Lecturer(models.Model):
     name = models.CharField(max_length=100)
-    student_reg_no = models.CharField(max_length=20, unique=True)
-    student_no = models.IntegerField(unique=True)
+    lecturer_id = models.CharField(max_length=20, unique=True)
     email = models.EmailField(max_length=255, unique=True)
     profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
-    year_of_study = models.IntegerField()
+    department = models.CharField(max_length=100)
     gender = models.CharField(max_length=20, default='other')
-    semester = models.IntegerField()
+    college = models.CharField(max_length=100)
     
     def __str__(self):
         return self.name
