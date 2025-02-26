@@ -1,0 +1,84 @@
+
+
+/* ------------------------------MAIN SECTION------------------------ */
+
+.welcome-hero {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.right-hero {
+  padding: 5rem 0;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  /* justify-content: space-around; */
+  color: whitesmoke;
+  font-weight: bold;
+  width: 70%;
+  height: 100%;
+  /* background: url("../Assets/"); */
+  /* background-position: 100%;
+  background-size: cover;
+  background-repeat: no-repeat; */
+}
+
+
+.right-hero h1 {
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  font-size: clamp(1.4rem, 2vw, 1.6rem);
+  white-space: wrap;
+  color: black;
+}
+.right-hero h1 span{
+  display: block;
+}
+
+.right-hero p {
+  margin-bottom: 1rem;
+  white-space: wrap;
+  text-align: center;
+  color: black;
+  font-weight: 400;
+  font-size: clamp(1rem,2vw,1.5rem);
+}
+.right-hero p span{
+  display: block;
+}
+
+.right-hero a{
+  text-decoration: none;
+}
+.right-hero button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 1.2rem;
+  background-color: aqua;
+  padding: 3px 20px;
+  border: none;
+  border-radius: 5px;
+}
+
+.left-hero {
+  width: 30%;
+  height: 100%;
+}
+.left-hero img {
+  width: 100%;
+  height: 100%;
+}
+@media (max-width: 664px) {
+  .welcome-hero .left-hero {
+    display: none;
+  }
+  .welcome-hero .right-hero {
+    width: 100%;
+  }
+} 

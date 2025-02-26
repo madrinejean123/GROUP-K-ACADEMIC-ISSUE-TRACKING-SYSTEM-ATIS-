@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     'issues',
     'department',
     'rest_framework',
-    'corsheaders'
 ]
 
 MIDDLEWARE = [
