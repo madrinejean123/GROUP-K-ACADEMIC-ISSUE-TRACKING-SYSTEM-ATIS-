@@ -1,24 +1,22 @@
 import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom"; // Updated import
-import Login from "./Authentication/login.js";
-import Signup from "./Authentication/signup.jsx";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
+import Login from "./Pages/LoginPage/login.jsx";
+import Signup from "./Pages/SignupPage/signup.jsx";
 
 function App() {
   return (
-    <Router>
-      <div className="App">
+    <div className="App">
+      <Router>
         <Routes>
-          {/* Routing for Home */}
-          <Route path="/" element={<Home />} />
-
-          {/* Routing for Login */}
-          <Route path="/login" element={<Login />} />
-
-          {/* Routing for Signup */}
-          <Route path="/signup" element={<Signup />} />
+          {/* <Route path="/" element={<Footer />} /> */}
+          <Route path="/" element={<HeroPage />} />
+          {/* <Route path="/" element={<SignupPage />} /> */}
         </Routes>
-      </div>
-    </Router>
+      </Router>
+      <Login />
+      <Signup />
+    </div>
   );
 }
 
