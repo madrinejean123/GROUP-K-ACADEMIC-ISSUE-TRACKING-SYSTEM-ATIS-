@@ -6,6 +6,7 @@ import SignupHeader from "../../Components/SignupHeader/SignupHeader";
 
 const Signup = () => {
   const [role, setRole] = useState(""); // Track selected role
+
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -16,7 +17,7 @@ const Signup = () => {
     confirmPassword: "",
   });
 
-  // Handle form input changes
+  
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -36,85 +37,34 @@ const Signup = () => {
           <option value="registrar">Registrar</option>
         </select>
 
-        {/* Common Fields */}
-        <input
-          type="text"
-          name="fullName"
-          placeholder="Full Name"
-          onChange={handleChange}
-          value={formData.fullName}
-          required
-        />
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          onChange={handleChange}
-          value={formData.email}
-          required
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          onChange={handleChange}
-          value={formData.password}
-          required
-        />
-        <input
-          type="password"
-          name="confirmPassword"
-          placeholder="Confirm Password"
-          onChange={handleChange}
-          value={formData.confirmPassword}
-          required
-        />
+        
+        <input type="text" name="fullName" placeholder="Full Name" onChange={handleChange} value={formData.fullName} required />
+        <input type="email" name="email" placeholder="Email" onChange={handleChange} value={formData.email} required />
+        <input type="password" name="password" placeholder="Password" onChange={handleChange} value={formData.password} required />
+        <input type="password" name="confirmPassword" placeholder="Confirm Password" onChange={handleChange} value={formData.confirmPassword} required />
 
         {/* Conditional Fields Based on Role */}
-        {role === "student" && (
-          <input
-            type="text"
-            name="studentNumber"
-            placeholder="Student Number"
-            onChange={handleChange}
-            value={formData.studentNumber}
-            required
-          />
+        {role === 'student' && (
+          <input type="text" name="studentNumber" placeholder="Student Number" onChange={handleChange} value={formData.studentNumber} required />
         )}
-        {role === "lecturer" && (
-          <input
-            type="text"
-            name="staffId"
-            placeholder="Staff ID"
-            onChange={handleChange}
-            value={formData.staffId}
-            required
-          />
+        {role === 'lecturer' && (
+          <input type="text" name="staffId" placeholder="Staff ID" onChange={handleChange} value={formData.staffId} required />
         )}
-        {role === "registrar" && (
-          <input
-            type="text"
-            name="registrarId"
-            placeholder="Registrar ID"
-            onChange={handleChange}
-            value={formData.registrarId}
-            required
-          />
+        {role === 'registrar' && (
+          <input type="text" name="registrarId" placeholder="Registrar ID" onChange={handleChange} value={formData.registrarId} required />
         )}
 
-        {/* Forgot Password link */}
+        
         <div className="forgot-password">
           <Link to="/forgot-password">Forgot Password?</Link>
         </div>
 
-        {/* Submit Button */}
+        
         <button type="submit">Sign Up</button>
 
-        {/* Login Button */}
+        
         <div className="login-redirect">
-          <p>
-            Already have an account? <Link to="/login">Login</Link>
-          </p>
+          <p>Already have an account? <Link to="/login">Login</Link></p>
         </div>
       </div>
       <Footer />

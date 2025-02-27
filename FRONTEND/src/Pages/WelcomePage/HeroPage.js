@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "../WelcomePage/HeroPage.css";
 import { useNavigate } from "react-router-dom";
 // import MakLogo from "../Assets/logo.jpg";
@@ -14,29 +14,40 @@ import HomeHeader from "../../Components/HomeHeader/HomeHeader";
 import Footer from "../../Components/Footer/Footer";
 
 const HeroPage = () => {
-  
   const navigate = useNavigate();
+  const [text, setText] = useState("");
+  const fullText =
+    "WEELCOME TO  MAKERERE UNIVERSITY ACADEMIC ISSUE TRACKING SYSTEM!";
+  let index = 0;
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (index < fullText.length) {
+        setText((prev) => prev + fullText.charAt(index));
+        index++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 50);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <>
       <HomeHeader />
       <main className="welcome-hero">
         <div className="left-hero">
-          <img src={LandingImg} />
+          <img src={LandingImg} alt="Landing" className="hero-image" />
         </div>
         <div className="right-hero">
-          <h1>
-            WELCOME TO THE MAKERERE UNIVERSITY{" "}
-            <span>ACADEMIC ISSUE TRACKING SYSTEM !</span>
-          </h1>
-          <p>
+          <h1 className="fade-in">{text}</h1>
+          <p className="slide-in">
             Let's bridge the gap between students & administration...
-            <span>log, track, resolve your academic related concerns here.</span>
+            <span> Log, track, resolve your academic-related concerns here.</span>
           </p>
-          <p>Enhancing Academic Excellence!</p>
-          <button onClick={() => navigate("/signup")}>
-            Get Started
-            <FaArrowRightLong />
+          <p className="fade-in">Enhancing Academic Excellence!</p>
+          <button className="cta-button" onClick={() => navigate("/signup")}>
+            Get Started <FaArrowRightLong />
           </button>
         </div>
       </main>
