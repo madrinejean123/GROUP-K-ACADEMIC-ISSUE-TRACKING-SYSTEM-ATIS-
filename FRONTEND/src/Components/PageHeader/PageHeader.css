@@ -1,17 +1,17 @@
 /* ---------- Sticky Header and Styling ---------- */
 .page-header {
     position: sticky;
-    z-index: 1000; /* Ensure it's on top of other elements */
+    z-index: 1000; 
     top: 0;
     width: 100%;
-    background-color: #ffffff; /* Solid background for header */
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Optional shadow effect */
+    background-color: #ffffff; 
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); 
   }
   
   /* ---------- Header Upper Section ---------- */
   .page-header .upper {
     padding: 0 8px;
-    background-color: rgba(128, 128, 128, 0.628); /* Slight grey background */
+    background-color: rgba(128, 128, 128, 0.628); 
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -32,7 +32,7 @@
   }
   
   .call-us a:hover {
-    color: #00b4d8; /* Light blue on hover */
+    color: #00b4d8; /
   }
   
   .links {
@@ -53,7 +53,7 @@
   /* ---------- Header Lower Section ---------- */
   .page-header .lower {
     padding: 0 8px;
-    background-color: rgba(9, 70, 42, 0.74); /* Greenish background */
+    background-color: rgba(9, 70, 42, 0.74); 
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -97,12 +97,12 @@
   
   .page-links a:hover {
     border-bottom: 2px solid whitesmoke;
-    color: #00b4d8; /* Light blue hover effect */
+    color: #00b4d8; 
   }
   
   @media (max-width: 542px) {
     .page-links {
-      display: none; /* Hide links on smaller screens */
+      display: none; 
     }
   }
   
@@ -123,7 +123,7 @@
   }
   
   .btns .notifications:hover {
-    background-color: #00b4d8; /* Light blue on hover */
+    background-color: #00b4d8; 
   }
   
   /* ---------- Optional Styling for Notifications Icon ---------- */

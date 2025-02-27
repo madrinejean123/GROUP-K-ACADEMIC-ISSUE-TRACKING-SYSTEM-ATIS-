@@ -4,7 +4,7 @@ import { MdAddCall } from "react-icons/md";
 import { FaSquareXTwitter } from "react-icons/fa6";
 import { FaSquareFacebook } from "react-icons/fa6";
 import { FaSquareWhatsapp } from "react-icons/fa6";
-import { Link } from "react-router-dom"; // Import Link from react-router-dom
+import { Link } from "react-router-dom"; 
 import MakLogo from "../assets/logo.png";
 
 const PageHeader = () => {

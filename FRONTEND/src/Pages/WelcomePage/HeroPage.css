@@ -9,7 +9,7 @@
   padding: 2rem;
   background: linear-gradient(to bottom, #f0f8ff, #dff6ff);
   overflow: visible; 
-  font-family: 'Poppins', sans-serif; /* Adding a modern and clean font */
+  font-family: 'Poppins', sans-serif; 
 }
 
 /* Right Section */
@@ -24,25 +24,25 @@
   height: 100%;
   text-align: center;
   animation: fadeIn 1s ease-in-out;
-  font-family: 'Poppins', sans-serif; /* Consistent font across sections */
+  font-family: 'Poppins', sans-serif; 
 }
 
 .right-hero h1 {
   text-align: center;
   font-weight: bold;
   margin-bottom: 1rem;
-  font-size: clamp(1.2rem, 3.5vw, 1.6rem); /* Reduced font size for a cleaner look */
+  font-size: clamp(1.2rem, 3.5vw, 1.6rem); 
   color: black;
-  white-space: normal; /* Allow text to wrap naturally */
+  white-space: normal; 
 }
 
 .right-hero p {
   margin-bottom: 1rem;
-  white-space: normal; /* Allow text to wrap naturally */
+  white-space: normal; 
   text-align: center;
   color: black;
   font-weight: 400;
-  font-size: clamp(0.9rem, 2.5vw, 1.2rem); /* Slightly reduced font size for a better fit */
+  font-size: clamp(0.9rem, 2.5vw, 1.2rem); 
   animation: slideUp 1s ease-in-out;
 }
 
@@ -52,7 +52,7 @@
   font-weight: bold;
 }
 
-/* Button */
+
 .right-hero button {
   display: flex;
   align-items: center;
@@ -74,7 +74,7 @@
   transform: scale(1.05);
 }
 
-/* Left Section */
+
 .left-hero {
   width: 40%;
   height: 100%;
@@ -82,9 +82,9 @@
 }
 
 .left-hero img {
-  max-width: 105%; /* Increased width */
+  max-width: 105%; 
   height: auto;
-  max-height: 80vh; /* Increased height */
+  max-height: 80vh;
   border-radius: 10px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
   animation: fadeIn 1.5s ease-in-out;
