@@ -1,19 +1,20 @@
-import React, { useState } from 'react';
-import { Link } from "react-router-dom";
-import PageHeader from "../../Components/PageHeader/PageHeader"; 
-import Footer from "../../Components/Footer/Footer"; 
+import React, { useState } from "react";
 import "../SignupPage/signup.css";
+import { Link } from "react-router-dom";
+import Footer from "../../Components/Footer/Footer";
+import SignupHeader from "../../Components/SignupHeader/SignupHeader";
 
 const Signup = () => {
-  const [role, setRole] = useState(''); 
+  const [role, setRole] = useState(""); // Track selected role
+
   const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    studentNumber: '',
-    staffId: '',
-    registrarId: '',
-    password: '',
-    confirmPassword: ''
+    fullName: "",
+    email: "",
+    studentNumber: "",
+    staffId: "",
+    registrarId: "",
+    password: "",
+    confirmPassword: "",
   });
 
   
@@ -23,9 +24,7 @@ const Signup = () => {
 
   return (
     <>
-      
-      <PageHeader />
-
+      <SignupHeader />
       <div className="signup-container">
         <h2>Sign Up</h2>
 
@@ -68,8 +67,6 @@ const Signup = () => {
           <p>Already have an account? <Link to="/login">Login</Link></p>
         </div>
       </div>
-
-      
       <Footer />
     </>
   );
