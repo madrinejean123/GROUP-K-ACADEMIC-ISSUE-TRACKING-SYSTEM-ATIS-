@@ -5,6 +5,7 @@ import { FaSquareXTwitter } from "react-icons/fa6";
 import { FaSquareFacebook } from "react-icons/fa6";
 import { FaSquareWhatsapp } from "react-icons/fa6";
 import { FaUser } from "react-icons/fa";
+import { Link } from "react-router-dom"; // Import Link from react-router-dom
 import MakLogo from "../assets/logo.png";
 
 const HomeHeader = () => {
@@ -35,7 +36,7 @@ const HomeHeader = () => {
       </div>
       <div className="lower">
         <div className="logo">
-          <img src={MakLogo} />
+          <img src={MakLogo} alt="Mak Logo" />
           <h2>
             MAKERERE UNIVERSITY <span>(AITS)</span>
           </h2>
@@ -46,17 +47,19 @@ const HomeHeader = () => {
           <a href="#"> ABOUT</a>
         </div>
         <div className="btns">
-          <a href="/login.html">
+          
+          <Link to="/login">
             <button className="login" type="submit">
               <FaUser /> Login
             </button>
-          </a>
+          </Link>
 
-          <a href="/signup.html">
+          {/* Use Link here to navigate to the signup page */}
+          <Link to="/signup">
             <button className="signup" type="submit">
               Sign Up
             </button>
-          </a>
+          </Link>
         </div>
       </div>
     </header>

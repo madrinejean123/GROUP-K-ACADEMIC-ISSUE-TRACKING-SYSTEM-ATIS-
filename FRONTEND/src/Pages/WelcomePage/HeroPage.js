@@ -1,8 +1,6 @@
 import React from "react";
 import "../WelcomePage/HeroPage.css";
-
-// import React, { useState } from "react";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 // import MakLogo from "../Assets/logo.jpg";
 // import { MdAddCall } from "react-icons/md";
 // import { FaSquareXTwitter } from "react-icons/fa6";
@@ -10,8 +8,6 @@ import "../WelcomePage/HeroPage.css";
 // import { FaSquareWhatsapp } from "react-icons/fa6";
 // import { FaUser } from "react-icons/fa";
 
-// import landingImg from "../components/assets/landing-page.jpg";
-// import LandingImg from "../../assets/landing-page.jpg";
 import LandingImg from "../../Components/assets/landing-page.jpg";
 import { FaArrowRightLong } from "react-icons/fa6";
 import HomeHeader from "../../Components/HomeHeader/HomeHeader";
@@ -19,6 +15,8 @@ import Footer from "../../Components/Footer/Footer";
 
 const HeroPage = () => {
   
+  const navigate = useNavigate();
+
   return (
     <>
       <HomeHeader />
@@ -36,12 +34,10 @@ const HeroPage = () => {
             <span>log, track, resolve your academic related concerns here.</span>
           </p>
           <p>Enhancing Academic Excellence!</p>
-          <a href="/signup.html">
-            <button>
-              Get Started
-              <FaArrowRightLong />
-            </button>
-          </a>
+          <button onClick={() => navigate("/signup")}>
+            Get Started
+            <FaArrowRightLong />
+          </button>
         </div>
       </main>
       <Footer />
