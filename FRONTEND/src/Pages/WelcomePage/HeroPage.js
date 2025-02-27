@@ -10,20 +10,21 @@ import "../WelcomePage/HeroPage.css";
 // import { FaSquareWhatsapp } from "react-icons/fa6";
 // import { FaUser } from "react-icons/fa";
 
-// import landingImg from "../components/Assets/landing-page.jpg";
-// import LandingImg from "../../Assets/landing-page.jpg";
-// import LandingImg from "../components/Assets/landing-page.jpg";
+// import landingImg from "../components/assets/landing-page.jpg";
+// import LandingImg from "../../assets/landing-page.jpg";
+import LandingImg from "../../Components/assets/landing-page.jpg";
 import { FaArrowRightLong } from "react-icons/fa6";
-import HomeHeader from "../../components/HomeHeader/HomeHeader";
-import Footer from "../../components/Footer/Footer";
+import HomeHeader from "../../Components/HomeHeader/HomeHeader";
+import Footer from "../../Components/Footer/Footer";
 
 const HeroPage = () => {
+  
   return (
     <>
       <HomeHeader />
       <main className="welcome-hero">
         <div className="left-hero">
-          {/* <img src={LandingImg} /> */}
+          <img src={LandingImg} />
         </div>
         <div className="right-hero">
           <h1>

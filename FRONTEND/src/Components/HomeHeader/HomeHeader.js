@@ -5,7 +5,7 @@ import { FaSquareXTwitter } from "react-icons/fa6";
 import { FaSquareFacebook } from "react-icons/fa6";
 import { FaSquareWhatsapp } from "react-icons/fa6";
 import { FaUser } from "react-icons/fa";
-import MakLogo from "../Assets/logo.png"
+import MakLogo from "../assets/logo.png";
 
 const HomeHeader = () => {
   return (

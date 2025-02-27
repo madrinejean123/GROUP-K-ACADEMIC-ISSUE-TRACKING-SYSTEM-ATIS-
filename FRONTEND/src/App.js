@@ -1,8 +1,9 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-import Login from "./Pages/LoginPage/login.jsx";
-import Signup from "./Pages/SignupPage/signup.jsx";
+// import Login from "./Pages/LoginPage/login.jsx";
+// import Signup from "./Pages/SignupPage/signup.jsx";
+import HeroPage from "./Pages/WelcomePage/HeroPage.js";
 
 function App() {
   return (
@@ -14,8 +15,8 @@ function App() {
           {/* <Route path="/" element={<SignupPage />} /> */}
         </Routes>
       </Router>
-      <Login />
-      <Signup />
+      {/* <Login /> */}
+      {/* <Signup /> */}
     </div>
   );
 }
