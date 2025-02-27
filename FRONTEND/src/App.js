@@ -17,8 +17,8 @@ function App() {
 
         </Routes>
       </Router>
-      {/* <Login /> */}
-      {/* <Signup /> */}
+      
+      
     </div>
   );
 }

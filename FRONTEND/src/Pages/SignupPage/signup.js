@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from "react-router-dom";
-import PageHeader from "../../Components/PageHeader/PageHeader"; // Import PageHeader
-import Footer from "../../Components/Footer/Footer"; // Import Footer
+import PageHeader from "../../Components/PageHeader/PageHeader"; 
+import Footer from "../../Components/Footer/Footer"; 
 import "../SignupPage/signup.css";
 
 const Signup = () => {
-  const [role, setRole] = useState(''); // Track selected role
+  const [role, setRole] = useState(''); 
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -16,14 +16,14 @@ const Signup = () => {
     confirmPassword: ''
   });
 
-  // Handle form input changes
+  
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   return (
     <>
-      {/* Page Header */}
+      
       <PageHeader />
 
       <div className="signup-container">
@@ -38,7 +38,7 @@ const Signup = () => {
           <option value="registrar">Registrar</option>
         </select>
 
-        {/* Common Fields */}
+        
         <input type="text" name="fullName" placeholder="Full Name" onChange={handleChange} value={formData.fullName} required />
         <input type="email" name="email" placeholder="Email" onChange={handleChange} value={formData.email} required />
         <input type="password" name="password" placeholder="Password" onChange={handleChange} value={formData.password} required />
@@ -55,21 +55,21 @@ const Signup = () => {
           <input type="text" name="registrarId" placeholder="Registrar ID" onChange={handleChange} value={formData.registrarId} required />
         )}
 
-        {/* Forgot Password link */}
+        
         <div className="forgot-password">
           <Link to="/forgot-password">Forgot Password?</Link>
         </div>
 
-        {/* Submit Button */}
+        
         <button type="submit">Sign Up</button>
 
-        {/* Login Button */}
+        
         <div className="login-redirect">
           <p>Already have an account? <Link to="/login">Login</Link></p>
         </div>
       </div>
 
-      {/* Footer */}
+      
       <Footer />
     </>
   );
