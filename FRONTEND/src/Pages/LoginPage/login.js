@@ -1,89 +1,57 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import "../LoginPage/login.css";  // You can adjust the path based on where your CSS is located.
+import { Link } from "react-router-dom";
+import PageHeader from "../../Components/PageHeader/PageHeader"; // Import PageHeader
+import Footer from "../../Components/Footer/Footer"; // Import Footer
+import "../LoginPage/login.css";
 
 const Login = () => {
-  const navigate = useNavigate(); // Hook for navigation
   const [formData, setFormData] = useState({
     email: '',
-    password: '',
-    rememberMe: false,
+    password: ''
   });
 
+  // Handle form input changes
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleRememberMeChange = (e) => {
-    setFormData({ ...formData, rememberMe: e.target.checked });
-  };
-
-  // Handle Login button click
-  const handleLogin = () => {
-    // You can add your login logic here (e.g., authentication)
-    // After successful login, navigate to the homepage or dashboard
-    navigate('/home'); // Navigates to the home screen after login (adjust as needed)
-  };
-
-  // Navigate to Forgot Password page
-  const handleForgotPassword = () => {
-    navigate('/forgot-password');
-  };
-
-  // Navigate to SignUp page
-  const handleSignUp = () => {
-    navigate('/signup');
-  };
-
   return (
-    <div className="login-container">
-      <h2>Login</h2>
-      {/* Form Fields */}
-      <input 
-        type="email" 
-        name="email" 
-        placeholder="Email" 
-        onChange={handleChange} 
-        value={formData.email} 
-      />
-      <input 
-        type="password" 
-        name="password" 
-        placeholder="Password" 
-        onChange={handleChange} 
-        value={formData.password} 
-      />
+    <>
+      {/* Page Header */}
+      <PageHeader />
 
-      {/* Remember Me Checkbox */}
-      <div>
-        <label>
-          <input 
-            type="checkbox" 
-            name="rememberMe" 
-            checked={formData.rememberMe} 
-            onChange={handleRememberMeChange} 
-          />
-          Remember Me
-        </label>
+      <div className="login-container">
+        <h2>Login</h2>
+
+        {/* Common Fields */}
+        <input type="email" name="email" placeholder="Email" onChange={handleChange} value={formData.email} required />
+        <input type="password" name="password" placeholder="Password" onChange={handleChange} value={formData.password} required />
+
+        {/* Forgot Password link */}
+        <div className="forgot-password">
+          <Link to="/forgot-password">Forgot Password?</Link>
+        </div>
+
+        {/* Submit Button */}
+        <button type="submit">Login</button>
+
+        {/* Signup Button */}
+        <div className="signup-redirect">
+          <p>Don't have an account? <Link to="/signup">Sign Up</Link></p>
+        </div>
       </div>
 
-      {/* Login Button */}
-      <button type="button" onClick={handleLogin}>Login</button>
 
-      {/* Forgot Password Link */}
-      <div>
-        <p>
-          <a href="#" onClick={handleForgotPassword}>Forgot Password? Click here!</a>
-        </p>
-      </div>
 
-      {/* Don't have an account */}
-      <div>
-        <p>
-          Don't have an account? <span onClick={handleSignUp}>Sign Up here</span>
-        </p>
-      </div>
-    </div>
+
+
+
+
+
+
+      {/* Footer */}
+      <Footer />
+    </>
   );
 };
 

@@ -2,10 +2,9 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-import HeroPage from "./Pages/WelcomePage/HeroPage.js";
 import HeroPage from "./Pages/WelcomePage/HeroPage";
-// import Signup from "./Pages/SignupPage/signup";
-// import Login from "./Pages/LoginPage/login" ;
+import Signup from "./Pages/SignupPage/signup";
+import Login from "./Pages/LoginPage/login" ;
 
 function App() {
   return (

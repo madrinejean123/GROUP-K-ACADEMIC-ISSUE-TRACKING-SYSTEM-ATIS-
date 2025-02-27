@@ -1,0 +1,133 @@
+/* ---------- Sticky Header and Styling ---------- */
+.page-header {
+    position: sticky;
+    z-index: 1000; /* Ensure it's on top of other elements */
+    top: 0;
+    width: 100%;
+    background-color: #ffffff; /* Solid background for header */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Optional shadow effect */
+  }
+  
+  /* ---------- Header Upper Section ---------- */
+  .page-header .upper {
+    padding: 0 8px;
+    background-color: rgba(128, 128, 128, 0.628); /* Slight grey background */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .call-us {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(0.7rem, 1vw, 0.8rem);
+  }
+  
+  .call-us a {
+    color: black;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease-in-out;
+  }
+  
+  .call-us a:hover {
+    color: #00b4d8; /* Light blue on hover */
+  }
+  
+  .links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(0.7rem, 2vw, 1.2rem);
+  }
+  
+  .links p {
+    font-size: clamp(0.7rem, 1vw, 0.8rem);
+  }
+  
+  .link a {
+    margin: 3px;
+  }
+  
+  /* ---------- Header Lower Section ---------- */
+  .page-header .lower {
+    padding: 0 8px;
+    background-color: rgba(9, 70, 42, 0.74); /* Greenish background */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.4rem, 2vw, 1rem);
+  }
+  
+  .logo img {
+    width: clamp(2rem, 5vw, 4rem);
+    height: clamp(1.8rem, 4vw, 3.5rem);
+  }
+  
+  .logo h2 {
+    font-size: clamp(0.7rem, 2vw, 1rem);
+  }
+  
+  .logo h2 span {
+    display: block;
+  }
+  
+  .page-links {
+    display: flex;
+    gap: 2rem;
+  }
+  
+  .page-links a {
+    color: whitesmoke;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    text-decoration: none;
+    transition: color 0.3s ease-in-out;
+  }
+  
+  .page-links a:hover {
+    border-bottom: 2px solid whitesmoke;
+    color: #00b4d8; /* Light blue hover effect */
+  }
+  
+  @media (max-width: 542px) {
+    .page-links {
+      display: none; /* Hide links on smaller screens */
+    }
+  }
+  
+  /* ---------- Notifications Button Styling ---------- */
+  .btns {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .btns .notifications {
+    padding: 3px 5px;
+    border-radius: 5px;
+    border: none;
+    background-color: lightcyan;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+  }
+  
+  .btns .notifications:hover {
+    background-color: #00b4d8; /* Light blue on hover */
+  }
+  
+  /* ---------- Optional Styling for Notifications Icon ---------- */
+  .btns .notifications svg {
+    margin-right: 5px;
+  }
+  
