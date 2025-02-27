@@ -7,12 +7,14 @@ import { useNavigate } from "react-router-dom";
 // import { FaSquareFacebook } from "react-icons/fa6";
 // import { FaSquareWhatsapp } from "react-icons/fa6";
 // import { FaUser } from "react-icons/fa";
-// import LandingImg from "../components/Assets/landing-page.jpg";
+
+import LandingImg from "../../Components/assets/landing-page.jpg";
 import { FaArrowRightLong } from "react-icons/fa6";
 import HomeHeader from "../../Components/HomeHeader/HomeHeader";
 import Footer from "../../Components/Footer/Footer";
 
 const HeroPage = () => {
+  
   const navigate = useNavigate();
 
   return (
@@ -20,7 +22,7 @@ const HeroPage = () => {
       <HomeHeader />
       <main className="welcome-hero">
         <div className="left-hero">
-          {/* <img src={LandingImg} alt="Landing" /> */}
+          <img src={LandingImg} />
         </div>
         <div className="right-hero">
           <h1>
