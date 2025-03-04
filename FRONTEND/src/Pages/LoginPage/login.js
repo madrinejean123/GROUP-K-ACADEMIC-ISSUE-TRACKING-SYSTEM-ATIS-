@@ -19,23 +19,6 @@ const Login = () => {
 
   return (
     <>
-      
-      <PageHeader />
-
-      <div className="login-container">
-        <h2>Login</h2>
-
-        
-        <input type="email" name="email" placeholder="Email" onChange={handleChange} value={formData.email} required />
-        <input type="password" name="password" placeholder="Password" onChange={handleChange} value={formData.password} required />
-
-        
-        <div className="forgot-password">
-          <Link to="/forgot-password">Forgot Password?</Link>
-        </div>
-
-  return (
-    <>
       <LoginHeader/>
       <div className="login-container">
         <h2>Login</h2>
@@ -96,3 +79,5 @@ const Login = () => {
 };
 
 export default Login;
+
+
