@@ -1,117 +1,113 @@
 /* General container styling */
 .signup-container {
-    width: 100%;
-    max-width: 450px;
-    max-height: 600px;
-    margin: 0 auto;
-    margin-top: 50px;  /* Added your margin-top for proper spacing */
-    padding: 20px;
-    background-color: #bec8ca;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
+  width: 100%;
+  max-width: 400px;
+  max-height: 500px;
+  margin: 1rem auto;
+  padding: 15px;
+  background-color: #bec8ca;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
 }
 
 .signup-container h2 {
-    text-align: center;
-    color: #333;
-    font-size: 2rem;
-    margin-bottom: 20px;
+  text-align: center;
+  color: #333;
+  font-size: 1.8rem;
+  margin-bottom: 15px;
 }
 
 /* Input fields styling */
 .signup-container input,
 .signup-container select {
-    width: 90%;
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1rem;
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9rem;
 }
 
 .signup-container input:focus,
 .signup-container select:focus {
-    border-color: #007bff;
-    outline: none;
+  border-color: #007bff;
+  outline: none;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"] {
+  width: 100%;
+  margin: 8px;
+  padding: 12px 20px;
+  display: inline-block;
+  border: 2px solid rgb(109, 8, 240);
+  border-radius: 10px 10px 0 0;
+  box-sizing: border-box;
 }
 
 /* Label styling */
 .signup-container label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 5px;
-    color: #333;
-}
-
-/* Select box styling */
-.signup-container select {
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    background-color: #fff;
-    background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 8 8%22 width=%224%22 height=%224%22%3E%3Cpath fill=%22%23333%22 d=%22M1 1l3 3L7 1z%22/%3E%3C/svg%3E');
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    background-size: 8px;
-    padding-right: 30px;
+  display: block;
+  font-weight: bold;
+  margin-bottom: 4px;
+  color: #333;
 }
 
 /* Button styling */
 .signup-container button {
-    width: 80%; /* Reduced width of the sign-up button */
-    padding: 12px;
-    background-color: #007bff;
-    color: white;
-    font-size: 1rem;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    margin-bottom: 10px; /* Add spacing below the button */
+  width: 100%;
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-bottom: 8px; /* Reduced margin */
 }
 
 .signup-container button:hover {
-    background-color: #0056b3;
+  background-color: #0056b3;
 }
 
 .signup-container button:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
+  background-color: #cccccc;
+  cursor: not-allowed;
 }
 
-/* Forgot Password link */
 .forgot-password {
-    margin-top: 10px;
-    font-size: 14px;
+  margin-top: 8px;
+  font-size: 13px;
 }
 
 .forgot-password a {
-    color: black;
-    text-decoration: underline;
+  color: black;
+  text-decoration: underline;
 }
 
-/* Login Redirect */
 .login-redirect {
-    margin-top: 15px; /* Added space between "Already have an account" and "Login" */
-    text-align: center;
-    font-size: 14px;
+  margin-top: 12px;
+  text-align: center;
+  font-size: 13px;
 }
 
 .login-redirect p {
-    margin-bottom: 5px;
+  margin-bottom: 5px;
 }
 
 .login-redirect a {
-    color: #007bff;
-    text-decoration: none;
+  color: #007bff;
+  text-decoration: none;
 }
 
-/* Responsive adjustments */
 @media (max-width: 600px) {
-    .signup-container {
-        padding: 15px;
-    }
-    .signup-container h2 {
-        font-size: 1.5rem;
-    }
+  .signup-container {
+    padding: 12px;
+  }
+  .signup-container h2 {
+    font-size: 1.5rem;
+  }
 }

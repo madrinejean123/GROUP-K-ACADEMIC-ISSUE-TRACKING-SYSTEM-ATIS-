@@ -4,38 +4,17 @@ import "../LoginPage/login.css";  // You can adjust the path based on where your
 import LoginHeader from '../../Components/LoginHeader/LoginHeader';
 import Footer from '../../Components/Footer/Footer';
 
+import { Link } from "react-router-dom";
 
 const Login = () => {
-  const navigate = useNavigate(); // Hook for navigation
   const [formData, setFormData] = useState({
     email: '',
-    password: '',
-    rememberMe: false,
+    password: ''
   });
 
+  
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleRememberMeChange = (e) => {
-    setFormData({ ...formData, rememberMe: e.target.checked });
-  };
-
-  // Handle Login button click
-  const handleLogin = () => {
-    // You can add your login logic here (e.g., authentication)
-    // After successful login, navigate to the homepage or dashboard
-    navigate('/home'); // Navigates to the home screen after login (adjust as needed)
-  };
-
-  // Navigate to Forgot Password page
-  const handleForgotPassword = () => {
-    navigate('/forgot-password');
-  };
-
-  // Navigate to SignUp page
-  const handleSignUp = () => {
-    navigate('/signup');
   };
 
   return (
