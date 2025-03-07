@@ -1,6 +1,7 @@
 from django.db import models
 
 # Create your models here.
+
 class Issues(models.Model):
     email = models.EmailField(max_length=225, unique=True)
     category = models.CharField(max_length=50)
@@ -10,9 +11,10 @@ class Issues(models.Model):
         ('rejected', 'Rejected'),
     ]
     status = models.CharField(max_length=20, choices=STATUS_CHOICE, default='pending')
+    title = models.CharField(max_length=255, default = 'untitled issue')
     description = models.TextField()
     attachment = models.ImageField(upload_to='insert tab/', blank=True, null=True)
-    assigned_lecturer = models.CharField(max_length=100)
+    assigned_lecturer = models.CharField(max_length=100, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
