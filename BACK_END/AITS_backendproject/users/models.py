@@ -14,7 +14,7 @@ class User(AbstractUser):
     ]
 
     user_role = models.CharField(max_length=25, choices=USER_ROLES_CHOICES) 
-    email_domain = models.CharField(max_length=50)
+    email_domain = models.CharField(max_length=50,null=True)
     gender = models.CharField(max_length=8, choices=GENDER_CHOICES)
     profile_pic = models.ImageField(upload_to='profile/', blank=True, null=True)
     college = models.CharField(max_length=20)

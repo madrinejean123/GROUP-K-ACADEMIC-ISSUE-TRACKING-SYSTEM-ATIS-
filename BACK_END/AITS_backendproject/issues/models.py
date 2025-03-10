@@ -14,11 +14,8 @@ class Issues(models.Model):
     title = models.CharField(max_length=255, default = 'untitled issue')
     description = models.TextField()
     attachment = models.ImageField(upload_to='insert tab/', blank=True, null=True)
-<<<<<<< HEAD
     assigned_lecturer = models.CharField(max_length=100, )
-=======
     assigned_lecturer = models.CharField(max_length=100, blank=True, null=True)
->>>>>>> 8df424e23ba6f22dd51dd8047b4354aee42813a7
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
