@@ -49,7 +49,36 @@
     display: none;
   }
 }
-.btns a {
-  color: whitesmoke;
-  text-decoration: underline;
+
+.profile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.profile-info {
+  border-radius: 30px 0 0 30px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.profile-name h2 {
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.initials h3 {
+  background-color: aliceblue;
+  padding: 5px;
+  border-radius: 50%;
+}
+button {
+  display: flex;
+  background: none;
+  border: none;
+  outline: none;
 }

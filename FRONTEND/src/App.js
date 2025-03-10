@@ -5,6 +5,11 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import HeroPage from "./Pages/WelcomePage/HeroPage";
 import Signup from "./Pages/SignupPage/signup";
 import Login from "./Pages/LoginPage/login" ;
+import StudentDashboard from "./Pages/StudentDashboard/StudentDashboard";
+import LecturerDashboard from "./Pages/LecturerDashboard/LecturerDashboard";
+import RegistrarDashboard from "./Pages/RegistrarDashbard/RegistrarDashboard";
+
+
 
 function App() {
   return (
@@ -14,6 +19,9 @@ function App() {
           <Route path="/" element={<HeroPage />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element = {<Login />} />
+          <Route path="/" element={<StudentDashboard />} />
+          <Route path="/" element={<LecturerDashboard />} />
+          <Route path="/" element={<RegistrarDashboard />} />
         </Routes>
       </Router>
     </div>
