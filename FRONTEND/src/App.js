@@ -14,7 +14,6 @@ function App() {
           <Route path="/" element={<HeroPage />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element = {<Login />} />
-
         </Routes>
       </Router>
     </div>
