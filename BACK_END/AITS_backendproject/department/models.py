@@ -14,7 +14,7 @@ class Department(models.Model):
         ('covab', 'COVAB'),
         ('school of law', 'SCHOOL OF LAW'),
     ]
-    Department_name = models.CharField(max_length=100, verbose_name='Department', choices=DEPARTMENT_CHOICES)
+    department_name = models.CharField(max_length=100, verbose_name='Department', choices=DEPARTMENT_CHOICES)
     description = models.TextField(verbose_name='Department Description')
     
     def __str__(self):
