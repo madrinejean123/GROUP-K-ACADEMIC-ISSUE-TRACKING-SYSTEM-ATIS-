@@ -17,7 +17,7 @@ class User(AbstractUser):
     email_domain = models.CharField(max_length=50,null=True)
     gender = models.CharField(max_length=8, choices=GENDER_CHOICES)
     profile_pic = models.ImageField(upload_to='profile/', blank=True, null=True)
-    college = models.CharField(max_length=20)
+    college = models.CharField(max_length=20, blank=True, null=True)
     office = models.CharField(max_length=20, blank=True, null=True)
 
     # Fix conflict with Django's default User model
@@ -33,3 +33,16 @@ class Student(models.Model):
 
     def __str__(self):
         return self.user.username
+class Lecturer(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='lecturer')
+    department =  models.ForeignKey('department.Department', on_delete=models.SET_NULL, null=True, related_name='lecturer')
+
+    def __str__(self):
+        return f"{self.user.username}-{self.department}"
+class CollegeRegister(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='register')
+    department = models.ForeignKey('department.Department', on_delete=models.SET_NULL, null=True, related_name='register')
+      
+    def __str__(self):
+        return f"{self.user.username}-{self.department}"
+    
