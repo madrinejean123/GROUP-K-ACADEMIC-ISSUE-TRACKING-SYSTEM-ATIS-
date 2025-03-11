@@ -8,6 +8,6 @@ class DepartmentSerializer(serializers.ModelSerializer):
         fields = ['id', 'department_name', 'description']
         read_only_fields = ['id']
         extra_kwargs = {'department_name':{'required':True},
-                        'description':{'require':False},
+                        'description' : {'require' : False},
                         }
         
