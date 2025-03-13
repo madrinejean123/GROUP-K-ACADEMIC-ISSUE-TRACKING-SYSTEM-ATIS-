@@ -8,6 +8,7 @@ import Login from "./Pages/LoginPage/login" ;
 import StudentDashboard from "./Pages/StudentDashboard/StudentDashboard";
 import LecturerDashboard from "./Pages/LecturerDashboard/LecturerDashboard";
 import RegistrarDashboard from "./Pages/RegistrarDashbard/RegistrarDashboard";
+import Dashboard from "./Pages/mukdashboard/dashboard";
 
 
 
@@ -18,10 +19,12 @@ function App() {
         <Routes>
           <Route path="/" element={<HeroPage />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element = {<Login />} />
-          <Route path="/" element={<StudentDashboard />} />
-          <Route path="/" element={<LecturerDashboard />} />
-          <Route path="/" element={<RegistrarDashboard />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/StudentDashboard" element={<StudentDashboard />} />
+          <Route path="/LecturerDashboard" element={<LecturerDashboard />} />
+          <Route path="/RegistrarDashboard" element={<RegistrarDashboard />} />
+          <Route path="/mukdashboard" element={<Dashboard />} />
+          
         </Routes>
       </Router>
     </div>
