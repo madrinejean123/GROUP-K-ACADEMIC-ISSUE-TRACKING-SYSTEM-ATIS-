@@ -1,19 +1,16 @@
-
 import React, { useState } from "react";
-import { useForm } from "react-hook-form"; // Import React Hook Form
+import { useForm } from "react-hook-form";
 import "../SignupPage/signup.css";
 import { Link } from "react-router-dom";
 import axios from "axios";
-
+import toast from "react-hot-toast";
 
 const USER_REGEX = /^[a-zA-Z]+(?:\s[a-zA-Z]+)+$/;
 const PASSWORD_REGEX =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,16}$/;
 const USERID_REGEX = /^\d{10}$/;
 
-
 const SignUp = () => {
-  // Initialize useForm hook
   const {
     register,
     handleSubmit,
@@ -21,24 +18,45 @@ const SignUp = () => {
     formState: { errors },
     watch,
   } = useForm();
-  const [loading,setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
 
   // Handle form submission
   const onSubmit = async (data) => {
-    setLoading(true)
+    setLoading(true);
     console.log(data);
     // Here, you can add your API call for submitting the form, for example using axios.
     // Example:
     try {
-      const response = await axios.post('https://airbnb-app-chi.vercel.app/api/v1/users', data);
+      const response = await axios.post("https://app/api/v1/users", data);
       console.log(response);
-      if(response){
-        setLoading(false)
-        reset()
+      if (response) {
+        setLoading(false);
+        reset();
+        toast.success("Logged in Successfully", {
+          position: "top-center", // Position of the toast
+          duration: 3000, // Duration in milliseconds
+          // icon: "👏", // Custom icon
+          // style: {
+          //   // Custom styling for the toast
+          //   backgroundColor: "#4caf50",
+          //   color: "#fff",
+          // },
+        });
+        window.href("/LoginPage");
       }
     } catch (error) {
       console.error("Error during signup:", error);
       setLoading(false);
+      toast.error("Failed to SignUp", {
+        position: "top-center", // Position of the toast
+        duration: 3000, // Duration in milliseconds
+        // icon: "👏", // Custom icon
+        // style: {
+        //   // Custom styling for the toast
+        //   backgroundColor: "#4caf50",
+        //   color: "#fff",
+        // },
+      });
     }
   };
 
@@ -70,7 +88,10 @@ const SignUp = () => {
           type="number"
           id="userId"
           placeholder="Student No. / Staff ID"
-          {...register("userId", { required: "User ID is required" })}
+          {...register("userId", {
+            required: "User ID is required",
+            pattern: { value: USERID_REGEX, message: "Enter a valid userId" },
+          })}
         />
         {errors.userId && (
           <p style={{ color: "red" }}>{errors.userId.message}</p>
