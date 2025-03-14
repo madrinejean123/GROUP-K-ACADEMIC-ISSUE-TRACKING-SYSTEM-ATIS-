@@ -9,6 +9,7 @@ import StudentDashboard from "./Pages/StudentDashboard/StudentDashboard";
 import LecturerDashboard from "./Pages/LecturerDashboard/LecturerDashboard";
 import RegistrarDashboard from "./Pages/RegistrarDashbard/RegistrarDashboard";
 import Dashboard from "./Pages/mukdashboard/dashboard";
+import { Toaster } from "react-hot-toast";
 
 
 
@@ -24,8 +25,8 @@ function App() {
           <Route path="/LecturerDashboard" element={<LecturerDashboard />} />
           <Route path="/RegistrarDashboard" element={<RegistrarDashboard />} />
           <Route path="/mukdashboard" element={<Dashboard />} />
-          
         </Routes>
+        <Toaster position="top-center" reverseOrder={false} />
       </Router>
     </div>
   );
