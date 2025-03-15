@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 
+from datetime import timedelta #just testing this 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -42,6 +44,7 @@ INSTALLED_APPS = [
     'department',
     'rest_framework',
     'corsheaders',
+    'rest_framework_simplejwt',
 ]
 
 MIDDLEWARE = [
@@ -54,13 +57,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware'
 ]
-
-
-REST_FRAMEWORK = {'DEFAULT_PERMISSION_CLASSES':[
-    'rest_framework.permissions.AllowAny'
-]}
-
-CORS_ORIGIN_ALLOW_ALL = True
 
 
 ROOT_URLCONF = 'AITS_backendproject.urls'
@@ -135,3 +131,48 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+      'some_other_backend.CustomBackend',
+]
+
+AUTH_USER_MODEL = 'users.User'  
+
+
+REST_FRAMEWORK = {
+    
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+
+    
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',
+    ],
+}
+
+CORS_ORIGIN_ALLOW_ALL = True
+
+
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Access token expires in 60 minutes
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),  # Refresh token expires in 1 day
+    'ROTATE_REFRESH_TOKENS': True,  # Issue a new refresh token on each refresh
+    'BLACKLIST_AFTER_ROTATION': True,  # Blacklist old refresh tokens
+    'UPDATE_LAST_LOGIN': True,  # Update the user's last_login field on token refresh
+
+    'ALGORITHM': 'HS256',  # Use HMAC-SHA256 for signing tokens
+    'SIGNING_KEY': SECRET_KEY,
+    'VERIFYING_KEY': None,  # No public key for HMAC
+    'AUDIENCE': None,
+    'ISSUER': None,
+
+    'AUTH_HEADER_TYPES': ('Bearer',),  # Authorization header type
+    'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',  # Header name for JWT
+    'USER_ID_FIELD': 'id',  # Field to identify users
+    'USER_ID_CLAIM': 'user_id',  # Claim to store user ID in the token
+}

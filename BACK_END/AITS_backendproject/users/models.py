@@ -1,6 +1,19 @@
+# users/models.py
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
+from cloudinary.models import CloudinaryField  # For profile picture storage
 
+# Import Department model from the other app
+from department.models import Department
+
+# Custom validator for university email domain
+def validate_email_domain(value):
+    if not value.endswith('@mak.ac.ug'):
+        raise ValidationError('Email must belong to the university domain.')
+
+# Custom User Model
 class User(AbstractUser):
     USER_ROLES_CHOICES = [
         ('student', 'Student'),
@@ -13,12 +26,11 @@ class User(AbstractUser):
         ('female', 'Female'), 
     ]
 
-    user_role = models.CharField(max_length=25, choices=USER_ROLES_CHOICES) 
-    email_domain = models.CharField(max_length=50,null=True)
+    user_role = models.CharField(max_length=25, choices=USER_ROLES_CHOICES, default='student') 
+    email = models.EmailField(unique=True, validators=[validate_email_domain]) 
     gender = models.CharField(max_length=8, choices=GENDER_CHOICES)
-    profile_pic = models.ImageField(upload_to='profile/', blank=True, null=True)
-    college = models.CharField(max_length=20, blank=True, null=True)
-    office = models.CharField(max_length=20, blank=True, null=True)
+    profile_pic = CloudinaryField('image', blank=True, null=True)  #  for file storage
+    office = models.CharField(max_length=20, blank=True, null=True)  # For lecturers/registrars
 
     # Fix conflict with Django's default User model
     groups = models.ManyToManyField(Group, related_name="custom_user_groups")
@@ -27,22 +39,27 @@ class User(AbstractUser):
     def __str__(self):
         return self.username
 
+# Student Model
 class Student(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student')
-    year_of_study = models.PositiveSmallIntegerField()  # Prevents negative values
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student', unique=True)
+    year_of_study = models.PositiveSmallIntegerField() 
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)  # Link to Department
 
     def __str__(self):
         return self.user.username
+
+# Lecturer Model
 class Lecturer(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='lecturer')
-    department =  models.ForeignKey('department.Department', on_delete=models.SET_NULL, null=True, related_name='lecturer')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='lecturer', unique=True)
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, related_name='lecturer')
 
     def __str__(self):
         return f"{self.user.username}-{self.department}"
+
+# College Register Model
 class CollegeRegister(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='register')
-    department = models.ForeignKey('department.Department', on_delete=models.SET_NULL, null=True, related_name='register')
-      
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='register', unique=True)
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, related_name='register')
+
     def __str__(self):
         return f"{self.user.username}-{self.department}"
-    
