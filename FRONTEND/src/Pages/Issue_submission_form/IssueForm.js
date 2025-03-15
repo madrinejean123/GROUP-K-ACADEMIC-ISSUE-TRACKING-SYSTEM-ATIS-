@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./IssueForm.css";
-import PageHeader from "../../Components/UserHeader/UserHeader";
+import UserHeader from "../../Components/UserHeader/UserHeader";
 import Footer from "../../Components/Footer/Footer";
 
 const colleges = {
@@ -169,8 +169,8 @@ const IssueForm = () => {
   const [selectedSemester, setSelectedSemester] = useState("");
   const [selectedAssessment, setSelectedAssessment] = useState(""); // New state for assessment type
   const [selectedComplaintCategory, setSelectedComplaintCategory] = useState(""); // New state for complaint category
-  const [description, setDescription] = useState(""); // Description state
-  const [attachment, setAttachment] = useState(null); // File attachment state
+  const [description, setDescription] = useState(""); // 
+  const [attachment, setAttachment] = useState(null); // 
   const [schools, setSchools] = useState([]);
   const [departments, setDepartments] = useState([]);
   const years = [
@@ -232,7 +232,7 @@ const IssueForm = () => {
 
   return (
     <>
-      <PageHeader />
+      <UserHeader />
       <div className="IssueForm">
         <h2>ISSUE SUBMISSION FORM</h2>
 

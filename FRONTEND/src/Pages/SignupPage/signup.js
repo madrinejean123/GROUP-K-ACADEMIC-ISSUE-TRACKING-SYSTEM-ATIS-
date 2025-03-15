@@ -62,7 +62,7 @@ const Signup = () => {
         <button type="submit">Sign Up</button>
 
         <div className="login-redirect">
-          <p>Already have an account? <Link to="/IssueForm">IssueForm</Link></p>
+          <p>Already have an account? <Link to="/login">login</Link></p>
         </div>
       </div>
       <Footer />
