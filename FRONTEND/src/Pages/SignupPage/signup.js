@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import "../SignupPage/signup.css";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
+import "../SignupPage/signup.css";
 
+// Regular expressions for validation
 const USER_REGEX = /^[a-zA-Z]+(?:\s[a-zA-Z]+)+$/;
 const PASSWORD_REGEX =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,16}$/;
@@ -19,69 +20,54 @@ const SignUp = () => {
     watch,
   } = useForm();
   const [loading, setLoading] = useState(false);
+  const [role, setRole] = useState(""); // For handling the user role
+
+  // Password watch to validate confirm password
+  const password = watch("password");
 
   // Handle form submission
   const onSubmit = async (data) => {
     setLoading(true);
     console.log(data);
-    // Here, you can add your API call for submitting the form, for example using axios.
-    // Example:
+
     try {
       const response = await axios.post("https://app/api/v1/users", data);
       console.log(response);
       if (response) {
         setLoading(false);
         reset();
-        toast.success("Logged in Successfully", {
-          position: "top-center", // Position of the toast
-          duration: 3000, // Duration in milliseconds
-          // icon: "👏", // Custom icon
-          // style: {
-          //   // Custom styling for the toast
-          //   backgroundColor: "#4caf50",
-          //   color: "#fff",
-          // },
+        toast.success("Signed Up Successfully", {
+          position: "top-center",
+          duration: 3000,
         });
-        window.href("/LoginPage");
+        window.location.href = "/login"; // Redirect to login page
       }
     } catch (error) {
       console.error("Error during signup:", error);
       setLoading(false);
       toast.error("Failed to SignUp", {
-        position: "top-center", // Position of the toast
-        duration: 3000, // Duration in milliseconds
-        // icon: "👏", // Custom icon
-        // style: {
-        //   // Custom styling for the toast
-        //   backgroundColor: "#4caf50",
-        //   color: "#fff",
-        // },
+        position: "top-center",
+        duration: 3000,
       });
     }
   };
 
-  // Validate if the password and confirm password match
-  const password = watch("password");
-
   return (
     <div className="signup-container">
-      <h1>Welcome!</h1>
-      <h2>
-        Sign Up into Makerere Academic Issue Tracking System to access our
-        services
-      </h2>
+      <h2>REGISTER HERE</h2>
+
       <form className="signup-form" onSubmit={handleSubmit(onSubmit)}>
-        <label htmlFor="name">Full Name:</label>
+        <label htmlFor="fullName">Full Name:</label>
         <input
           type="text"
-          id="name"
-          placeholder="Enter your name"
-          {...register("name", {
+          id="fullName"
+          placeholder="Enter your full name"
+          {...register("fullName", {
             required: "Full name is required",
             pattern: { value: USER_REGEX, message: "Enter a valid full name" },
           })}
         />
-        {errors.name && <p style={{ color: "red" }}>{errors.name.message}</p>}
+        {errors.fullName && <p style={{ color: "red" }}>{errors.fullName.message}</p>}
 
         <label htmlFor="userId">User-ID:</label>
         <input
@@ -93,9 +79,7 @@ const SignUp = () => {
             pattern: { value: USERID_REGEX, message: "Enter a valid userId" },
           })}
         />
-        {errors.userId && (
-          <p style={{ color: "red" }}>{errors.userId.message}</p>
-        )}
+        {errors.userId && <p style={{ color: "red" }}>{errors.userId.message}</p>}
 
         <label htmlFor="email">Email:</label>
         <input
@@ -105,6 +89,16 @@ const SignUp = () => {
           {...register("email", { required: "Email is required" })}
         />
         {errors.email && <p style={{ color: "red" }}>{errors.email.message}</p>}
+
+        {/* Conditional email for role */}
+        {(role === "lecturer" || role === "registrar") && (
+          <input
+            type="email"
+            id="makEmail"
+            placeholder="MAK Email"
+            {...register("makEmail", { required: "MAK Email is required" })}
+          />
+        )}
 
         <label htmlFor="password">Password:</label>
         <input
@@ -120,27 +114,23 @@ const SignUp = () => {
             },
           })}
         />
-        {errors.password && (
-          <p style={{ color: "red" }}>{errors.password.message}</p>
-        )}
+        {errors.password && <p style={{ color: "red" }}>{errors.password.message}</p>}
 
-        <label htmlFor="confirm-password">Confirm Password:</label>
+        <label htmlFor="confirmPassword">Confirm Password:</label>
         <input
           type="password"
-          id="confirm-password"
+          id="confirmPassword"
           placeholder="Enter password again"
           {...register("confirmPassword", {
             required: "Please confirm your password",
             validate: (value) => value === password || "Passwords do not match",
           })}
         />
-        {errors.confirmPassword && (
-          <p style={{ color: "red" }}>{errors.confirmPassword.message}</p>
-        )}
+        {errors.confirmPassword && <p style={{ color: "red" }}>{errors.confirmPassword.message}</p>}
 
         {loading ? (
           <button disabled className="signup-button-loading">
-            Signing in...
+            Signing up...
           </button>
         ) : (
           <button type="submit" className="signup-button">
@@ -148,6 +138,7 @@ const SignUp = () => {
           </button>
         )}
       </form>
+
       <p className="login-link">
         Already have an account? <Link to="/login">Login here</Link>
       </p>
