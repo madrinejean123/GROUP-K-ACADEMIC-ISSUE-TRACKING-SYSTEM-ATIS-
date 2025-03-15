@@ -8,6 +8,7 @@ import Login from "./Pages/LoginPage/login" ;
 import StudentDashboard from "./Pages/StudentDashboard/StudentDashboard";
 import LecturerDashboard from "./Pages/LecturerDashboard/LecturerDashboard";
 import RegistrarDashboard from "./Pages/RegistrarDashbard/RegistrarDashboard";
+import IssueForm from "./Pages/Issue_submission_form/IssueForm";
 
 
 
@@ -22,6 +23,7 @@ function App() {
           <Route path="/" element={<StudentDashboard />} />
           <Route path="/" element={<LecturerDashboard />} />
           <Route path="/" element={<RegistrarDashboard />} />
+          <Route path="/IssueForm" element={<IssueForm />}/>
         </Routes>
       </Router>
     </div>
