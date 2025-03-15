@@ -1,17 +1,56 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import "../LoginPage/login.css";  
+import { useForm } from 'react-hook-form';
+import '../LoginPage/login.css';
 import LoginHeader from '../../Components/LoginHeader/LoginHeader';
 import Footer from '../../Components/Footer/Footer';
-import { Link } from "react-router-dom";
+import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
+
+const users = [
+  {
+    role: 'student',
+    userId: '2400711993',
+    email: 'runy23@gmail.com',
+    password: 'studentPass123',
+    dashboard: '/StudentDashboard',
+  },
+  {
+    role: 'lecturer',
+    userId: '',
+    email: 'johndoe@mak.ac.ug',
+    password: 'lecturerPass123',
+    dashboard: '/LecturerDashboard',
+  },
+  {
+    role: 'registrar',
+    userId: '1200713401',
+    email: 'timothykigozi@mak.ac.com',
+    password: 'registrarPass123',
+    dashboard: '/RegistrarDashboard',
+  },
+  {
+    role: 'admin',
+    userId: '2100000001',
+    email: 'admin1@gmail.com',
+    password: 'adminPass123',
+    dashboard: '/AdminDashboard',
+  },
+];
 
 const Login = () => {
   const navigate = useNavigate();
-  
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    rememberMe: false
+    rememberMe: false,
   });
 
   // Handle input changes
@@ -19,22 +58,42 @@ const Login = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Handle checkbox change
+  // Handle checkbox change for Remember Me
   const handleRememberMeChange = (e) => {
     setFormData({ ...formData, rememberMe: e.target.checked });
   };
 
   // Handle login action
-  const handleLogin = () => {
-    console.log("Logging in with:", formData);
-    // Here, you can add authentication logic
-    navigate('/dashboard'); // Redirect to dashboard after login
+  const onSubmit = async (data) => {
+    setLoading(true);
+    const { email, password } = data;
+
+    // get user by email and password
+    const user = users.find(
+      (user) => user.email === email && user.password === password
+    );
+
+    if (user) {
+      // Redirect user based on their role and dashboard path
+      toast.success('Login Successful!', {
+        position: 'top-center',
+        duration: 3000,
+      });
+      navigate(user.dashboard); // Redirect to the correct dashboard based on role
+    } else {
+      toast.error('Invalid credentials. Please try again.', {
+        position: 'top-center',
+        duration: 3000,
+      });
+    }
+
+    setLoading(false);
   };
 
   // Handle forgot password action
   const handleForgotPassword = (e) => {
     e.preventDefault();
-    console.log("Forgot password clicked");
+    console.log('Forgot password clicked');
     // Redirect or open forgot password page
   };
 
@@ -49,60 +108,50 @@ const Login = () => {
       <div className="login-container">
         <h2>Login</h2>
 
-        {/* Form Fields */}
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          onChange={handleChange}
-          value={formData.email}
-          required
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          onChange={handleChange}
-          value={formData.password}
-          required
-        />
+        <form className="login-form" onSubmit={handleSubmit(onSubmit)}>
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            onChange={handleChange}
+            value={formData.email}
+            required
+          />
+          {errors.email && <p style={{ color: 'red' }}>{errors.email.message}</p>}
 
-        {/* Remember Me Checkbox */}
-        <div>
-          <label>
-            <input
-              type="checkbox"
-              name="rememberMe"
-              checked={formData.rememberMe}
-              onChange={handleRememberMeChange}
-            />
-            Remember Me
-          </label>
-        </div>
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            onChange={handleChange}
+            value={formData.password}
+            required
+          />
+          {errors.password && (
+            <p style={{ color: 'red' }}>{errors.password.message}</p>
+          )}
 
-        {/* Login Button */}
-        <button type="button" onClick={handleLogin}>
-          Login
-        </button>
+          <div className="login-buttons">
+            <button type="submit" className="login-button" disabled={loading}>
+              {loading ? 'Logging in...' : 'Login'}
+            </button>
+            <button type="button" className="cancel-button">
+              Cancel
+            </button>
+          </div>
 
-        {/* Forgot Password Link */}
-        <div>
-          <p>
-            <a href="#" onClick={handleForgotPassword}>
-              Forgot Password? Click here!
-            </a>
-          </p>
-        </div>
-
-        {/* Don't have an account */}
-        <div>
-          <p>
-            Don't have an account?{" "}
-            <span onClick={handleSignUp} style={{ cursor: "pointer", color: "blue" }}>
-              Sign Up here
-            </span>
-          </p>
-        </div>
+          <div>
+            <p>
+              Don't have an account?{' '}
+              <span
+                onClick={handleSignUp}
+                style={{ cursor: 'pointer', color: 'blue' }}
+              >
+                Sign Up here
+              </span>
+            </p>
+          </div>
+        </form>
       </div>
       <Footer />
     </>

@@ -1,6 +1,6 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
-import './Footer.css';
+import React from "react";
+import { Link } from "react-router-dom";
+import "./Footer.css";
 
 const Footer = () => {
   return (
@@ -19,6 +19,6 @@ const Footer = () => {
       </p>
     </footer>
   );
-}
+};
 
 export default Footer;

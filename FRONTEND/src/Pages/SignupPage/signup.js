@@ -1,73 +1,149 @@
 import React, { useState } from "react";
-import "../SignupPage/signup.css";
+import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
-import Footer from "../../Components/Footer/Footer";
-import SignupHeader from "../../Components/SignupHeader/SignupHeader";
+import axios from "axios";
+import toast from "react-hot-toast";
+import "../SignupPage/signup.css";
 
-const Signup = () => {
-  const [role, setRole] = useState(""); 
+// Regular expressions for validation
+const USER_REGEX = /^[a-zA-Z]+(?:\s[a-zA-Z]+)+$/;
+const PASSWORD_REGEX =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,16}$/;
+const USERID_REGEX = /^\d{10}$/;
 
-  const [formData, setFormData] = useState({
-    fullName: "",
-    studentNumber: "",
-    email: "",
-    makEmail: "",
-    password: "",
-    confirmPassword: "",
-  });
+const SignUp = () => {
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+    watch,
+  } = useForm();
+  const [loading, setLoading] = useState(false);
+  const [role, setRole] = useState(""); // For handling the user role
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  // Password watch to validate confirm password
+  const password = watch("password");
+
+  // Handle form submission
+  const onSubmit = async (data) => {
+    setLoading(true);
+    console.log(data);
+
+    try {
+      const response = await axios.post("https://app/api/v1/users", data);
+      console.log(response);
+      if (response) {
+        setLoading(false);
+        reset();
+        toast.success("Signed Up Successfully", {
+          position: "top-center",
+          duration: 3000,
+        });
+        window.location.href = "/login"; // Redirect to login page
+      }
+    } catch (error) {
+      console.error("Error during signup:", error);
+      setLoading(false);
+      toast.error("Failed to SignUp", {
+        position: "top-center",
+        duration: 3000,
+      });
+    }
   };
 
   return (
-    <>
-      <SignupHeader />
-      <div className="signup-container">
-        <h2>REGISTER HERE</h2>
+    <div className="signup-container">
+      <h2>REGISTER HERE</h2>
 
-        {/* Role Selection */}
-        <label>Select Role:</label>
-        <select onChange={(e) => setRole(e.target.value)} value={role}>
-          <option value="">-- Select Role --</option>
-          <option value="student">Student</option>
-          <option value="lecturer">Lecturer</option>
-          <option value="registrar">Registrar</option>
-        </select>
+      <form className="signup-form" onSubmit={handleSubmit(onSubmit)}>
+        <label htmlFor="fullName">Full Name:</label>
+        <input
+          type="text"
+          id="fullName"
+          placeholder="Enter your full name"
+          {...register("fullName", {
+            required: "Full name is required",
+            pattern: { value: USER_REGEX, message: "Enter a valid full name" },
+          })}
+        />
+        {errors.fullName && <p style={{ color: "red" }}>{errors.fullName.message}</p>}
 
-        <input type="text" name="fullName" placeholder="Full Name" onChange={handleChange} value={formData.fullName} required />
-        
-        
-        {role === "student" && (
-          <input type="email" name="email" placeholder="Email" onChange={handleChange} value={formData.email} required />
-        )}
-        
-        {/* MAK Email for Lecturer and Registrar */}
+        <label htmlFor="userId">User-ID:</label>
+        <input
+          type="number"
+          id="userId"
+          placeholder="Student No. / Staff ID"
+          {...register("userId", {
+            required: "User ID is required",
+            pattern: { value: USERID_REGEX, message: "Enter a valid userId" },
+          })}
+        />
+        {errors.userId && <p style={{ color: "red" }}>{errors.userId.message}</p>}
+
+        <label htmlFor="email">Email:</label>
+        <input
+          type="email"
+          id="email"
+          placeholder="Enter your Email"
+          {...register("email", { required: "Email is required" })}
+        />
+        {errors.email && <p style={{ color: "red" }}>{errors.email.message}</p>}
+
+        {/* Conditional email for role */}
         {(role === "lecturer" || role === "registrar") && (
-          <input type="email" name="makEmail" placeholder="MAK Email" onChange={handleChange} value={formData.makEmail} required />
-        )}
-        
-        <input type="password" name="password" placeholder="Password" onChange={handleChange} value={formData.password} required />
-        <input type="password" name="confirmPassword" placeholder="Confirm Password" onChange={handleChange} value={formData.confirmPassword} required />
-
-        {/* Conditional Fields Based on Role */}
-        {role === "student" && (
-          <input type="text" name="studentNumber" placeholder="Student Number" onChange={handleChange} value={formData.studentNumber} required />
+          <input
+            type="email"
+            id="makEmail"
+            placeholder="MAK Email"
+            {...register("makEmail", { required: "MAK Email is required" })}
+          />
         )}
 
-        <div className="forgot-password">
-          <Link to="/forgot-password">Forgot Password?</Link>
-        </div>
+        <label htmlFor="password">Password:</label>
+        <input
+          type="password"
+          id="password"
+          placeholder="Enter password"
+          {...register("password", {
+            required: "Password is required",
+            pattern: {
+              value: PASSWORD_REGEX,
+              message:
+                "Password must contain 8-16 characters, including uppercase, lowercase, numbers, and symbols",
+            },
+          })}
+        />
+        {errors.password && <p style={{ color: "red" }}>{errors.password.message}</p>}
 
-        <button type="submit">Sign Up</button>
+        <label htmlFor="confirmPassword">Confirm Password:</label>
+        <input
+          type="password"
+          id="confirmPassword"
+          placeholder="Enter password again"
+          {...register("confirmPassword", {
+            required: "Please confirm your password",
+            validate: (value) => value === password || "Passwords do not match",
+          })}
+        />
+        {errors.confirmPassword && <p style={{ color: "red" }}>{errors.confirmPassword.message}</p>}
 
-        <div className="login-redirect">
-          <p>Already have an account? <Link to="/login">login</Link></p>
-        </div>
-      </div>
-      <Footer />
-    </>
+        {loading ? (
+          <button disabled className="signup-button-loading">
+            Signing up...
+          </button>
+        ) : (
+          <button type="submit" className="signup-button">
+            Sign Up
+          </button>
+        )}
+      </form>
+
+      <p className="login-link">
+        Already have an account? <Link to="/login">Login here</Link>
+      </p>
+    </div>
   );
 };
 
-export default Signup;
+export default SignUp;

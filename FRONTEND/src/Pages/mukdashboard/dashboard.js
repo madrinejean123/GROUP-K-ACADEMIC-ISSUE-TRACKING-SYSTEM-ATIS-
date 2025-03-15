@@ -1,9 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "./StudentDashboard.css";
-import UserHeader from "../../Components/UserHeader/UserHeader";
-import Footer from "../../Components/Footer/Footer";
-import UserImg from "../../Components/assets/defaultUser.png";
-
+import "./dashboard.css";
 
 const issuesData = [
   {
@@ -50,7 +46,7 @@ const getStatusClass = (status) => {
   }
 };
 
-const StudentDashboard = () => {
+const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("home");
   const [issues, setIssues] = useState(issuesData);
 
@@ -83,20 +79,56 @@ const StudentDashboard = () => {
       ))}
     </tbody>
   );
+
   return (
-    <>
-      <UserHeader />
+    <div className="dashboard">
+      {/* Header */}
+      <header className="header">
+        <div className="container header-container">
+          <div className="contact-info">
+            <div className="contact-item">
+              <span className="icon">📞</span>
+              <span>Call us: 07775644332 (AITS)</span>
+            </div>
+            <div className="contact-item">
+              <span className="icon">✉️</span>
+              <span>Mail us: jasksj@gmail.com</span>
+            </div>
+          </div>
+          <div className="user-actions">
+            <button className="icon-button">🔔</button>
+            <div className="user-avatar">JN</div>
+          </div>
+        </div>
+      </header>
+
+      {/* Navigation */}
+      <nav className="main-nav">
+        <div className="container nav-container">
+          <div className="system-title">
+            Makerere Academic Issue Tracking System
+          </div>
+          <div className="nav-buttons">
+            <button className="nav-button">STUDENT</button>
+            <button className="nav-button">HOME</button>
+            <button className="nav-button">SERVICES</button>
+          </div>
+        </div>
+      </nav>
+
+      {/* Main Content */}
       <main className="main-content">
         <div className="container content-container">
           {/* Sidebar */}
           <aside className="sidebar">
             <div className="profile-card">
               <div className="profile-image-container">
-                <img src={UserImg} alt="UserImg" />
+                <div className="profile-image"></div>
               </div>
-              <div className="profile-infor">
-                <div className="profile-name">John Namanya</div>
+              <div className="profile-info">
+                <div className="profile-name">John N</div>
                 <div className="profile-details">Std No: 2400709341</div>
+                <div className="profile-details">BSCS</div>
               </div>
 
               <div className="sidebar-nav">
@@ -170,9 +202,22 @@ const StudentDashboard = () => {
           </div>
         </div>
       </main>
-      <Footer />
-    </>
+
+      {/* Footer */}
+      <footer className="footer">
+        <div className="container footer-container">
+          <div className="copyright">
+            @ 2025 Makerere University (AITS) All rights reserved
+          </div>
+          <div className="footer-links">
+            <a href="#" className="footer-link">
+              Privacy/Terms&Conditions/Contact
+            </a>
+          </div>
+        </div>
+      </footer>
+    </div>
   );
 };
 
-export default StudentDashboard;
+export default Dashboard;

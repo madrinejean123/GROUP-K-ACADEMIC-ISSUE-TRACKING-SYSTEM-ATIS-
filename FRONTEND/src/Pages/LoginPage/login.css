@@ -1,126 +1,184 @@
-
 .login-container {
-    width: 380px; 
-    max-height: 900px; 
-    margin: 0 auto;
-    margin-top: 50px;
-    padding: 20px;
-    background-color: #d3d6dd; 
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
+  text-align: center;
+  margin-top: 50px;
+  background-color: #e3e3e3;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 380px; 
+  max-height: 900px; 
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: #d3d6dd; 
+}
+
+h1 {
+  color: darkred;
+  font-size: 24px;
+  margin-bottom: 5px;
+}
+
+h2 {
+  color: darkred;
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+
+.login-form label {
+  display: flex;
+  margin: 10px 0 5px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.login-form input {
+  width: 90%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.login-form input:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+.login-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.login-button,
+.cancel-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.login-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #4a5568;
+  color: white;
+}
+
+.cancel-button {
+  width: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #cbd5e0;
+  color: black;
+}
+
+.login-options {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.forgot-password {
+  text-decoration: underline;
+  color: blue;
+}
+
+.register-link {
+  display: block;
+  margin-top: 20px;
+  color: blue;
+}
+
+.login-container .remember-me {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  justify-content: flex-start; 
+}
+
+.login-container .remember-me input {
+  margin-right: 0%; 
+}
+
+.login-container .remember-me label {
+  font-size: 0.9rem;
+  color: #333;
+  display: inline-block;
+}
+
+.login-container button {
+  width: 100%;
+  padding: 12px;
+  background-color: #007bff;
+  color: white;
+  font-size: 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.login-container button:hover {
+  background-color: #0056b3;
+}
+
+.login-container button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.login-container a {
+  text-decoration: underline;
+  color: #007bff;
+  cursor: pointer;
+}
+
+.login-container a:hover {
+  color: #0056b3;
+}
+
+.login-container div {
+  text-align: center;
+  margin-top: 15px;
+}
+
+.login-container div p {
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.login-container div span {
+  color: #007bff;
+  cursor: pointer;
+}
+
+.login-container div span:hover {
+  color: #0056b3;
+}
+
+@media (max-width: 600px) {
+  .login-container {
+    padding: 15px;
   }
-  
-  
+
   .login-container h2 {
-    text-align: center;
-    color: #333;
-    font-size: 2rem;
-    margin-bottom: 20px;
+    font-size: 1.5rem;
   }
-  
-  
+
   .login-container input {
-    width: 90%;
-    padding: 12px;
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1rem;
+    padding: 10px;
   }
-  
-  .login-container input:focus {
-    border-color: #007bff;
-    outline: none;
-  }
-  
-  
-  .login-container .remember-me {
-    display: flex;
-    align-items: center;
-    margin-bottom: 15px;
-    justify-content: flex-start; 
-  }
-  
-  .login-container .remember-me input {
-    margin-right: 0%; 
-  }
-  
-  /* Label for Remember Me */
-  .login-container .remember-me label {
-    font-size: 0.9rem;
-    color: #333;
-    display: inline-block;
-  }
-  
-  
+
   .login-container button {
-    width: 100%;
-    padding: 12px;
-    background-color: #007bff;
-    color: white;
-    font-size: 1rem;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s;
+    padding: 10px;
   }
-  
-  .login-container button:hover {
-    background-color: #0056b3;
-  }
-  
-  .login-container button:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
-  }
-  
-  
-  .login-container a {
-    text-decoration: underline;
-    color: #007bff;
-    cursor: pointer;
-  }
-  
-  .login-container a:hover {
-    color: #0056b3;
-  }
-  
-  
-  .login-container div {
-    text-align: center;
-    margin-top: 15px;
-  }
-  
-  .login-container div p {
-    font-size: 0.9rem;
-    color: #333;
-  }
-  
-  .login-container div span {
-    color: #007bff;
-    cursor: pointer;
-  }
-  
-  .login-container div span:hover {
-    color: #0056b3;
-  }
-  
-  
-  @media (max-width: 600px) {
-    .login-container {
-      padding: 15px;
-    }
-  
-    .login-container h2 {
-      font-size: 1.5rem;
-    }
-  
-    .login-container input {
-      padding: 10px;
-    }
-  
-    .login-container button {
-      padding: 10px;
-    }
-  }
-  
+}
