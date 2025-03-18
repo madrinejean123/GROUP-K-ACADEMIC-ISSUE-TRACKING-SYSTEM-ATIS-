@@ -23,7 +23,7 @@ class StudentDepartmentView(APIView):
             department = request.user.student.department
             serializer = DepartmentSerializer(department)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response({'error':'User is not a student'}, status=status.HTTP__401__Unauthorized)
+        return Response({'error':'User is not a student'}, status=status.HTTP_401_UNAUTHORIZED)
     
     
 class RegisterDepartmentView(APIView):
@@ -34,7 +34,7 @@ class RegisterDepartmentView(APIView):
             department = request.user.register.department
             serializer = DepartmentSerializer(department)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response({'error':'User is not a register'}, status=status.HTTP__401__Unauthorized)
+        return Response({'error':'User is not a register'}, status=status.HTTP_401_UNAUTHORIZED)
     
     
 class LecturerDepartmentView(APIView):
@@ -45,6 +45,5 @@ class LecturerDepartmentView(APIView):
             department = request.user.lecturer.department
             serializer = DepartmentSerializer(department)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response({'error':'User is not a lecturer'}, status=status.HTTP__401__Unauthorized)
+        return Response({'error':'User is not a lecturer'}, status=status.HTTP_401_UNAUTHORIZED)
     
-            
