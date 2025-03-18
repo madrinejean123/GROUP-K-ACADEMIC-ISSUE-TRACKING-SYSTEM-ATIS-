@@ -6,6 +6,7 @@ import LoginHeader from '../../Components/LoginHeader/LoginHeader';
 import Footer from '../../Components/Footer/Footer';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { FaEnvelope, FaLock } from 'react-icons/fa'; 
 
 const users = [
   {
@@ -109,28 +110,37 @@ const Login = () => {
         <h2>Login</h2>
 
         <form className="login-form" onSubmit={handleSubmit(onSubmit)}>
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            onChange={handleChange}
-            value={formData.email}
-            required
-          />
+          {/* Email Input */}
+          <div className="input-group">
+            <FaEnvelope className="icon" />
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              onChange={handleChange}
+              value={formData.email}
+              required
+            />
+          </div>
           {errors.email && <p style={{ color: 'red' }}>{errors.email.message}</p>}
 
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            onChange={handleChange}
-            value={formData.password}
-            required
-          />
+          {/* Password Input */}
+          <div className="input-group">
+            <FaLock className="icon" />
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              onChange={handleChange}
+              value={formData.password}
+              required
+            />
+          </div>
           {errors.password && (
             <p style={{ color: 'red' }}>{errors.password.message}</p>
           )}
 
+          {/* Submit Buttons */}
           <div className="login-buttons">
             <button type="submit" className="login-button" disabled={loading}>
               {loading ? 'Logging in...' : 'Login'}
@@ -140,6 +150,7 @@ const Login = () => {
             </button>
           </div>
 
+          {/* Sign Up Link */}
           <div>
             <p>
               Don't have an account?{' '}
