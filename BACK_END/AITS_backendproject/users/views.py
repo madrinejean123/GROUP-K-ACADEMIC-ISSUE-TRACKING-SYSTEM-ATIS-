@@ -15,7 +15,7 @@ from .serializers import (
     CollegeRegisterSerializer,
 )
 
-# User Registration ViewSet
+# this  API enables users to regiser based on roles with the serializer verifying school webmail in the serialzer
 class UserRegistrationViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]
     serializer_class = UserRegistrationSerializer
@@ -41,7 +41,7 @@ class UserRegistrationViewSet(viewsets.ModelViewSet):
             status=status.HTTP_201_CREATED,
         )
 
-# User Login ViewSet
+#fidel we need to work on this late cause its the only api still not functioning fully 
 class UserLoginViewSet(viewsets.ViewSet):
     permission_classes = [permissions.AllowAny]
     serializer_class = UserLoginSerializer
@@ -76,7 +76,7 @@ class UserLoginViewSet(viewsets.ViewSet):
             status=status.HTTP_200_OK,
         )
 
-# User Profile ViewSet
+
 class UserProfileViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = UserProfileSerializer
@@ -97,7 +97,7 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserProfileSerializer
     permission_classes = [permissions.AllowAny]
-    
+
 
     @action(detail=False, methods=['get'])
     def students(self, request):
