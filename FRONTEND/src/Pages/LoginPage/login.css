@@ -33,17 +33,19 @@ h2 {
 }
 
 .login-form input {
-  width: 90%;
+  width: 120%;
   padding: 12px;
   margin-bottom: 15px;
-  border: 1px solid #ccc;
+  border: none;
   border-radius: 4px;
   font-size: 1rem;
+
 }
 
 .login-form input:focus {
-  border-color: #007bff;
+  border: none;
   outline: none;
+  width: 70%;
 }
 
 .login-buttons {
@@ -76,7 +78,7 @@ h2 {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #cbd5e0;
+  background-color: #8fa0b3;
   color: black;
 }
 
@@ -118,7 +120,7 @@ h2 {
 .login-container button {
   width: 100%;
   padding: 12px;
-  background-color: #007bff;
+  background-color: #506070;
   color: white;
   font-size: 1rem;
   border: none;
@@ -128,7 +130,7 @@ h2 {
 }
 
 .login-container button:hover {
-  background-color: #0056b3;
+  background-color: #0a703d;
 }
 
 .login-container button:disabled {
@@ -138,12 +140,12 @@ h2 {
 
 .login-container a {
   text-decoration: underline;
-  color: #007bff;
+  color: #6c6f72;
   cursor: pointer;
 }
 
 .login-container a:hover {
-  color: #0056b3;
+  color: #531c07;
 }
 
 .login-container div {
@@ -157,12 +159,12 @@ h2 {
 }
 
 .login-container div span {
-  color: #007bff;
+  color: #485666;
   cursor: pointer;
 }
 
 .login-container div span:hover {
-  color: #0056b3;
+  color: #586069;
 }
 
 @media (max-width: 600px) {
@@ -181,4 +183,5 @@ h2 {
   .login-container button {
     padding: 10px;
   }
+
 }
