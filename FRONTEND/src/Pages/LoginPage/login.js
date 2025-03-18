@@ -24,11 +24,12 @@ const users = [
     dashboard: '/LecturerDashboard',
   },
   {
-    role: 'registrar',
-    userId: '1200713401',
-    email: 'timothykigozi@mak.ac.com',
-    password: 'registrarPass123',
-    dashboard: '/RegistrarDashboard',
+    role: "registrar",
+    userId: "1200713401",
+    email: "timothykigozi@mak.ac.ug",
+    password: "registrarPass123",
+    dashboard: "/RegistrarDashboard",
+
   },
   {
     role: 'admin',
