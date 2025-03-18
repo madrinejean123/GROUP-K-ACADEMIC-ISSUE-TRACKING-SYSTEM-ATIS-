@@ -1,24 +1,27 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useForm } from "react-hook-form";
-import "../LoginPage/login.css";
-import { Link } from "react-router-dom";
-import toast from "react-hot-toast";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import '../LoginPage/login.css';
+import LoginHeader from '../../Components/LoginHeader/LoginHeader';
+import Footer from '../../Components/Footer/Footer';
+import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { FaEnvelope, FaLock } from 'react-icons/fa'; 
 
 const users = [
   {
-    role: "student",
-    userId: "2400711993",
-    email: "runy23@gmail.com",
-    password: "studentPass123",
-    dashboard: "/StudentDashboard",
+    role: 'student',
+    userId: '2400711993',
+    email: 'runy23@gmail.com',
+    password: 'studentPass123',
+    dashboard: '/StudentDashboard',
   },
   {
-    role: "lecturer",
-    userId: "",
-    email: "johndoe@mak.ac.ug",
-    password: "lecturerPass123",
-    dashboard: "/LecturerDashboard",
+    role: 'lecturer',
+    userId: '',
+    email: 'johndoe@mak.ac.ug',
+    password: 'lecturerPass123',
+    dashboard: '/LecturerDashboard',
   },
   {
     role: "registrar",
@@ -26,19 +29,23 @@ const users = [
     email: "timothykigozi@mak.ac.ug",
     password: "registrarPass123",
     dashboard: "/RegistrarDashboard",
+    role: 'registrar',
+    userId: '1200713401',
+    email: 'timothykigozi@mak.ac.com',
+    password: 'registrarPass123',
+    dashboard: '/RegistrarDashboard',
   },
   {
-    role: "admin",
-    userId: "2100000001",
-    email: "admin1@gmail.com",
-    password: "adminPass123",
-    dashboard: "/AdminDashboard",
+    role: 'admin',
+    userId: '2100000001',
+    email: 'admin1@gmail.com',
+    password: 'adminPass123',
+    dashboard: '/AdminDashboard',
   },
 ];
 
 const Login = () => {
   const navigate = useNavigate();
-
   const {
     register,
     handleSubmit,
@@ -46,8 +53,23 @@ const Login = () => {
   } = useForm();
 
   const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    rememberMe: false,
+  });
 
-  // Handle form submission
+  // Handle input changes
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  // Handle checkbox change for Remember Me
+  const handleRememberMeChange = (e) => {
+    setFormData({ ...formData, rememberMe: e.target.checked });
+  };
+
+  // Handle login action
   const onSubmit = async (data) => {
     setLoading(true);
     const { email, password } = data;
@@ -59,14 +81,14 @@ const Login = () => {
 
     if (user) {
       // Redirect user based on their role and dashboard path
-      toast.success("Login Successful!", {
-        position: "top-center",
+      toast.success('Login Successful!', {
+        position: 'top-center',
         duration: 3000,
       });
       navigate(user.dashboard); // Redirect to the correct dashboard based on role
     } else {
-      toast.error("Invalid credentials. Please try again.", {
-        position: "top-center",
+      toast.error('Invalid credentials. Please try again.', {
+        position: 'top-center',
         duration: 3000,
       });
     }
@@ -74,51 +96,81 @@ const Login = () => {
     setLoading(false);
   };
 
+  // Handle forgot password action
+  const handleForgotPassword = (e) => {
+    e.preventDefault();
+    console.log('Forgot password clicked');
+    // Redirect or open forgot password page
+  };
+
+  // Handle sign-up action
+  const handleSignUp = () => {
+    navigate('/signup'); // Redirect to signup page
+  };
+
   return (
-    <div className="login-container">
-      <h1>Welcome!</h1>
-      <h2>Login into Makerere Academic Issue Tracking System</h2>
-      <form className="login-form" onSubmit={handleSubmit(onSubmit)}>
-        <label htmlFor="email">Email:</label>
-        <input
-          type="email"
-          id="email"
-          placeholder="Enter Your Email"
-          {...register("email", { required: "Email is required" })}
-        />
-        {errors.email && <p style={{ color: "red" }}>{errors.email.message}</p>}
+    <>
+      <LoginHeader />
+      <div className="login-container">
+        <h2>Login</h2>
 
-        <label htmlFor="password">Password:</label>
-        <input
-          type="password"
-          id="password"
-          placeholder="Enter Password"
-          {...register("password", { required: "Password is required" })}
-        />
-        {errors.password && (
-          <p style={{ color: "red" }}>{errors.password.message}</p>
-        )}
+        <form className="login-form" onSubmit={handleSubmit(onSubmit)}>
+          {/* Email Input */}
+          <div className="input-group">
+            <FaEnvelope className="icon" />
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              onChange={handleChange}
+              value={formData.email}
+              required
+            />
+          </div>
+          {errors.email && <p style={{ color: 'red' }}>{errors.email.message}</p>}
 
-        <div className="login-buttons">
-          <button type="submit" className="login-button" disabled={loading}>
-            {loading ? "Logging in..." : "Login"}
-          </button>
-          <button type="button" className="cancel-button">
-            Cancel
-          </button>
-        </div>
+          {/* Password Input */}
+          <div className="input-group">
+            <FaLock className="icon" />
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              onChange={handleChange}
+              value={formData.password}
+              required
+            />
+          </div>
+          {errors.password && (
+            <p style={{ color: 'red' }}>{errors.password.message}</p>
+          )}
 
-        {/* <div className="login-options">
-          <Link to="/forgot-password" className="forgot-password">
-            Forgot password
-          </Link>
-        </div> */}
-      </form>
+          {/* Submit Buttons */}
+          <div className="login-buttons">
+            <button type="submit" className="login-button" disabled={loading}>
+              {loading ? 'Logging in...' : 'Login'}
+            </button>
+            <button type="button" className="cancel-button">
+              Cancel
+            </button>
+          </div>
 
-      <p className="register-link">
-        Don't have an account? <Link to="/signup">Register</Link>
-      </p>
-    </div>
+          {/* Sign Up Link */}
+          <div>
+            <p>
+              Don't have an account?{' '}
+              <span
+                onClick={handleSignUp}
+                style={{ cursor: 'pointer', color: 'blue' }}
+              >
+                Sign Up here
+              </span>
+            </p>
+          </div>
+        </form>
+      </div>
+      <Footer />
+    </>
   );
 };
 

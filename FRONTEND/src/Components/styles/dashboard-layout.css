@@ -4,14 +4,16 @@
   padding: 0;
   box-sizing: border-box;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
 }
 
+/* Hide scrollbars for WebKit browsers */
 ::-webkit-scrollbar {
   display: none;
 }
 
+/* Update body background */
 body {
   background-color: #ffffff;
   color: #0a3d62;
@@ -26,17 +28,17 @@ body {
 
 /* Theme variables */
 :root {
-  --bg-primary: #ffffff;
-  --bg-secondary: #ffffff;
-  --text-primary: #0a3d62;
-  --text-secondary: #3282b8;
-  --accent-color: #0984e3;
-  --accent-hover: #0466c8;
-  --border-color: #e0e0e0;
+  --bg-primary: #ffffff; /* Pure white background */
+  --bg-secondary: #ffffff; /* Pure white for cards */
+  --text-primary: #0a3d62; /* Darker blue text for contrast */
+  --text-secondary: #3282b8; /* Medium blue text */
+  --accent-color: #0984e3; /* Bright blue accent */
+  --accent-hover: #0466c8; /* Slightly darker blue for hover */
+  --border-color: #e0e0e0; /* Light gray border for separation */
   --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  --header-bg: #ffffff;
-  --sidebar-bg: #ffffff;
-  --hover-bg: #f5f9ff;
+  --header-bg: #ffffff; /* White header */
+  --sidebar-bg: #ffffff; /* White sidebar */
+  --hover-bg: #f5f9ff; /* Very light blue hover state */
   --badge-bg: #f0f7ff;
   --badge-text: #0a3d62;
   --input-bg: #ffffff;
@@ -47,18 +49,18 @@ body {
   --table-row-hover: #f5f9ff;
 }
 
-/*  DASHBOARD CONTAINER*/
+/* Dashboard container */
 .dashboard-container {
   display: flex;
   flex: 1;
 }
 
-/* MAIN CONTENT STYLES */
+/* Main content styles */
 .main-content {
   flex: 1;
   padding: 20px;
   background-color: var(--bg-primary);
-  width: 100%;
+  width: 100%; /* Ensure full width */
 }
 
 .main-content.expanded {
@@ -66,24 +68,31 @@ body {
   width: 100%;
 }
 
+/* Improve sidebar responsiveness for all screen sizes */
+/* Small screens (phones) */
 @media (max-width: 576px) {
   .main-content {
     width: 100%;
     margin-left: 0;
+    padding: 15px;
   }
 }
 
+/* Medium screens (tablets) */
 @media (min-width: 577px) and (max-width: 768px) {
   .main-content {
     width: 100%;
     margin-left: 0;
+    padding: 15px;
   }
 }
 
+/* Large screens (laptops) */
 @media (min-width: 769px) and (max-width: 992px) {
   .main-content {
-    margin-left: 220px;
     width: calc(100% - 220px);
+    margin-left: 0;
+    padding: 20px;
   }
 
   .main-content.expanded {
@@ -92,10 +101,12 @@ body {
   }
 }
 
+/* Extra large screens (desktops) */
 @media (min-width: 993px) {
   .main-content {
-    margin-left: 250px;
     width: calc(100% - 250px);
+    margin-left: 0;
+    padding: 20px;
   }
 
   .main-content.expanded {
