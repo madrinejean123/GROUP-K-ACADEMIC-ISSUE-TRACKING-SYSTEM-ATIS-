@@ -97,7 +97,7 @@
 .page-links a:hover {
   border-bottom: 2px solid whitesmoke;
   color: #00b4d8; 
- 
+  
 }
 
 @media (max-width: 542px) {
@@ -138,5 +138,5 @@
 
 .btns .signup:hover {
   background-color: #d83a3a; 
-  background-color: #926709; /* Darker red on hover */
+
 }
