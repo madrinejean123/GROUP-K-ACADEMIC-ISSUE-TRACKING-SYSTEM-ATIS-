@@ -23,7 +23,7 @@ const users = [
   {
     role: "registrar",
     userId: "1200713401",
-    email: "timothykigozi@mak.ac.com",
+    email: "timothykigozi@mak.ac.ug",
     password: "registrarPass123",
     dashboard: "/RegistrarDashboard",
   },
