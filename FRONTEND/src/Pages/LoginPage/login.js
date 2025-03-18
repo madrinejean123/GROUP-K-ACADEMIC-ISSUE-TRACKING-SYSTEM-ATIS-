@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import '../LoginPage/login.css';
-import LoginHeader from '../../Components/LoginHeader/LoginHeader';
-import Footer from '../../Components/Footer/Footer';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { FaEnvelope, FaLock } from 'react-icons/fa'; 
@@ -106,7 +104,6 @@ const Login = () => {
 
   return (
     <>
-      <LoginHeader />
       <div className="login-container">
         <h2>Login</h2>
 
@@ -165,7 +162,6 @@ const Login = () => {
           </div>
         </form>
       </div>
-      <Footer />
     </>
   );
 };
