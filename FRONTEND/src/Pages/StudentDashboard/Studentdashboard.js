@@ -86,7 +86,7 @@ const StudentDashboard = () => {
         <div className="welcome-section">
           <div className="welcome-text">
             <h2>Welcome, Student!</h2>
-            <p>Track and manage your academic issues in one place.</p>
+            <p>Log, track and manage your academic related issues here.</p>
           </div>
           <div className="stats-cards">
             <div className="stat-card">
