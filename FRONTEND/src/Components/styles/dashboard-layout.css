@@ -1,0 +1,116 @@
+/* Base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+/* Hide scrollbars for WebKit browsers */
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* Update body background */
+body {
+  background-color: #ffffff;
+  color: #0a3d62;
+  overflow-x: hidden;
+}
+
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Theme variables */
+:root {
+  --bg-primary: #ffffff; /* Pure white background */
+  --bg-secondary: #ffffff; /* Pure white for cards */
+  --text-primary: #0a3d62; /* Darker blue text for contrast */
+  --text-secondary: #3282b8; /* Medium blue text */
+  --accent-color: #0984e3; /* Bright blue accent */
+  --accent-hover: #0466c8; /* Slightly darker blue for hover */
+  --border-color: #e0e0e0; /* Light gray border for separation */
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --header-bg: #ffffff; /* White header */
+  --sidebar-bg: #ffffff; /* White sidebar */
+  --hover-bg: #f5f9ff; /* Very light blue hover state */
+  --badge-bg: #f0f7ff;
+  --badge-text: #0a3d62;
+  --input-bg: #ffffff;
+  --input-border: #e0e0e0;
+  --modal-bg: #ffffff;
+  --modal-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  --table-header-bg: #f5f9ff;
+  --table-row-hover: #f5f9ff;
+}
+
+/* Dashboard container */
+.dashboard-container {
+  display: flex;
+  flex: 1;
+}
+
+/* Main content styles */
+.main-content {
+  flex: 1;
+  padding: 20px;
+  background-color: var(--bg-primary);
+  width: 100%; /* Ensure full width */
+}
+
+.main-content.expanded {
+  margin-left: 0;
+  width: 100%;
+}
+
+/* Improve sidebar responsiveness for all screen sizes */
+/* Small screens (phones) */
+@media (max-width: 576px) {
+  .main-content {
+    width: 100%;
+    margin-left: 0;
+    padding: 15px;
+  }
+}
+
+/* Medium screens (tablets) */
+@media (min-width: 577px) and (max-width: 768px) {
+  .main-content {
+    width: 100%;
+    margin-left: 0;
+    padding: 15px;
+  }
+}
+
+/* Large screens (laptops) */
+@media (min-width: 769px) and (max-width: 992px) {
+  .main-content {
+    width: calc(100% - 220px);
+    margin-left: 0;
+    padding: 20px;
+  }
+
+  .main-content.expanded {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+/* Extra large screens (desktops) */
+@media (min-width: 993px) {
+  .main-content {
+    width: calc(100% - 250px);
+    margin-left: 0;
+    padding: 20px;
+  }
+
+  .main-content.expanded {
+    margin-left: 0;
+    width: 100%;
+  }
+}
