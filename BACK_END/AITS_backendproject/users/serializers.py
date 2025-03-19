@@ -96,3 +96,9 @@ class DepartmentSerializer(serializers.ModelSerializer):
         if Department.objects.filter(name__iexact=value, college=college).exists():
             raise serializers.ValidationError("A department with this name already exists in this college.")
         return value
+    
+    
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User  # Ensure User is imported correctly
+        fields = '__all__'
