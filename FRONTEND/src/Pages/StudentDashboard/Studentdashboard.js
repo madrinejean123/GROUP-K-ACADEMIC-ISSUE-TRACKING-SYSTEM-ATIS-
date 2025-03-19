@@ -16,7 +16,7 @@ const StudentDashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
 
   useEffect(() => {
-    // In a real app, this would be an API call
+    //  API call here
     setIssues(mockIssues);
   }, []);
 
@@ -58,7 +58,7 @@ const StudentDashboard = () => {
   };
 
   const handleNewIssueSubmit = (newIssue) => {
-    // In a real app, this would be an API call to create a new issue
+    //  API call to create a new issue here
     const newIssueWithId = {
       ...newIssue,
       id: issues.length + 1,
