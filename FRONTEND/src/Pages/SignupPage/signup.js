@@ -21,7 +21,7 @@ const SignUp = () => {
     watch,
   } = useForm();
   const [loading, setLoading] = useState(false);
-  const [role, setRole] = useState(""); // For handling the user role
+  const [role, setRole] = useState("student"); // Default role as student
 
   // Password watch to validate confirm password
   const password = watch("password");
@@ -32,7 +32,8 @@ const SignUp = () => {
     console.log(data);
 
     try {
-      const response = await axios.post("https://app/api/v1/users", data);
+      const response = await axios.post("http://127.0.0.1:8000/api/v1/users/", data);
+
       console.log(response);
       if (response) {
         setLoading(false);
@@ -57,6 +58,16 @@ const SignUp = () => {
     <div className="signup-container">
       <h2>REGISTER HERE</h2>
 
+      {/* Role Selection */}
+      <div className="role-selection">
+        <label>Select Role:</label>
+        <select onChange={(e) => setRole(e.target.value)} value={role}>
+          <option value="student">Student</option>
+          <option value="lecturer">Lecturer</option>
+          <option value="registrar">Registrar</option>
+        </select>
+      </div>
+
       <form className="signup-form" onSubmit={handleSubmit(onSubmit)}>
         {/* Full Name Field */}
         <label htmlFor="fullName">Full Name:</label>
@@ -74,45 +85,56 @@ const SignUp = () => {
         </div>
         {errors.fullName && <p style={{ color: "red" }}>{errors.fullName.message}</p>}
 
-        {/* User ID Field */}
-        <label htmlFor="userId">User-ID:</label>
-        <div className="input-group">
-          <FaIdBadge className="icon" />
-          <input
-            type="number"
-            id="userId"
-            placeholder="Student No. / Staff ID"
-            {...register("userId", {
-              required: "User ID is required",
-              pattern: { value: USERID_REGEX, message: "Enter a valid userId" },
-            })}
-          />
-        </div>
-        {errors.userId && <p style={{ color: "red" }}>{errors.userId.message}</p>}
+        {/* User ID Field (Only for Students) */}
+        {role === "student" && (
+          <>
+            <label htmlFor="userId">User-ID:</label>
+            <div className="input-group">
+              <FaIdBadge className="icon" />
+              <input
+                type="number"
+                id="userId"
+                placeholder="Student No."
+                {...register("userId", {
+                  required: "User ID is required",
+                  pattern: { value: USERID_REGEX, message: "Enter a valid userId" },
+                })}
+              />
+            </div>
+            {errors.userId && <p style={{ color: "red" }}>{errors.userId.message}</p>}
+          </>
+        )}
 
-        {/* Email Field */}
-        <label htmlFor="email">Email:</label>
+        {/* MAK Email Field (Compulsory for all) */}
+        <label htmlFor="makEmail">MAK Email:</label>
         <div className="input-group">
           <FaEnvelope className="icon" />
           <input
             type="email"
-            id="email"
-            placeholder="Enter your Email"
-            {...register("email", { required: "Email is required" })}
+            id="makEmail"
+            placeholder="Enter your MAK Email"
+            {...register("makEmail", { required: "MAK Email is required" })}
           />
         </div>
-        {errors.email && <p style={{ color: "red" }}>{errors.email.message}</p>}
+        {errors.makEmail && <p style={{ color: "red" }}>{errors.makEmail.message}</p>}
 
-        {/* Conditional MAK Email Field */}
-        {(role === "lecturer" || role === "registrar") && (
+        {/* Conditional College Field for Registrar */}
+        {role === "registrar" && (
           <div className="input-group">
-            <FaEnvelope className="icon" />
-            <input
-              type="email"
-              id="makEmail"
-              placeholder="MAK Email"
-              {...register("makEmail", { required: "MAK Email is required" })}
-            />
+            <label htmlFor="college">College:</label>
+            <select id="college" {...register("college", { required: "College selection is required" })}>
+              <option value="">Select College</option>
+              <option value="COCIS">COCIS</option>
+              <option value="COBAMS">COBAMS</option>
+              <option value="CONAS">CONAS</option>
+              <option value="CEES">CEES</option>
+              <option value="COVAB">COVAB</option>
+              <option value="CNS">CNS</option>
+              <option value="CHUS">CHUS</option>
+
+            
+            </select>
+            {errors.college && <p style={{ color: "red" }}>{errors.college.message}</p>}
           </div>
         )}
 
