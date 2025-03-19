@@ -20,9 +20,11 @@ h2 {
   margin-bottom: 20px;
   font-size: 16px;
 }
-.signup-form{
+
+.signup-form {
   width: 90%;
 }
+
 .signup-form label {
   display: flex;
   font-size: 14px;
@@ -36,7 +38,7 @@ h2 {
   margin-bottom: 15px;
   border: 2px solid purple;
   border-radius: 5px;
-  font-size:small;
+  font-size: small;
 }
 
 .signup-button {
@@ -51,7 +53,8 @@ h2 {
   color: white;
   cursor: pointer;
 }
-.signup-button-loading{
+
+.signup-button-loading {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -78,17 +81,13 @@ h2 {
   margin-bottom: 30px;
   min-width: 6px;
   height: 50px;
-  
 }
 
 .input-group .icon {
   margin-right: 6px;
   color: #4d4c4c;
   margin-bottom: 0px;
-  margin-top: 10px
-  ;
-  
-  
+  margin-top: 10px;
 }
 
 .input-group input {
@@ -98,4 +97,5 @@ h2 {
   margin-bottom: 15px;
   margin-top: 3px;
   height: 30px;
+  color: rgb(83, 51, 8);
 }
