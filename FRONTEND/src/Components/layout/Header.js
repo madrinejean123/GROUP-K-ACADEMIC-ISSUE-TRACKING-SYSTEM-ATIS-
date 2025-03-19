@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { FaBell, FaBars, FaTimes, FaSignOutAlt, FaUser } from "react-icons/fa";
+import { FiSettings } from "react-icons/fi";
 import { MdEmail } from "react-icons/md";
 import "../styles/header.css";
 import MakLogo from "../assets/logo.png";
+
 
 
 const Header = ({ toggleSidebar, isMobile, sidebarOpen, userRole }) => {
@@ -97,19 +99,20 @@ const Header = ({ toggleSidebar, isMobile, sidebarOpen, userRole }) => {
           </button>
           {profileOpen && (
             <div className="dropdown-menu profile-menu">
-              <div className="profile-header">
+              {/* <div className="profile-header">
                 <img src={user?.avatar || "/placeholder.svg"} alt="Profile" />
                 <div>
                   <p className="profile-name">{user?.name}</p>
                   <p className="profile-email">{user?.email}</p>
                 </div>
-              </div>
+              </div> */}
               <div className="profile-options">
+                <h2 style={{ color: 'black' }}>My Account</h2>
                 <button className="profile-option" onClick={handleMyAccount}>
-                  <FaUser /> My Account
+                  <FaUser /> My profile
                 </button>
                 <button className="profile-option" onClick={handleSettings}>
-                  <FaUser /> Settings
+                  <FiSettings /> Settings
                 </button>
                 <button
                   className="profile-option logout-option"

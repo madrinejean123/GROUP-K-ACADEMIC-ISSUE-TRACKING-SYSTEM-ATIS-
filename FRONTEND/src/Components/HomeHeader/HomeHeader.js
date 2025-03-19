@@ -5,13 +5,13 @@ import { FaSquareXTwitter } from "react-icons/fa6";
 import { FaSquareFacebook } from "react-icons/fa6";
 import { FaSquareWhatsapp } from "react-icons/fa6";
 import { FaUser } from "react-icons/fa";
-import { Link } from "react-router-dom"; // Import Link from react-router-dom
+import { Link } from "react-router-dom"; 
 import MakLogo from "../assets/logo.png";
 
 const HomeHeader = () => {
   return (
     <header className="header">
-      <div className="upper">
+      {/* <div className="upper">
         <div className="call-us">
           <p>
             <MdAddCall />
@@ -33,7 +33,7 @@ const HomeHeader = () => {
             <FaSquareXTwitter />
           </a>
         </div>
-      </div>
+      </div> */}
       <div className="lower">
         <div className="logo">
           <img src={MakLogo} alt="Mak Logo" />
