@@ -1,12 +1,11 @@
-# users/models.py
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from cloudinary.models import CloudinaryField  # For profile picture storage
 
-# Import Department model from the other app
-from department.models import Department
+# Import Department and College models from the departments app
+from department.models import Department, College
 
 # Custom validator for university email domain
 def validate_email_domain(value):
@@ -27,19 +26,19 @@ class User(AbstractUser):
     ]
 
     user_role = models.CharField(max_length=25, choices=USER_ROLES_CHOICES, default='student') 
-    email = models.EmailField(unique=True, validators=[validate_email_domain]) 
+    email = models.EmailField(unique=True, validators=[validate_email_domain])  # Ensure university email
     gender = models.CharField(max_length=8, choices=GENDER_CHOICES)
-    profile_pic = CloudinaryField('image', blank=True, null=True)  #  for file storage
-    office = models.CharField(max_length=20, blank=True, null=True)  # For lecturers/registrars
+    profile_pic = CloudinaryField('image', blank=True, null=True)  # Use Cloudinary for file storage
+    college = models.ForeignKey(College, on_delete=models.SET_NULL, null=True, blank=True) 
+    office = models.CharField(max_length=20, blank=True, null=True)  
 
-    # Fix conflict with Django's default User model
     groups = models.ManyToManyField(Group, related_name="custom_user_groups")
     user_permissions = models.ManyToManyField(Permission, related_name="custom_user_permissions")
 
     def __str__(self):
         return self.username
 
-# Student Model
+
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student', unique=True)
     year_of_study = models.PositiveSmallIntegerField() 
