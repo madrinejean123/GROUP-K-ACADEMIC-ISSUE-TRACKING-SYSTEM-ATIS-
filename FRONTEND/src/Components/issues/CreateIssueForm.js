@@ -5,8 +5,8 @@ import "../styles/create-issue.css";
 const CreateIssueForm = ({ onSubmit, onCancel }) => {
   const [newIssue, setNewIssue] = useState({
     title: "",
+    courseCode: "",
     description: "",
-    courseCode: "", // Added course code field
     category: "Missing Marks",
     status: "Open",
     attachments: [],
@@ -43,9 +43,9 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
     setFormError(null);
 
     try {
-      // Call the onSubmit function which will now handle the API call
+      //  onSubmit function to handle the API call
       await onSubmit(newIssue);
-      // Form submission was successful, the parent component will handle UI updates
+      // Form submission was successful-handle ui
     } catch (error) {
       // Set form error to display to the user
       setFormError(
