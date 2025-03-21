@@ -1,12 +1,10 @@
 .footer {
-  background-color: red;
-  /* width: 100%; */
-  /* position: fixed; */
-  /* bottom: 0; */
-  /* padding: 0; */
-  /* background-color: rgb(9, 100, 94); */
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+  padding: 0;
+  background-color: rgb(9, 100, 94);
   color: aliceblue;
-  color: black;
   font-size: 1rem;
   display: flex;
   justify-content: space-around;
@@ -21,7 +19,6 @@
 }
 .footer a {
   color: rgba(245, 245, 245, 0.794);
-  color: black;
 }
 .footer p a:hover {
   color: whitesmoke;
