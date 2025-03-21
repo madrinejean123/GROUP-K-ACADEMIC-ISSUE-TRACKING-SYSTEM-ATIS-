@@ -32,7 +32,7 @@
 }
 
 .call-us a:hover {
-  color: #00b4d8; 
+  color: #12be46; 
 }
 
 .links {
@@ -96,7 +96,7 @@
 }
 
 .page-links a:hover {
-  border-bottom: 2px solid whitesmoke;
+  border-bottom: 2px solid rgb(12, 6, 6);
   color: #00b4d8; /* Light blue hover effect */
 }
 
@@ -116,7 +116,7 @@
   padding: 3px 5px;
   border-radius: 5px;
   border: none;
-  background-color: lightcyan;
+  background-color: rgb(7, 78, 78);
   font-weight: bold;
   cursor: pointer;
   transition: background-color 0.3s ease-in-out;
@@ -138,5 +138,5 @@
 }
 
 .btns .signup:hover {
-  background-color: #d83a3a; /* Darker red on hover */
+  background-color: #926709; /* Darker red on hover */
 }
