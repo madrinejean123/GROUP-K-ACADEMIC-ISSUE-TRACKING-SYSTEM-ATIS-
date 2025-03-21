@@ -31,8 +31,14 @@ const SignUp = () => {
     setLoading(true);
     console.log(data);
 
+    // Include the role in the data being sent to the backend
+    const requestData = {
+      ...data,
+      user_role: role, // Add role to the form data
+    };
+
     try {
-      const response = await axios.post("http://127.0.0.1:8000/api/v1/users/", data);
+      const response = await axios.post("http://127.0.0.1:8000/users/register/", requestData);
 
       console.log(response);
       if (response) {
@@ -59,8 +65,8 @@ const SignUp = () => {
       <h2>REGISTER HERE</h2>
 
       {/* Role Selection */}
-      <div className="role-selection">
-        <label>Select Role:</label>
+      <div className="user_role">
+        <label>user_role:</label>
         <select onChange={(e) => setRole(e.target.value)} value={role}>
           <option value="student">Student</option>
           <option value="lecturer">Lecturer</option>
@@ -70,53 +76,53 @@ const SignUp = () => {
 
       <form className="signup-form" onSubmit={handleSubmit(onSubmit)}>
         {/* Full Name Field */}
-        <label htmlFor="fullName">Full Name:</label>
+        <label htmlFor="full_name">Full Name:</label>
         <div className="input-group">
           <FaUser className="icon" />
           <input
             type="text"
-            id="fullName"
+            id="full_name"
             placeholder="Enter your full name"
-            {...register("fullName", {
+            {...register("full_name", {
               required: "Full name is required",
               pattern: { value: USER_REGEX, message: "Enter a valid full name" },
             })}
           />
         </div>
-        {errors.fullName && <p style={{ color: "red" }}>{errors.fullName.message}</p>}
+        {errors.full_name && <p style={{ color: "red" }}>{errors.full_name.message}</p>}
 
         {/* User ID Field (Only for Students) */}
         {role === "student" && (
           <>
-            <label htmlFor="userId">User-ID:</label>
+            <label htmlFor="student_no">srudent_no:</label>
             <div className="input-group">
               <FaIdBadge className="icon" />
               <input
                 type="number"
-                id="userId"
-                placeholder="Student No."
-                {...register("userId", {
+                id="student_no"
+                placeholder="student_no."
+                {...register("student_no", {
                   required: "User ID is required",
                   pattern: { value: USERID_REGEX, message: "Enter a valid userId" },
                 })}
               />
             </div>
-            {errors.userId && <p style={{ color: "red" }}>{errors.userId.message}</p>}
+            {errors.student_no&& <p style={{ color: "red" }}>{errors.student_no.message}</p>}
           </>
         )}
 
         {/* MAK Email Field (Compulsory for all) */}
-        <label htmlFor="makEmail">MAK Email:</label>
+        <label htmlFor="mak_email">mak_email:</label>
         <div className="input-group">
           <FaEnvelope className="icon" />
           <input
             type="email"
-            id="makEmail"
+            id="mak_email"
             placeholder="Enter your MAK Email"
-            {...register("makEmail", { required: "MAK Email is required" })}
+            {...register("mak_email", { required: "MAK Email is required" })}
           />
         </div>
-        {errors.makEmail && <p style={{ color: "red" }}>{errors.makEmail.message}</p>}
+        {errors.mak_email && <p style={{ color: "red" }}>{errors.mak_email.message}</p>}
 
         {/* Conditional College Field for Registrar */}
         {role === "registrar" && (
@@ -131,8 +137,6 @@ const SignUp = () => {
               <option value="COVAB">COVAB</option>
               <option value="CNS">CNS</option>
               <option value="CHUS">CHUS</option>
-
-            
             </select>
             {errors.college && <p style={{ color: "red" }}>{errors.college.message}</p>}
           </div>
@@ -159,20 +163,20 @@ const SignUp = () => {
         {errors.password && <p style={{ color: "red" }}>{errors.password.message}</p>}
 
         {/* Confirm Password Field */}
-        <label htmlFor="confirmPassword">Confirm Password:</label>
+        <label htmlFor="confirm_password">confirm_password:</label>
         <div className="input-group">
           <FaLock className="icon" />
           <input
             type="password"
-            id="confirmPassword"
+            id="confirm_password"
             placeholder="Enter password again"
-            {...register("confirmPassword", {
+            {...register("confirm_password", {
               required: "Please confirm your password",
               validate: (value) => value === password || "Passwords do not match",
             })}
           />
         </div>
-        {errors.confirmPassword && <p style={{ color: "red" }}>{errors.confirmPassword.message}</p>}
+        {errors.confirm_password && <p style={{ color: "red" }}>{errors.confirm_password.message}</p>}
 
         {/* Submit Button */}
         {loading ? (
