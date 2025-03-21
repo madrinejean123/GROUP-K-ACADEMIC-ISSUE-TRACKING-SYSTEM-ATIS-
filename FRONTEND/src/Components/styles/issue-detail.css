@@ -1,0 +1,245 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.issue-detail-modal {
+  background-color: var(--modal-bg);
+  border-radius: 8px;
+  padding: 25px;
+  width: 90%;
+  max-width: 700px;
+  box-shadow: var(--modal-shadow);
+  max-height: 90vh;
+  overflow-y: auto;
+  border: 1px solid var(--border-color);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.modal-header h2 {
+  color: var(--accent-color);
+  margin: 0;
+}
+
+.close-modal-button {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+
+.close-modal-button:hover {
+  color: var(--text-primary);
+}
+
+.issue-detail-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.issue-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  background-color: var(--hover-bg);
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.issue-id-badge {
+  background-color: var(--badge-bg);
+  color: var(--text-primary);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.issue-detail-title {
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  margin-bottom: 15px;
+  background-color: var(--hover-bg);
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.issue-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 10px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  background-color: var(--hover-bg);
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.issue-detail-section {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--hover-bg);
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.issue-detail-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.issue-detail-section h4 {
+  color: var(--accent-color);
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+}
+
+.issue-detail-description {
+  color: var(--text-primary);
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+.comments-list {
+  margin-bottom: 20px;
+  background-color: var(--bg-secondary);
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.comment-item {
+  padding: 15px;
+  border-radius: 8px;
+  background-color: var(--hover-bg);
+  margin-bottom: 15px;
+}
+
+.comment-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.comment-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.comment-meta {
+  flex: 1;
+}
+
+.comment-author {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.comment-date {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.comment-content {
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+.no-comments {
+  color: var(--text-secondary);
+  font-style: italic;
+  padding: 10px 0;
+}
+
+.add-comment {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background-color: var(--bg-secondary);
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.comment-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--input-border);
+  border-radius: 4px;
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  resize: vertical;
+}
+
+.issue-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.status-update-button {
+  padding: 8px 16px;
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.status-update-button:hover {
+  background-color: var(--accent-hover);
+}
+
+.status-update-button.cancel {
+  background-color: #e63946;
+}
+
+.status-update-button.cancel:hover {
+  background-color: #c1121f;
+}
+
+.issue-attachments {
+  margin-top: 15px;
+}
+
+.issue-attachments h5 {
+  margin-bottom: 10px;
+  color: var(--text-primary);
+}
+
+.attachment-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.attachment-link:hover {
+  background-color: var(--hover-bg);
+}
+

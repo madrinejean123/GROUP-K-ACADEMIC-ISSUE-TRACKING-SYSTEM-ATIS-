@@ -43,7 +43,10 @@ const HeroPage = () => {
           <h1 className="fade-in">{text}</h1>
           <p className="slide-in">
             Let's bridge the gap between students & administration...
-            <span> Log, track, resolve your academic-related concerns here.</span>
+            <span>
+              {" "}
+              Log, track, resolve your academic-related concerns here.
+            </span>
           </p>
           <p className="fade-in">Enhancing Academic Excellence!</p>
           <button className="cta-button" onClick={() => navigate("/signup")}>

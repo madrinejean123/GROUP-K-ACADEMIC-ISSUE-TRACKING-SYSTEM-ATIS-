@@ -1,0 +1,113 @@
+.issues-table-container {
+  overflow-x: auto;
+}
+
+.issues-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.issues-table th {
+  text-align: left;
+  padding: 12px 15px;
+  background-color: var(--table-header-bg);
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.issues-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+  background-color: var(--bg-secondary);
+}
+
+.issues-table tr:hover td {
+  background-color: var(--table-row-hover);
+}
+
+.description-cell {
+  max-width: 300px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.status-open {
+  background-color: #e6f7ff;
+  color: #0958d9;
+}
+
+.status-progress {
+  background-color: #fff7e6;
+  color: #d46b08;
+}
+
+.status-resolved {
+  background-color: #f6ffed;
+  color: #389e0d;
+}
+
+.status-closed {
+  background-color: var(--badge-bg);
+  color: var(--badge-text);
+}
+
+.category-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.category-missing-marks {
+  background-color: #e6f7ff;
+  color: #0958d9;
+}
+
+.category-appeals {
+  background-color: #fff1f0;
+  color: #cf1322;
+}
+
+.category-correction {
+  background-color: #f6ffed;
+  color: #389e0d;
+}
+
+.action-button {
+  background-color: var(--hover-bg);
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-primary);
+}
+
+.action-button:hover {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.no-issues {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-secondary);
+  background-color: var(--bg-secondary);
+}
+
+@media (max-width: 768px) {
+  .issues-table {
+    min-width: 800px;
+  }
+}
+
