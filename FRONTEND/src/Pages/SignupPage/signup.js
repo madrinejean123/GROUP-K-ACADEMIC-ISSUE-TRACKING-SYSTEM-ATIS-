@@ -21,7 +21,7 @@ const SignUp = () => {
     watch,
   } = useForm();
   const [loading, setLoading] = useState(false);
-  const [role, setRole] = useState(""); // For handling the user role
+  const [role, setRole] = useState("student"); // Default role as student
 
   // Password watch to validate confirm password
   const password = watch("password");
@@ -31,8 +31,15 @@ const SignUp = () => {
     setLoading(true);
     console.log(data);
 
+    // Include the role in the data being sent to the backend
+    const requestData = {
+      ...data,
+      user_role: role, // Add role to the form data
+    };
+
     try {
-      const response = await axios.post("https://app/api/v1/users", data);
+      const response = await axios.post("http://127.0.0.1:8000/users/register/", requestData);
+
       console.log(response);
       if (response) {
         setLoading(false);
@@ -57,8 +64,19 @@ const SignUp = () => {
     <div className="signup-container">
       <h2>REGISTER HERE</h2>
 
+      {/* Role Selection */}
+      <div className="user_role">
+        <label>user_role:</label>
+        <select onChange={(e) => setRole(e.target.value)} value={role}>
+          <option value="student">Student</option>
+          <option value="lecturer">Lecturer</option>
+          <option value="registrar">Registrar</option>
+        </select>
+      </div>
+
       <form className="signup-form" onSubmit={handleSubmit(onSubmit)}>
         {/* Full Name Field */}
+<<<<<<< HEAD
         <label htmlFor="fullName">Full Name:</label>
         <div className="input-group">
           <FaUser className="icon" />
@@ -116,6 +134,74 @@ const SignUp = () => {
           </div>
         )}
 
+=======
+        <label htmlFor="full_name">Full Name:</label>
+        <div className="input-group">
+          <FaUser className="icon" />
+          <input
+            type="text"
+            id="full_name"
+            placeholder="Enter your full name"
+            {...register("full_name", {
+              required: "Full name is required",
+              pattern: { value: USER_REGEX, message: "Enter a valid full name" },
+            })}
+          />
+        </div>
+        {errors.full_name && <p style={{ color: "red" }}>{errors.full_name.message}</p>}
+
+        {/* User ID Field (Only for Students) */}
+        {role === "student" && (
+          <>
+            <label htmlFor="student_no">srudent_no:</label>
+            <div className="input-group">
+              <FaIdBadge className="icon" />
+              <input
+                type="number"
+                id="student_no"
+                placeholder="student_no."
+                {...register("student_no", {
+                  required: "User ID is required",
+                  pattern: { value: USERID_REGEX, message: "Enter a valid userId" },
+                })}
+              />
+            </div>
+            {errors.student_no&& <p style={{ color: "red" }}>{errors.student_no.message}</p>}
+          </>
+        )}
+
+        {/* MAK Email Field (Compulsory for all) */}
+        <label htmlFor="mak_email">mak_email:</label>
+        <div className="input-group">
+          <FaEnvelope className="icon" />
+          <input
+            type="email"
+            id="mak_email"
+            placeholder="Enter your MAK Email"
+            {...register("mak_email", { required: "MAK Email is required" })}
+          />
+        </div>
+        {errors.mak_email && <p style={{ color: "red" }}>{errors.mak_email.message}</p>}
+
+        {/* Conditional College Field for Registrar */}
+        {role === "registrar" && (
+          <div className="input-group">
+            <label htmlFor="college">College:</label>
+            <select id="college" {...register("college", { required: "College selection is required" })}>
+              <option value="">Select College</option>
+              <option value="COCIS">COCIS</option>
+              <option value="COBAMS">COBAMS</option>
+              <option value="CONAS">CONAS</option>
+              <option value="CEES">CEES</option>
+              <option value="COVAB">COVAB</option>
+              <option value="CNS">CNS</option>
+              <option value="CHUS">CHUS</option>
+            </select>
+            {errors.college && <p style={{ color: "red" }}>{errors.college.message}</p>}
+          </div>
+        )}
+
+>>>>>>> 495e18720fc3e464cac6e2b2e0339a7f72197b96
         {/* Password Field */}
         <label htmlFor="password">Password:</label>
         <div className="input-group">
@@ -137,20 +223,34 @@ const SignUp = () => {
         {errors.password && <p style={{ color: "red" }}>{errors.password.message}</p>}
 
         {/* Confirm Password Field */}
+<<<<<<< HEAD
         <label htmlFor="confirmPassword">Confirm Password:</label>
+=======
+        <label htmlFor="confirm_password">confirm_password:</label>
+>>>>>>> 495e18720fc3e464cac6e2b2e0339a7f72197b96
         <div className="input-group">
           <FaLock className="icon" />
           <input
             type="password"
+<<<<<<< HEAD
             id="confirmPassword"
             placeholder="Enter password again"
             {...register("confirmPassword", {
+=======
+            id="confirm_password"
+            placeholder="Enter password again"
+            {...register("confirm_password", {
+>>>>>>> 495e18720fc3e464cac6e2b2e0339a7f72197b96
               required: "Please confirm your password",
               validate: (value) => value === password || "Passwords do not match",
             })}
           />
         </div>
+<<<<<<< HEAD
         {errors.confirmPassword && <p style={{ color: "red" }}>{errors.confirmPassword.message}</p>}
+=======
+        {errors.confirm_password && <p style={{ color: "red" }}>{errors.confirm_password.message}</p>}
+>>>>>>> 495e18720fc3e464cac6e2b2e0339a7f72197b96
 
         {/* Submit Button */}
         {loading ? (

@@ -1,4 +1,3 @@
-# users/serializers.py
 from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
@@ -9,25 +8,44 @@ User = get_user_model()
 # User Registration Serializer
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
-    year_of_study = serializers.IntegerField(required=False)  # Add this field
+    confirm_password = serializers.CharField(write_only=True)  # Added confirm password field
+    student_no = serializers.CharField(write_only=True, required=False)  # Added student_no, made it write_only and optional.
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'password', 'user_role', 'gender', 'year_of_study']
+        fields = ['id', 'user_role', 'full_name', 'student_no', 'mak_email', 'password', 'confirm_password']  # Added student_no to fields.
+
+    def validate(self, attrs):
+        """
+        Validate that password and confirm_password match.
+        """
+        password = attrs.get('password')
+        confirm_password = attrs.get('confirm_password')
+
+        if password != confirm_password:
+            raise serializers.ValidationError({"confirm_password": "Passwords must match."})
+
+        return attrs
 
     def create(self, validated_data):
-        # Extract year_of_study if provided
-        year_of_study = validated_data.pop('year_of_study', None)
+        # Print out validated data for debugging
+        print("Validated Data:", validated_data)  # This line will print the incoming data
 
         # Hash the password before saving
-        validated_data['password'] = make_password(validated_data['password'])
-        user = User.objects.create(**validated_data)
+        password = validated_data.pop('password')
+        confirm_password = validated_data.pop('confirm_password')  # Remove confirm password from validated data.
+        student_no = validated_data.pop('student_no', None)  # Remove student_no from validated data.
+
+        user = User.objects.create(
+            username=validated_data['full_name'],  # Use full_name as the username
+            mak_email=validated_data['mak_email'],  # Use mak_email instead of email
+            password=make_password(password),  # Hash password
+            user_role=validated_data['user_role'],
+        )
 
         # Create role-specific profile
         if user.user_role == 'student':
-            if year_of_study is None:
-                raise serializers.ValidationError({"year_of_study": "This field is required for students."})
-            Student.objects.create(user=user, year_of_study=year_of_study)
+            Student.objects.create(user=user, student_no=student_no)
         elif user.user_role == 'lecturer':
             Lecturer.objects.create(user=user)
         elif user.user_role == 'register':
@@ -37,23 +55,22 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
 # User Login Serializer
 class UserLoginSerializer(serializers.Serializer):
-    email = serializers.EmailField()
+    mak_email = serializers.EmailField()  # Changed email to mak_email
     password = serializers.CharField(write_only=True)
 
 # User Profile Serializer
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'user_role', 'gender', 'profile_pic', 'office']
+        fields = ['id', 'username', 'mak_email', 'user_role', 'profile_pic', 'office']
 
-# User Update Serializer
+# User Update Serializers
 class UserUpdateSerializers(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'gender', 'profile_pic', 'office']
+        fields = ['username', 'profile_pic', 'office']
         extra_kwargs = {
             'username': {'required': False},
-            'gender': {'required': False},
             'profile_pic': {'required': False},
             'office': {'required': False},
         }
@@ -64,7 +81,7 @@ class StudentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Student
-        fields = ['id', 'user', 'year_of_study', 'department']
+        fields = ['id', 'user', 'student_number']
 
 # Lecturer Serializer
 class LecturerSerializer(serializers.ModelSerializer):

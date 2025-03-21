@@ -21,6 +21,7 @@ h2 {
   font-size: 16px;
 }
 
+
 .signup-form label {
   display: flex;
   font-size: 14px;
@@ -96,4 +97,8 @@ h2 {
   margin-bottom: 15px;
   margin-top: 3px;
   height: 30px;
+<<<<<<< HEAD
+=======
+  color: rgb(83, 51, 8);
+>>>>>>> 495e18720fc3e464cac6e2b2e0339a7f72197b96
 }
