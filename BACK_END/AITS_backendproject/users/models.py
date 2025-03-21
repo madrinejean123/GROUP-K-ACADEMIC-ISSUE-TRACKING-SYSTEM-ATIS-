@@ -1,12 +1,9 @@
-# users/models.py
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from cloudinary.models import CloudinaryField  # For profile picture storage
-
-# Import Department model from the other app
-from department.models import Department
+from department.models import Department  # Import Department model from the other app
 
 # Custom validator for university email domain
 def validate_email_domain(value):
@@ -26,10 +23,11 @@ class User(AbstractUser):
         ('female', 'Female'), 
     ]
 
+    full_name = models.CharField(max_length=255, blank=True, null=True)  # Added full_name field
     user_role = models.CharField(max_length=25, choices=USER_ROLES_CHOICES, default='student') 
-    email = models.EmailField(unique=True, validators=[validate_email_domain]) 
+    mak_email = models.EmailField(unique=True, validators=[validate_email_domain]) 
     gender = models.CharField(max_length=8, choices=GENDER_CHOICES)
-    profile_pic = CloudinaryField('image', blank=True, null=True)  #  for file storage
+    profile_pic = CloudinaryField('image', blank=True, null=True)  # for profile picture storage
     office = models.CharField(max_length=20, blank=True, null=True)  # For lecturers/registrars
 
     # Fix conflict with Django's default User model
@@ -39,11 +37,16 @@ class User(AbstractUser):
     def __str__(self):
         return self.username
 
+    def get_full_name(self):
+        if self.full_name:
+            return self.full_name
+        return f"{self.first_name} {self.last_name}"  # Fallback to Django's default full name if no full_name is provided
+
 # Student Model
 class Student(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student', unique=True)
-    year_of_study = models.PositiveSmallIntegerField() 
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)  # Link to Department
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student', unique=True, null=True)
+    student_no = models.CharField(max_length=20, unique=True)  # Added student_no field
+  
 
     def __str__(self):
         return self.user.username
