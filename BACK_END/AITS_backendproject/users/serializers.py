@@ -28,23 +28,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-<<<<<<< HEAD
-        fields = ['id', 'user_role', 'full_name', 'student_no', 'mak_email', 'password', 'confirm_password']  # Added student_no to fields.
-
-    def validate(self, attrs):
-        """
-        Validate that password and confirm_password match.
-        """
-        password = attrs.get('password')
-        confirm_password = attrs.get('confirm_password')
-
-        if password != confirm_password:
-            raise serializers.ValidationError({"confirm_password": "Passwords must match."})
-
-        return attrs
-=======
         fields = ['id', 'username', 'email', 'password', 'user_role', 'gender', 'year_of_study', 'college']
->>>>>>> 5612254bfe2eacc911a0882a93b2dc6b743970e5
 
     def create(self, validated_data):
         # Print out validated data for debugging
@@ -83,15 +67,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-<<<<<<< HEAD
-        fields = ['id', 'username', 'mak_email', 'user_role', 'profile_pic', 'office']
-
-# User Update Serializers
-class UserUpdateSerializers(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['username', 'profile_pic', 'office']
-=======
         fields = ['id', 'username', 'email', 'user_role', 'gender', 'profile_pic', 'office', 'college']
 
 
@@ -99,7 +74,6 @@ class UserUpdateSerializers(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['username', 'gender', 'profile_pic', 'office', 'college']
->>>>>>> 5612254bfe2eacc911a0882a93b2dc6b743970e5
         extra_kwargs = {
             'username': {'required': False},
             'profile_pic': {'required': False},
@@ -134,17 +108,6 @@ class CollegeRegisterSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     college = CollegeSerializer(read_only=True)  # Include college details
 
-<<<<<<< HEAD
-    def validate_name(self, value):
-        """
-        Validate that the department name is unique within a college.
-        """
-        college = self.initial_data.get('college')
-        if Department.objects.filter(name__iexact=value, college=college).exists():
-            raise serializers.ValidationError("A department with this name already exists in this college.")
-        return value
-=======
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'user_role', 'gender', 'profile_pic', 'office', 'college']
->>>>>>> 5612254bfe2eacc911a0882a93b2dc6b743970e5
