@@ -76,65 +76,6 @@ const SignUp = () => {
 
       <form className="signup-form" onSubmit={handleSubmit(onSubmit)}>
         {/* Full Name Field */}
-<<<<<<< HEAD
-        <label htmlFor="fullName">Full Name:</label>
-        <div className="input-group">
-          <FaUser className="icon" />
-          <input
-            type="text"
-            id="fullName"
-            placeholder="Enter your full name"
-            {...register("fullName", {
-              required: "Full name is required",
-              pattern: { value: USER_REGEX, message: "Enter a valid full name" },
-            })}
-          />
-        </div>
-        {errors.fullName && <p style={{ color: "red" }}>{errors.fullName.message}</p>}
-
-        {/* User ID Field */}
-        <label htmlFor="userId">User-ID:</label>
-        <div className="input-group">
-          <FaIdBadge className="icon" />
-          <input
-            type="number"
-            id="userId"
-            placeholder="Student No. / Staff ID"
-            {...register("userId", {
-              required: "User ID is required",
-              pattern: { value: USERID_REGEX, message: "Enter a valid userId" },
-            })}
-          />
-        </div>
-        {errors.userId && <p style={{ color: "red" }}>{errors.userId.message}</p>}
-
-        {/* Email Field */}
-        <label htmlFor="email">Email:</label>
-        <div className="input-group">
-          <FaEnvelope className="icon" />
-          <input
-            type="email"
-            id="email"
-            placeholder="Enter your Email"
-            {...register("email", { required: "Email is required" })}
-          />
-        </div>
-        {errors.email && <p style={{ color: "red" }}>{errors.email.message}</p>}
-
-        {/* Conditional MAK Email Field */}
-        {(role === "lecturer" || role === "registrar") && (
-          <div className="input-group">
-            <FaEnvelope className="icon" />
-            <input
-              type="email"
-              id="makEmail"
-              placeholder="MAK Email"
-              {...register("makEmail", { required: "MAK Email is required" })}
-            />
-          </div>
-        )}
-
-=======
         <label htmlFor="full_name">Full Name:</label>
         <div className="input-group">
           <FaUser className="icon" />
@@ -201,7 +142,6 @@ const SignUp = () => {
           </div>
         )}
 
->>>>>>> 495e18720fc3e464cac6e2b2e0339a7f72197b96
         {/* Password Field */}
         <label htmlFor="password">Password:</label>
         <div className="input-group">
@@ -223,34 +163,20 @@ const SignUp = () => {
         {errors.password && <p style={{ color: "red" }}>{errors.password.message}</p>}
 
         {/* Confirm Password Field */}
-<<<<<<< HEAD
-        <label htmlFor="confirmPassword">Confirm Password:</label>
-=======
         <label htmlFor="confirm_password">confirm_password:</label>
->>>>>>> 495e18720fc3e464cac6e2b2e0339a7f72197b96
         <div className="input-group">
           <FaLock className="icon" />
           <input
             type="password"
-<<<<<<< HEAD
-            id="confirmPassword"
-            placeholder="Enter password again"
-            {...register("confirmPassword", {
-=======
             id="confirm_password"
             placeholder="Enter password again"
             {...register("confirm_password", {
->>>>>>> 495e18720fc3e464cac6e2b2e0339a7f72197b96
               required: "Please confirm your password",
               validate: (value) => value === password || "Passwords do not match",
             })}
           />
         </div>
-<<<<<<< HEAD
-        {errors.confirmPassword && <p style={{ color: "red" }}>{errors.confirmPassword.message}</p>}
-=======
         {errors.confirm_password && <p style={{ color: "red" }}>{errors.confirm_password.message}</p>}
->>>>>>> 495e18720fc3e464cac6e2b2e0339a7f72197b96
 
         {/* Submit Button */}
         {loading ? (
