@@ -1,0 +1,88 @@
+/* Issue Form Styles */
+form {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  form input,
+  form select,
+  form textarea {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    box-sizing: border-box;
+  }
+  
+  form label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+  }
+  
+  form textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+  
+  /*   title */
+  h2 {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  
+  
+  .form-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .form-group select {
+    flex: 1;
+  }
+  
+  .form-group .selected-option {
+    margin-left: 15px;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  
+  button {
+    padding: 5px 10px; 
+    font-size: 20px;   
+    margin-right: 20px; 
+    cursor: pointer;
+    border: 1px solid #ccc;
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 10px;
+  }
+  
+  button[type="cancel"] {
+    background-color: #f44336; 
+  }
+  
+  
+  form button {
+    display: inline-block;
+  }
+  
+  /* Center the form */
+  form {
+    text-align: center;
+  }
+  
+  form button:hover {
+    opacity: 0.8;
+  }
+  
