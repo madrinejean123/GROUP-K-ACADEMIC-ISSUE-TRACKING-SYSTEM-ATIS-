@@ -24,9 +24,11 @@ class UserRegistrationViewSet(viewsets.ModelViewSet):
     http_method_names = ['post']
 
     def create(self, request):
+        print("Received data for registration:", request.data)  # Debugging: Print incoming data
         serializer = self.get_serializer(data=request.data)
+        
         if not serializer.is_valid():
-            print(serializer.errors)  # Debugging: Print errors to console
+            print("Serializer errors:", serializer.errors)  # Debugging: Print errors to console
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         user = serializer.save()
@@ -52,17 +54,32 @@ class UserLoginViewSet(viewsets.ViewSet):
     permission_classes = [permissions.AllowAny]
 
     def create(self, request):
+        print("Received data for login:", request.data)  # Debugging: Print incoming data
         serializer = UserLoginSerializer(data=request.data)
+        
         if not serializer.is_valid():
-            print(serializer.errors)  # Debugging: Print errors to console
+            print("Serializer errors:", serializer.errors)  # Debugging: Print errors to console
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         mak_email = serializer.validated_data['mak_email'].lower()
         password = serializer.validated_data['password']
 
+        # Check if the user exists using mak_email
+        try:
+            user = User.objects.get(mak_email=mak_email)
+            print("User found:", user)  # Debugging: Print user details
+        except User.DoesNotExist:
+            print("User does not exist for mak_email:", mak_email)  # Debugging: Print user not found
+            return Response(
+                {'error': 'Invalid credentials'},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
         # Authenticate user using mak_email
-        user = authenticate(request, username=mak_email, password=password)  
+        user = authenticate(request, username=mak_email, password=password)
+        
         if not user:
+            print("Authentication failed for mak_email:", mak_email)  # Debugging: Print failed login attempt
             return Response(
                 {'error': 'Invalid credentials'},
                 status=status.HTTP_401_UNAUTHORIZED,
@@ -95,9 +112,11 @@ class UserProfileViewSet(viewsets.ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
+        print("Received data for user update:", request.data)  # Debugging: Print incoming data
         serializer = UserUpdateSerializers(instance, data=request.data, partial=True)
+        
         if not serializer.is_valid():
-            print(serializer.errors)  # Debugging: Print errors to console
+            print("Serializer errors during update:", serializer.errors)  # Debugging: Print errors to console
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         serializer.save()
@@ -114,16 +133,19 @@ class UserViewSet(viewsets.ModelViewSet):
     def students(self, request):
         students = Student.objects.all()
         serializer = StudentSerializer(students, many=True)
+        print("Returning students data:", serializer.data)  # Debugging: Print students data
         return Response(serializer.data)
 
     @action(detail=False, methods=['get'])
     def lecturers(self, request):
         lecturers = Lecturer.objects.all()
         serializer = LecturerSerializer(lecturers, many=True)
+        print("Returning lecturers data:", serializer.data)  # Debugging: Print lecturers data
         return Response(serializer.data)
 
     @action(detail=False, methods=['get'])
     def registrars(self, request):
         registrars = CollegeRegister.objects.all()
         serializer = CollegeRegisterSerializer(registrars, many=True)
+        print("Returning registrars data:", serializer.data)  # Debugging: Print registrars data
         return Response(serializer.data)

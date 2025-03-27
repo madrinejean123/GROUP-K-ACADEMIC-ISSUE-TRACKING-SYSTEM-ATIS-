@@ -6,8 +6,7 @@ import Signup from "./Pages/SignupPage/signup";
 import Login from "./Pages/LoginPage/login";
 import StudentDashboard from "./Pages/StudentDashboard/Studentdashboard";
 import RegistrarDashboard from "./Pages/RegistrarDashboard/Registrardashboard";
-<<<<<<< HEAD
-=======
+import ForgotPassword from "./Pages/Forgot_password/ForgotPassword";
 import LecturerDashboard from "./Pages/LecturerDashboard/LecturerDashboard";
 >>>>>>> 064a9d5b1e91d74a07be8e1524f8f32c8e46878c
 
@@ -23,8 +22,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/student" element={<StudentDashboard />} />
           <Route path="/registrar" element={<RegistrarDashboard />} />
-<<<<<<< HEAD
-=======
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/lecturer" element={<LecturerDashboard />} />
 >>>>>>> 064a9d5b1e91d74a07be8e1524f8f32c8e46878c
         </Routes>

@@ -1,169 +1,117 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import '../LoginPage/login.css';
-import { Link } from 'react-router-dom';
-import toast from 'react-hot-toast';
-import { FaEnvelope, FaLock } from 'react-icons/fa'; 
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
+import axios from "axios";
+import { useForm } from "react-hook-form";
+import toast from "react-hot-toast"; // Correct import for toast
+import "../LoginPage/login.css";  // Add your custom styling
+import { FaEnvelope, FaLock } from "react-icons/fa"; // Import the icons
 
-const users = [
-  {
-    role: 'student',
-    userId: '2400711993',
-    email: 'runy23@gmail.com',
-    password: 'studentPass123',
-    dashboard: '/StudentDashboard',
-  },
-  {
-    role: 'lecturer',
-    userId: '',
-    email: 'johndoe@mak.ac.ug',
-    password: 'lecturerPass123',
-    dashboard: '/LecturerDashboard',
-  },
-  {
-    role: "registrar",
-    userId: "1200713401",
-    email: "timothykigozi@mak.ac.ug",
-    password: "registrarPass123",
-    dashboard: "/RegistrarDashboard",
-
-  },
-  {
-    role: 'admin',
-    userId: '2100000001',
-    email: 'admin1@gmail.com',
-    password: 'adminPass123',
-    dashboard: '/AdminDashboard',
-  },
-];
-
-const Login = () => {
-  const navigate = useNavigate();
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
-
+const LoginPage = () => {
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    rememberMe: false,
-  });
+  const { register, handleSubmit, reset, formState: { errors } } = useForm();
+  const navigate = useNavigate(); // Initialize useNavigate for navigation
 
-  // Handle input changes
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  // Handle checkbox change for Remember Me
-  const handleRememberMeChange = (e) => {
-    setFormData({ ...formData, rememberMe: e.target.checked });
-  };
-
-  // Handle login action
+  // Handle form submission
   const onSubmit = async (data) => {
     setLoading(true);
-    const { email, password } = data;
+    console.log(data);
 
-    // get user by email and password
-    const user = users.find(
-      (user) => user.email === email && user.password === password
-    );
+    try {
+      // Assuming the login API is at this URL
+      const response = await axios.post("http://127.0.0.1:8000/users/login/", data);
 
-    if (user) {
-      // Redirect user based on their role and dashboard path
-      toast.success('Login Successful!', {
-        position: 'top-center',
-        duration: 3000,
-      });
-      navigate(user.dashboard); // Redirect to the correct dashboard based on role
-    } else {
-      toast.error('Invalid credentials. Please try again.', {
-        position: 'top-center',
+      console.log(response);
+      if (response.data && response.data.tokens) {
+        setLoading(false);
+        reset();
+        toast.success("Logged In Successfully", {
+          position: "top-center",
+          duration: 3000,
+        });
+
+        // Store the tokens in localStorage or cookies
+        localStorage.setItem("access_token", response.data.tokens.access);
+        localStorage.setItem("refresh_token", response.data.tokens.refresh);
+
+        // Check the user's role and navigate to the appropriate dashboard
+        const userRole = response.data.user.user_role;
+        if (userRole === "student") {
+          navigate("/student");
+        } else if (userRole === "lecturer") {
+          navigate("/lecturer");
+        } else if (userRole === "registrar") {
+          navigate("/registrar");
+        } else {
+          navigate("/"); // Default to home page if role is not recognized
+        }
+      } else {
+        throw new Error("Invalid credentials");
+      }
+    } catch (error) {
+      console.error("Error during login:", error);
+      setLoading(false);
+      toast.error("Failed to Log In", {
+        position: "top-center",
         duration: 3000,
       });
     }
-
-    setLoading(false);
-  };
-
-  // Handle forgot password action
-  const handleForgotPassword = (e) => {
-    e.preventDefault();
-    console.log('Forgot password clicked');
-    // Redirect or open forgot password page
-  };
-
-  // Handle sign-up action
-  const handleSignUp = () => {
-    navigate('/signup'); // Redirect to signup page
   };
 
   return (
-    <>
-      <div className="login-container">
-        <h2>Login</h2>
-
-        <form className="login-form" onSubmit={handleSubmit(onSubmit)}>
-          {/* Email Input */}
-          <div className="input-group">
-            <FaEnvelope className="icon" />
+    <div className="login-form">
+      <h2>Login</h2>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="form-group">
+          <label htmlFor="mak_email">
+            <FaEnvelope /> Email
+          </label>
+          <div className="input-container">
             <input
               type="email"
-              name="email"
-              placeholder="Email"
-              onChange={handleChange}
-              value={formData.email}
-              required
+              id="mak_email"
+              name="mak_email"
+              {...register("mak_email", { required: "Email is required" })}
             />
           </div>
-          {errors.email && <p style={{ color: 'red' }}>{errors.email.message}</p>}
+          {errors.mak_email && <p>{errors.mak_email.message}</p>}
+        </div>
 
-          {/* Password Input */}
-          <div className="input-group">
-            <FaLock className="icon" />
+        <div className="form-group">
+          <label htmlFor="password">
+            <FaLock /> Password
+          </label>
+          <div className="input-container">
             <input
               type="password"
+              id="password"
               name="password"
-              placeholder="Password"
-              onChange={handleChange}
-              value={formData.password}
-              required
+              {...register("password", { required: "Password is required" })}
             />
           </div>
-          {errors.password && (
-            <p style={{ color: 'red' }}>{errors.password.message}</p>
-          )}
+          {errors.password && <p>{errors.password.message}</p>}
+        </div>
 
-          {/* Submit Buttons */}
-          <div className="login-buttons">
-            <button type="submit" className="login-button" disabled={loading}>
-              {loading ? 'Logging in...' : 'Login'}
-            </button>
-            <button type="button" className="cancel-button">
-              Cancel
-            </button>
-          </div>
+        <div className="form-group">
+          <button type="submit" disabled={loading}>
+            {loading ? "Logging In..." : "Log In"}
+          </button>
+        </div>
+      </form>
 
-          {/* Sign Up Link */}
-          <div>
-            <p>
-              Don't have an account?{' '}
-              <span
-                onClick={handleSignUp}
-                style={{ cursor: 'pointer', color: 'blue' }}
-              >
-                Sign Up here
-              </span>
-            </p>
-          </div>
-        </form>
+      {/* Forgot Password Link */}
+      <div className="forgot-password">
+        <p>
+          Forgot your password?{" "}
+          <span
+            className="forgot-password-link"
+            onClick={() => navigate("/forgot-password")}
+          >
+            Reset it here
+          </span>
+        </p>
       </div>
-    </>
+    </div>
   );
 };
 
-export default Login;
+export default LoginPage;
