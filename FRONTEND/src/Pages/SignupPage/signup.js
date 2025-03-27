@@ -47,15 +47,23 @@ const SignUp = () => {
         toast.success("Signed Up Successfully", {
           position: "top-center",
           duration: 3000,
+          style: {
+            backgroundColor: "green",
+            color: "white",
+          },
         });
         window.location.href = "/login"; // Redirect to login page
       }
     } catch (error) {
       console.error("Error during signup:", error);
       setLoading(false);
-      toast.error("Failed to SignUp", {
+      toast.error("Failed to Sign Up", {
         position: "top-center",
         duration: 3000,
+        style: {
+          backgroundColor: "red",
+          color: "white",
+        },
       });
     }
   };
@@ -94,25 +102,25 @@ const SignUp = () => {
         {/* User ID Field (Only for Students) */}
         {role === "student" && (
           <>
-            <label htmlFor="student_no">srudent_no:</label>
+            <label htmlFor="student_no">Student No:</label>
             <div className="input-group">
               <FaIdBadge className="icon" />
               <input
                 type="number"
                 id="student_no"
-                placeholder="student_no."
+                placeholder="Student No."
                 {...register("student_no", {
-                  required: "User ID is required",
-                  pattern: { value: USERID_REGEX, message: "Enter a valid userId" },
+                  required: "Student No is required",
+                  pattern: { value: USERID_REGEX, message: "Enter a valid Student No" },
                 })}
               />
             </div>
-            {errors.student_no&& <p style={{ color: "red" }}>{errors.student_no.message}</p>}
+            {errors.student_no && <p style={{ color: "red" }}>{errors.student_no.message}</p>}
           </>
         )}
 
         {/* MAK Email Field (Compulsory for all) */}
-        <label htmlFor="mak_email">mak_email:</label>
+        <label htmlFor="mak_email">MAK Email:</label>
         <div className="input-group">
           <FaEnvelope className="icon" />
           <input
@@ -163,7 +171,7 @@ const SignUp = () => {
         {errors.password && <p style={{ color: "red" }}>{errors.password.message}</p>}
 
         {/* Confirm Password Field */}
-        <label htmlFor="confirm_password">confirm_password:</label>
+        <label htmlFor="confirm_password">Confirm Password:</label>
         <div className="input-group">
           <FaLock className="icon" />
           <input

@@ -3,6 +3,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
 from .models import User, Student, Lecturer, CollegeRegister
 from department.models import Department, College
+import re
 
 User = get_user_model()
 
@@ -78,10 +79,21 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Passwords do not match.")
         
         role = data.get('user_role', '').lower()
+
+        # Email validation based on user role
+        email = data.get('mak_email', '').lower()
+        if role == 'student':
+            if not re.match(r'^[a-zA-Z]+\.[a-zA-Z]+@students\.mak\.ac\.ug$', email):
+                raise serializers.ValidationError({"mak_email": "Student email must be in the format: firstname.lastname@students.mak.ac.ug."})
+        elif role in ['lecturer', 'registrar']:
+            if not re.match(r'^[a-zA-Z]+\.[a-zA-Z]+@mak\.ac\.ug$', email):
+                raise serializers.ValidationError({"mak_email": "Email must be in the format: firstname.lastname@mak.ac.ug."})
+
         if role == 'student' and not data.get('student_no'):
             raise serializers.ValidationError({"student_no": "Student number is required for students."})
         if role == 'registrar' and not data.get('college'):
             raise serializers.ValidationError({"college": "College is required for registrars."})
+        
         return data
 
     def create(self, validated_data):
@@ -96,20 +108,13 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         # Create the user with basic fields.
         user = User.objects.create(
             username=validated_data['full_name'],  # Using full_name as username
-            mak_email=validated_data['mak_email'],   # Initially provided email (will be reformatted)
+            mak_email=validated_data['mak_email'],   # The user enters their own email
             password=make_password(password),         # Hash password
             user_role=validated_data['user_role'],
             college=college  # Set for registrar; None for others
         )
 
-        # Format email using full_name: firstname.lastname@... based on role.
-        names = validated_data['full_name'].split()
-        first_name = names[0].lower()
-        last_name = names[-1].lower()
-        if user.user_role == 'student':
-            user.mak_email = f"{first_name}.{last_name}@students.mak.ac.ug"
-        elif user.user_role in ['lecturer', 'registrar']:
-            user.mak_email = f"{first_name}.{last_name}@mak.ac.ug"
+        # Save the user with the entered email.
         user.save()
 
         # Create role-specific profile.
@@ -126,6 +131,25 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 class UserLoginSerializer(serializers.Serializer):
     mak_email = serializers.EmailField()  # Changed email to mak_email
     password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        mak_email = data.get('mak_email').lower()
+        password = data.get('password')
+
+        print("Validating data:", data)  # Debugging: Print incoming data
+
+        # Email format validation
+        if not re.match(r'^[a-zA-Z]+\.[a-zA-Z]+@(students\.)?mak\.ac\.ug$', mak_email):
+            raise serializers.ValidationError("Invalid email format.")
+
+        if mak_email and password:
+            if not User.objects.filter(mak_email=mak_email).exists():
+                print("User does not exist for mak_email:", mak_email)  # Debugging: Print user not found
+                raise serializers.ValidationError("Invalid credentials")
+        else:
+            raise serializers.ValidationError("Must include 'mak_email' and 'password'")
+
+        return data
 
 # User Profile Serializer
 class UserProfileSerializer(serializers.ModelSerializer):
