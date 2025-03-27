@@ -1,5 +1,6 @@
 __pycache__/
 *.pyc
-db.sqlite3*.pyo
+db.sqlite3
+*.pyo
 *.log
 .env

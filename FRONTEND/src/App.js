@@ -6,6 +6,7 @@ import Signup from "./Pages/SignupPage/signup";
 import Login from "./Pages/LoginPage/login";
 import StudentDashboard from "./Pages/StudentDashboard/Studentdashboard";
 import RegistrarDashboard from "./Pages/RegistrarDashboard/Registrardashboard";
+import ForgotPassword from "./Pages/Forgot_password/ForgotPassword";
 import LecturerDashboard from "./Pages/LecturerDashboard/LecturerDashboard";
 
 import { Toaster } from "react-hot-toast";
@@ -20,6 +21,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/student" element={<StudentDashboard />} />
           <Route path="/registrar" element={<RegistrarDashboard />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/lecturer" element={<LecturerDashboard />} />
         </Routes>
         <Toaster />
