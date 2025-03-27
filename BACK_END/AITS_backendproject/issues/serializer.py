@@ -8,3 +8,4 @@ class IssueSerializers(ModelSerializer):
     class Meta:
         model = Issues
         fields = '__all__'
+        

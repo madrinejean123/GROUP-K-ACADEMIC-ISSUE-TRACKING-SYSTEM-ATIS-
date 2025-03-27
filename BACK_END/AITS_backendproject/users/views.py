@@ -1,10 +1,9 @@
-# users/views.py
 from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth import authenticate
-from .models import User, Student, Lecturer, CollegeRegister
+from django.contrib.auth import authenticate, get_user_model
+from .models import Student, Lecturer, CollegeRegister
 from .serializers import (
     UserRegistrationSerializer,
     UserLoginSerializer,
@@ -15,7 +14,10 @@ from .serializers import (
     CollegeRegisterSerializer,
 )
 
-# this  API enables users to regiser based on roles with the serializer verifying school webmail in the serialzer
+User = get_user_model()
+
+
+# User Registration API
 class UserRegistrationViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]
     serializer_class = UserRegistrationSerializer
@@ -23,7 +25,10 @@ class UserRegistrationViewSet(viewsets.ModelViewSet):
 
     def create(self, request):
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            print(serializer.errors)  # Debugging: Print errors to console
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
         user = serializer.save()
 
         # Generate JWT tokens
@@ -35,26 +40,28 @@ class UserRegistrationViewSet(viewsets.ModelViewSet):
 
         return Response(
             {
-                'user': serializer.data,
+                'user': UserProfileSerializer(user).data,  # Send user profile after registration
                 'tokens': tokens,
             },
             status=status.HTTP_201_CREATED,
         )
 
-#fidel we need to work on this late cause its the only api still not functioning fully 
+
+# User Login API
 class UserLoginViewSet(viewsets.ViewSet):
     permission_classes = [permissions.AllowAny]
-    serializer_class = UserLoginSerializer
 
     def create(self, request):
         serializer = UserLoginSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            print(serializer.errors)  # Debugging: Print errors to console
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        email = serializer.validated_data['email'].lower()
+        mak_email = serializer.validated_data['mak_email'].lower()
         password = serializer.validated_data['password']
 
-        # Authenticate user
-        user = authenticate(request, email=email, password=password)
+        # Authenticate user using mak_email
+        user = authenticate(request, username=mak_email, password=password)  
         if not user:
             return Response(
                 {'error': 'Invalid credentials'},
@@ -77,6 +84,7 @@ class UserLoginViewSet(viewsets.ViewSet):
         )
 
 
+# User Profile API
 class UserProfileViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = UserProfileSerializer
@@ -88,16 +96,19 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = UserUpdateSerializers(instance, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            print(serializer.errors)  # Debugging: Print errors to console
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
         serializer.save()
         return Response(serializer.data)
 
-# Role-Based User Retrieval ViewSet
+
+# Role-Based User Retrieval API
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserProfileSerializer
     permission_classes = [permissions.AllowAny]
-
 
     @action(detail=False, methods=['get'])
     def students(self, request):

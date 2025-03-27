@@ -16,7 +16,7 @@ def validate_email_domain(value):
 class User(AbstractUser):
     USER_ROLES_CHOICES = [
         ('student', 'Student'),
-        ('register', 'College Register'),
+        ('registrar', 'Registrar'),
         ('lecturer', 'Lecturer'),
     ]
 
@@ -25,8 +25,13 @@ class User(AbstractUser):
         ('female', 'Female'), 
     ]
 
+    full_name = models.CharField(max_length=255, blank=True, null=True)  # Added full_name field
     user_role = models.CharField(max_length=25, choices=USER_ROLES_CHOICES, default='student') 
+<<<<<<< HEAD
     email = models.EmailField(unique=True, validators=[validate_email_domain])  # Ensure university email
+=======
+    mak_email = models.EmailField(unique=True, validators=[validate_email_domain])  # Ensure university email
+>>>>>>> 064a9d5b1e91d74a07be8e1524f8f32c8e46878c
     gender = models.CharField(max_length=8, choices=GENDER_CHOICES)
     profile_pic = CloudinaryField('image', blank=True, null=True)  # Use Cloudinary for file storage
     college = models.ForeignKey(College, on_delete=models.SET_NULL, null=True, blank=True) 
@@ -38,14 +43,41 @@ class User(AbstractUser):
     def __str__(self):
         return self.username
 
+<<<<<<< HEAD
+=======
+    # Override the save method to modify the email based on the user role
+    def save(self, *args, **kwargs):
+        # Ensure first_name and last_name are properly set before constructing the email
+        if self.first_name and self.last_name:
+            email_prefix = f"{self.first_name.lower()}.{self.last_name.lower()}"
+        else:
+            email_prefix = self.username.lower()
+
+        if self.user_role == 'student':
+            # If the user is a student, ensure the email follows the student format
+            self.mak_email = f"{email_prefix}@students.mak.ac.ug"
+        elif self.user_role in ['lecturer', 'registrar']:
+            # If the user is a lecturer or college register, use the general university format
+            self.mak_email = f"{email_prefix}@mak.ac.ug"
+
+        # Call the parent class's save method to save the user object
+        super().save(*args, **kwargs)
+
+>>>>>>> 064a9d5b1e91d74a07be8e1524f8f32c8e46878c
 
 class Student(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student', unique=True)
-    year_of_study = models.PositiveSmallIntegerField() 
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)  # Link to Department
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student', unique=True, null=True)
+    student_no = models.CharField(max_length=20, unique=True)  # Added student_no field
 
     def __str__(self):
         return self.user.username
+
+    # Ensure student_no is only required for students
+    def save(self, *args, **kwargs):
+        if self.user.user_role != 'student':
+            self.student_no = None  # Do not require student number for non-students (Lecturer/Registrar)
+        super().save(*args, **kwargs)
+
 
 # Lecturer Model
 class Lecturer(models.Model):
@@ -57,7 +89,7 @@ class Lecturer(models.Model):
 
 # College Register Model
 class CollegeRegister(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='register', unique=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='registrar', unique=True)
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, related_name='register')
 
     def __str__(self):
