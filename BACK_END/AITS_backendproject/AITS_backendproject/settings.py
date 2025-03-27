@@ -155,6 +155,8 @@ REST_FRAMEWORK = {
     ],
 }
 
+CORS_ALLOWED_ORIGINS = ['http://10.10.119.11:3000',]
+
 CORS_ORIGIN_ALLOW_ALL = True
 
 

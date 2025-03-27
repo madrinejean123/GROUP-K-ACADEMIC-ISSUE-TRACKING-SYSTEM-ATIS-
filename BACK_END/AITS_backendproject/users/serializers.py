@@ -2,6 +2,12 @@ from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
 from .models import User, Student, Lecturer, CollegeRegister
+<<<<<<< HEAD
+from department.models import Department, College  
+
+User = get_user_model()
+
+=======
 from department.models import Department, College
 import re
 
@@ -17,6 +23,7 @@ class CustomPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
                 self.fail('invalid', input=data)
         return super().to_internal_value(data)
 
+>>>>>>> 064a9d5b1e91d74a07be8e1524f8f32c8e46878c
 # College Serializer
 class CollegeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -41,6 +48,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
+<<<<<<< HEAD
+        fields = ['id', 'username', 'email', 'password', 'user_role', 'gender', 'year_of_study', 'college']
+=======
         fields = [
             'id', 
             'full_name', 
@@ -95,6 +105,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"college": "College is required for registrars."})
         
         return data
+>>>>>>> 064a9d5b1e91d74a07be8e1524f8f32c8e46878c
 
     def create(self, validated_data):
         # Debug print
@@ -127,7 +138,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
         return user
 
-# User Login Serializer
+# User Login Serializer but am still working on it 
 class UserLoginSerializer(serializers.Serializer):
     mak_email = serializers.EmailField()  # Changed email to mak_email
     password = serializers.CharField(write_only=True)
@@ -157,6 +168,10 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
+<<<<<<< HEAD
+        fields = ['id', 'username', 'email', 'user_role', 'gender', 'profile_pic', 'office', 'college']
+
+=======
         fields = [
             'id', 
             'username', 
@@ -167,6 +182,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'office', 
             'college'
         ]
+>>>>>>> 064a9d5b1e91d74a07be8e1524f8f32c8e46878c
 
 class UserUpdateSerializers(serializers.ModelSerializer):
     class Meta:
@@ -179,12 +195,20 @@ class UserUpdateSerializers(serializers.ModelSerializer):
             'college': {'required': False},
         }
 
+<<<<<<< HEAD
+
+=======
+>>>>>>> 064a9d5b1e91d74a07be8e1524f8f32c8e46878c
 class StudentSerializer(serializers.ModelSerializer):
     user = UserProfileSerializer()
     class Meta:
         model = Student
         fields = ['id', 'user', 'student_no']
 
+<<<<<<< HEAD
+
+=======
+>>>>>>> 064a9d5b1e91d74a07be8e1524f8f32c8e46878c
 class LecturerSerializer(serializers.ModelSerializer):
     user = UserProfileSerializer()
     class Meta:
@@ -200,6 +224,13 @@ class CollegeRegisterSerializer(serializers.ModelSerializer):
 # User Serializer (for general use)
 class UserSerializer(serializers.ModelSerializer):
     college = CollegeSerializer(read_only=True)  # Include college details
+<<<<<<< HEAD
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'user_role', 'gender', 'profile_pic', 'office', 'college']
+=======
     class Meta:
         model = User
         fields = ['id', 'username', 'mak_email', 'user_role', 'gender', 'profile_pic', 'office', 'college']
+>>>>>>> 064a9d5b1e91d74a07be8e1524f8f32c8e46878c
