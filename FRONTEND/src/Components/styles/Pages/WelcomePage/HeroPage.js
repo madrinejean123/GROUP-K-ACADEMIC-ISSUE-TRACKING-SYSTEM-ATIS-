@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from "react";
 import "../WelcomePage/HeroPage.css";
 import { useNavigate } from "react-router-dom";
+// import MakLogo from "../Assets/logo.jpg";
+// import { MdAddCall } from "react-icons/md";
+// import { FaSquareXTwitter } from "react-icons/fa6";
+// import { FaSquareFacebook } from "react-icons/fa6";
+// import { FaSquareWhatsapp } from "react-icons/fa6";
+// import { FaUser } from "react-icons/fa";
 
 import LandingImg from "../../Components/assets/landing-page.jpg";
 import { FaArrowRightLong } from "react-icons/fa6";
