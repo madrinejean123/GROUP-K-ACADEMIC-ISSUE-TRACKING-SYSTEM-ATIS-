@@ -17,3 +17,4 @@ class IssueSerializers(serializers.ModelSerializer):
         if value in ['resolved', 'rejected'] and not self.context['request'].user.is_lecturer:
             raise serializers.ValidationError("Only lecturers can resolve/reject issues.")
         return value
+    
