@@ -9,8 +9,12 @@ class Issues(models.Model):
         ('resolved', 'Resolved'),
         ('rejected', 'Rejected'),
     ]
+    TITLE_CHOICES = [
+        ('registration_issue', 'REGISTRATION ISSUE'),
+        ('marks_correction', 'MARKS CORRECTION'),
+    ]
     status = models.CharField(max_length=20, choices=STATUS_CHOICE, default='pending')
-    title = models.CharField(max_length=255, default='Untitled Issue')
+    title = models.CharField(max_length=255, choices=TITLE_CHOICES, default='marks_correction')
     description = models.TextField()
     attachment = models.ImageField(upload_to='issue_attachments/', blank=True, null=True)
     assigned_lecturer = models.ForeignKey(Lecturer, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_issues')
