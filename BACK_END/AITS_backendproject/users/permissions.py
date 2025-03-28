@@ -1,6 +1,4 @@
-# users/permissions.py
 from rest_framework import permissions
-
 
 class IsStudent(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -10,6 +8,7 @@ class IsLecturer(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user.user_role == 'lecturer'
 
-class IsRegistrar(permissions.BasePermission):
+class IsCollegeRegister(permissions.BasePermission):
+    
     def has_permission(self, request, view):
-        return request.user.user_role == 'register'
+        return request.user.user_role == 'registrar'  # Matches USER_ROLES choice
