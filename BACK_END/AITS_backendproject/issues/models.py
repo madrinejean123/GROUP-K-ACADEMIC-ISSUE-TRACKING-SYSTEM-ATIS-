@@ -18,7 +18,7 @@ class Issues(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     author = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='submitted_issues')
     register = models.ForeignKey(CollegeRegister, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_issues')
-    college = models.ForeignKey(College, on_delete=models.CASCADE, related_name='issues')  # Direct link to college
+    college = models.ForeignKey(College, on_delete=models.CASCADE, related_name='issues', default=1)  # Direct link to college
 
     def __str__(self):
         return self.title
