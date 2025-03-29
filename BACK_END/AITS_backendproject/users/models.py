@@ -41,6 +41,8 @@ class User(AbstractUser):
 
     groups = models.ManyToManyField(Group, related_name="custom_user_groups")
     user_permissions = models.ManyToManyField(Permission, related_name="custom_user_permissions")
+    reset_token = models.CharField(max_length=32, blank=True, null=True)
+    reset_token_expiry = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return self.username

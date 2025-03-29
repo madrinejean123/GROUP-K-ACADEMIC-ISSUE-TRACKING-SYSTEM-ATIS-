@@ -172,7 +172,7 @@ class UserUpdateSerializers(serializers.ModelSerializer):
         extra_kwargs = {
             'profile_pic': {'required': False},
             'username': {'required': False},
-            'college': {'required': False}  # Add if optional
+            'college': {'required': False}  
         } 
 class StudentSerializer(serializers.ModelSerializer):
     user = UserProfileSerializer()
@@ -198,3 +198,22 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'mak_email', 'user_role', 'gender', 'profile_pic', 'office', 'college']
+
+
+class ForgotPasswordSerializer(serializers.Serializer):
+    mak_email = serializers.EmailField()
+
+    def validate_mak_email(self, value):
+        if not self.context['user_exists'](value):
+            raise serializers.ValidationError("No user with this email exists.")
+        return value
+
+class ResetPasswordSerializer(serializers.Serializer):
+    token = serializers.CharField()
+    new_password = serializers.CharField(min_length=8)
+    confirm_password = serializers.CharField()
+
+    def validate(self, data):
+        if data['new_password'] != data['confirm_password']:
+            raise serializers.ValidationError("Passwords must match")
+        return data
