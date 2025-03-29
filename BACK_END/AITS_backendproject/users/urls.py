@@ -5,6 +5,8 @@ from .views import (
     UserLoginViewSet,
     UserProfileViewSet,
     UserViewSet,
+    ForgotPasswordView,
+    ResetPasswordView,
 )
 
 router = DefaultRouter()
@@ -14,5 +16,8 @@ router.register(r'profile', UserProfileViewSet, basename='profile')  # This crea
 router.register(r'users', UserViewSet, basename='users')
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('', include(router.urls)), 
+    path('forgot-password/', ForgotPasswordView.as_view()),
+    path('reset-password/', ResetPasswordView.as_view()),
 ]
+
