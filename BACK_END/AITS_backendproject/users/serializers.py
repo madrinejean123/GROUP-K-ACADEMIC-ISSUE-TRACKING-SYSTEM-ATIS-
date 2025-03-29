@@ -165,18 +165,15 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'office', 
             'college'
         ]
-
 class UserUpdateSerializers(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['username', 'gender', 'profile_pic', 'office', 'college']
         extra_kwargs = {
-            'username': {'required': False},
             'profile_pic': {'required': False},
-            'office': {'required': False},
-            'college': {'required': False},
-        }
-
+            'username': {'required': False},
+            'college': {'required': False}  # Add if optional
+        } 
 class StudentSerializer(serializers.ModelSerializer):
     user = UserProfileSerializer()
     class Meta:

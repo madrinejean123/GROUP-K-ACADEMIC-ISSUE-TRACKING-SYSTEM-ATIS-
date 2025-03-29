@@ -101,29 +101,31 @@ class UserLoginViewSet(viewsets.ViewSet):
         )
 
 
-# User Profile API
-class UserProfileViewSet(viewsets.ModelViewSet):
+# Updated UserProfileViewSetfrom rest_framework.decorators import action
+from rest_framework.response import Response
+
+class UserProfileViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
-    serializer_class = UserProfileSerializer
-    http_method_names = ['get', 'put']
 
-    def get_object(self):
-        return self.request.user
-
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        print("Received data for user update:", request.data)  # Debugging: Print incoming data
-        serializer = UserUpdateSerializers(instance, data=request.data, partial=True)
-        
-        if not serializer.is_valid():
-            print("Serializer errors during update:", serializer.errors)  # Debugging: Print errors to console
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        serializer.save()
+    @action(detail=False, methods=['GET'])
+    def me(self, request):
+        """GET /profile/me/ - View current user profile"""
+        serializer = UserProfileSerializer(request.user)
         return Response(serializer.data)
 
-
-# Role-Based User Retrieval API
+    @action(detail=False, methods=['PUT', 'PATCH'])
+    def update_me(self, request):
+        """PUT/PATCH /profile/update_me/ - Update current user profile"""
+        is_partial = request.method == 'PATCH'
+        serializer = UserUpdateSerializers(
+            request.user,
+            data=request.data,
+            partial=is_partial,
+            context={'request': request}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserProfileSerializer
