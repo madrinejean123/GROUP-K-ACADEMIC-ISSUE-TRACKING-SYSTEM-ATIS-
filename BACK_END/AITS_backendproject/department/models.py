@@ -23,7 +23,7 @@ class College(models.Model):
     
 class School(models.Model):
     school_name = models.CharField(max_length=255, default='')
-    college = models.ForeignKey(College, related_name='school', on_delete=models.CASCADE, default=1)
+    college = models.ForeignKey(College, related_name='schools', on_delete=models.CASCADE, default=1)
     
     def __str__(self):
         return self.school_name
