@@ -1,17 +1,23 @@
 from rest_framework import serializers
-from .models import College, Department
+from .models import College, School, Department
 
 # College Serializer
 class CollegeSerializer(serializers.ModelSerializer):
     class Meta:
         model = College
         fields = ['id', 'name', 'code']
-
+#school serializer
+class SchoolSerializer(serializers.ModelSerializer):
+    college = CollegeSerializer(read_only=True)
+    class Meta:
+        model = School
+        fields = ['id', 'school_name', 'college']
+    
 # Department Serializer
 class DepartmentSerializer(serializers.ModelSerializer):
-    college = CollegeSerializer(read_only=True)  # Include college details
+    school = SchoolSerializer(read_only=True)  # Include college details
 
     class Meta:
         model = Department
-        fields = ['id', 'name', 'description', 'college']
+        fields = ['id', 'name', 'description', 'school']
         
