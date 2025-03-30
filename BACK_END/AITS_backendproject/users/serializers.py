@@ -3,7 +3,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
 from .models import User, Student, Lecturer, CollegeRegister
 from department.models import Department, College
-import re
+import re  
 
 User = get_user_model()
 
@@ -123,9 +123,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
         return user
 
-
-
-
+# User Login Serializer
 class UserLoginSerializer(serializers.Serializer):
     mak_email = serializers.EmailField()  # Changed email to mak_email
     password = serializers.CharField(write_only=True)
@@ -152,6 +150,7 @@ class UserLoginSerializer(serializers.Serializer):
 # User Profile Serializer
 class UserProfileSerializer(serializers.ModelSerializer):
     college = CollegeSerializer(read_only=True)  # Include college details
+    student_no = serializers.SerializerMethodField()  # Add student_no field
 
     class Meta:
         model = User
@@ -163,8 +162,18 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'gender', 
             'profile_pic', 
             'office', 
-            'college'
+            'college',
+            'student_no'  # Include student_no in the response
         ]
+
+    def get_student_no(self, obj):
+        # Check if the user is a student and return the student_no
+        if obj.user_role == 'student':
+            student = Student.objects.filter(user=obj).first()
+            if student:
+                return student.student_no
+        return None
+
 class UserUpdateSerializers(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -173,7 +182,8 @@ class UserUpdateSerializers(serializers.ModelSerializer):
             'profile_pic': {'required': False},
             'username': {'required': False},
             'college': {'required': False}  
-        } 
+        }
+
 class StudentSerializer(serializers.ModelSerializer):
     user = UserProfileSerializer()
     class Meta:
@@ -197,23 +207,4 @@ class UserSerializer(serializers.ModelSerializer):
     college = CollegeSerializer(read_only=True)  # Include college details
     class Meta:
         model = User
-        fields = ['id', 'username', 'mak_email', 'user_role', 'gender', 'profile_pic', 'office', 'college']
-
-
-class ForgotPasswordSerializer(serializers.Serializer):
-    mak_email = serializers.EmailField()
-
-    def validate_mak_email(self, value):
-        if not self.context['user_exists'](value):
-            raise serializers.ValidationError("No user with this email exists.")
-        return value
-
-class ResetPasswordSerializer(serializers.Serializer):
-    token = serializers.CharField()
-    new_password = serializers.CharField(min_length=8)
-    confirm_password = serializers.CharField()
-
-    def validate(self, data):
-        if data['new_password'] != data['confirm_password']:
-            raise serializers.ValidationError("Passwords must match")
-        return data
+        fields = ['id', 'username', 'mak

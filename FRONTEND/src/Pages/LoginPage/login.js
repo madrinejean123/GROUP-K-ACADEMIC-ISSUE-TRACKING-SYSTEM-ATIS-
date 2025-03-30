@@ -33,6 +33,9 @@ const LoginPage = () => {
         localStorage.setItem("access_token", response.data.tokens.access);
         localStorage.setItem("refresh_token", response.data.tokens.refresh);
 
+        console.log("Access Token:", localStorage.getItem("access_token"));
+        console.log("Refresh Token:", localStorage.getItem("refresh_token"));
+
         // Check the user's role and navigate to the appropriate dashboard
         const userRole = response.data.user.user_role;
         if (userRole === "student") {

@@ -21,7 +21,7 @@ from .serializers import (
     ForgotPasswordSerializer,
     ResetPasswordSerializer,
 )
-from .helpers.tokens import generate_reset_token,  get_token_expiry, validate_token_expiry
+from .helpers.tokens import generate_reset_token, get_token_expiry, validate_token_expiry
 
 User = get_user_model()
 
@@ -110,9 +110,7 @@ class UserLoginViewSet(viewsets.ViewSet):
         )
 
 
-# Updated UserProfileViewSetfrom rest_framework.decorators import action
-from rest_framework.response import Response
-
+# User Profile API
 class UserProfileViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -135,6 +133,9 @@ class UserProfileViewSet(viewsets.ViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+
+
+# User ViewSet
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserProfileSerializer
@@ -162,6 +163,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
+# Forgot Password API
 class ForgotPasswordView(APIView):
     throttle_classes = [AnonRateThrottle]
 
@@ -189,6 +191,8 @@ class ForgotPasswordView(APIView):
         )
         return Response({"status": "reset_email_sent"})
 
+
+# Reset Password API
 class ResetPasswordView(APIView):
     def post(self, request):
         serializer = ResetPasswordSerializer(data=request.data)
