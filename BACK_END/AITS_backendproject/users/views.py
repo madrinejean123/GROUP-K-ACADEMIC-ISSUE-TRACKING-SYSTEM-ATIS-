@@ -107,8 +107,9 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     serializer_class = UserProfileSerializer
     http_method_names = ['get', 'put']
 
-    def get_object(self):
-        return self.request.user
+    def get_queryset(self):
+        # Return only the logged-in user's profile
+        return User.objects.filter(id=self.request.user.id)
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()

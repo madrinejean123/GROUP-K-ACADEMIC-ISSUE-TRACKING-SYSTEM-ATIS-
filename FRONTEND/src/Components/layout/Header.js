@@ -1,134 +1,220 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaBell, FaBars, FaTimes, FaSignOutAlt, FaUser } from "react-icons/fa";
 import { FiSettings } from "react-icons/fi";
 import { MdEmail } from "react-icons/md";
+import axios from "axios";
 import "../styles/header.css";
 import MakLogo from "../assets/logo.png";
 
-
-
-const Header = ({ toggleSidebar, isMobile, sidebarOpen, userRole }) => {
+const Header = ({ toggleSidebar, isMobile, sidebarOpen, userRole, profile }) => {
+  // Local state to hold profile data from backend.
+  const [profileData, setProfileData] = useState({});
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [showProfileForm, setShowProfileForm] = useState(false);
+  const [formData, setFormData] = useState({});
 
-  // Database data ,props or context
-  const user = {
-    name: `John Doe (${userRole})`,
-    email: "john.doe@university.edu",
-    avatar: "/placeholder.svg?height=80&width=80",
+  // Whenever the profile prop changes, update profileData.
+  useEffect(() => {
+    console.log("Incoming profile prop:", profile);
+    // If profile is an array, use its first element; otherwise, use it directly.
+    const data = profile ? (Array.isArray(profile) ? profile[0] : profile) : {};
+    setProfileData(data);
+    setFormData(data);
+  }, [profile]);
+
+  // Debug logs to confirm we have the right profile info.
+  useEffect(() => {
+    console.log("Profile Data:", profileData);
+  }, [profileData]);
+
+  // Compute initials from the username using only the first two words.
+  const getInitials = (name) => {
+    if (!name || name.trim() === "") return "U"; // Fallback if name is undefined or empty
+    const names = name.trim().split(" ");
+    const initials = names
+      .slice(0, 2) // Take only the first two words
+      .map((n) => n[0].toUpperCase()) // Get the first letter of each word
+      .join(""); // Combine the initials
+    return initials;
   };
 
   const handleLogout = () => {
-    //  logout logic here
     alert("Logout clicked");
     setProfileOpen(false);
   };
 
   const handleMyAccount = () => {
-    // navigate to account page
-    alert("My Account clicked");
+    setShowProfileForm(true);
     setProfileOpen(false);
   };
 
   const handleSettings = () => {
-    // open settings
     alert("Settings clicked");
     setProfileOpen(false);
   };
 
-  const getUserInitials = (name) => {
-    if (!name) return "U";
-    return name
-      .split(" ")
-      .map((name) => name[0])
-      .join("")
-      .substring(0, 2)
-      .toUpperCase();
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem("access_token");
+      const response = await axios.put(
+        "http://127.0.0.1:8000/users/profile/",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      alert("Profile updated successfully!");
+      setShowProfileForm(false);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      alert("Failed to update profile. Please try again.");
+    }
   };
 
   return (
-    <header className="header">
-      <div className="header-left">
-        {isMobile && (
-          <button className="sidebar-toggle" onClick={toggleSidebar}>
-            {sidebarOpen ? <FaTimes /> : <FaBars />}
-          </button>
-        )}
-        <div className="logo">
-          <img src={MakLogo} alt="MUK logo" />
-          <h1>MAKERERE UNIVERSITY (AITS)</h1>
-        </div>
-      </div>
-      <div className="header-right">
-        <button className="icon-button">
-          <MdEmail />
-        </button>
-        <div className="notification-container">
-          <button
-            className="icon-button"
-            onClick={() => setNotificationsOpen(!notificationsOpen)}
-          >
-            <FaBell />
-            <span className="notification-badge">3</span>
-          </button>
-          {notificationsOpen && (
-            <div className="dropdown-menu notification-menu">
-              <div className="notification-item">
-                <p>New issue has been assigned</p>
-                <span className="notification-time">2 hours ago</span>
-              </div>
-              <div className="notification-item">
-                <p>Issue #5678 has been updated</p>
-                <span className="notification-time">Yesterday</span>
-              </div>
-              <div className="notification-item">
-                <p>Issue #9012 has been resolved</p>
-                <span className="notification-time">2 days ago</span>
-              </div>
-            </div>
+    <>
+      <header className="header">
+        <div className="header-left">
+          {isMobile && (
+            <button className="sidebar-toggle" onClick={toggleSidebar}>
+              {sidebarOpen ? <FaTimes /> : <FaBars />}
+            </button>
           )}
+          <div className="logo">
+            <img src={MakLogo} alt="MUK logo" />
+            <h1>MAKERERE UNIVERSITY (AITS)</h1>
+          </div>
         </div>
-        <div className="profile-container">
-          <button
-            className="profile-button"
-            onClick={() => setProfileOpen(!profileOpen)}
-          >
-            <div className="profile-initials">
-              {getUserInitials(user?.name)}
-            </div>
+        <div className="header-right">
+          <button className="icon-button">
+            <MdEmail />
           </button>
-          {profileOpen && (
-            <div className="dropdown-menu profile-menu">
-              {/* <div className="profile-header">
-                <img src={user?.avatar || "/placeholder.svg"} alt="Profile" />
-                <div>
-                  <p className="profile-name">{user?.name}</p>
-                  <p className="profile-email">{user?.email}</p>
+          <div className="notification-container">
+            <button
+              className="icon-button"
+              onClick={() => setNotificationsOpen(!notificationsOpen)}
+            >
+              <FaBell />
+              <span className="notification-badge">3</span>
+            </button>
+            {notificationsOpen && (
+              <div className="dropdown-menu notification-menu">
+                <div className="notification-item">
+                  <p>New issue has been assigned</p>
+                  <span className="notification-time">2 hours ago</span>
                 </div>
-              </div> */}
-              <div className="profile-options">
-                <h2 style={{ color: 'black' }}>My Account</h2>
-                <button className="profile-option" onClick={handleMyAccount}>
-                  <FaUser /> My profile
-                </button>
-                <button className="profile-option" onClick={handleSettings}>
-                  <FiSettings /> Settings
-                </button>
-                <button
-                  className="profile-option logout-option"
-                  onClick={handleLogout}
-                >
-                  <FaSignOutAlt /> Logout
-                </button>
+                <div className="notification-item">
+                  <p>Issue #5678 has been updated</p>
+                  <span className="notification-time">Yesterday</span>
+                </div>
+                <div className="notification-item">
+                  <p>Issue #9012 has been resolved</p>
+                  <span className="notification-time">2 days ago</span>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
+          <div className="profile-container">
+            <button
+              className="profile-button"
+              onClick={() => setProfileOpen(!profileOpen)}
+            >
+              <div className="profile-initials">
+                {getInitials(profileData.username)}
+              </div>
+            </button>
+            {profileOpen && (
+              <div className="dropdown-menu profile-menu">
+                <div className="profile-options">
+                  <h2 style={{ color: "black" }}>My Account</h2>
+                  <button className="profile-option" onClick={handleMyAccount}>
+                    <FaUser /> My profile
+                  </button>
+                  <button className="profile-option" onClick={handleSettings}>
+                    <FiSettings /> Settings
+                  </button>
+                  <button
+                    className="profile-option logout-option"
+                    onClick={handleLogout}
+                  >
+                    <FaSignOutAlt /> Logout
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+
+      {/* Profile Form */}
+      {showProfileForm && (
+        <div className="profile-form-container">
+          <form className="profile-form" onSubmit={handleFormSubmit}>
+            <h2>Edit Profile</h2>
+            {/* Read-only fields displayed as plain text */}
+            <div className="readonly-field">
+              <strong>Username:</strong> {formData.username || "N/A"}
+            </div>
+            <div className="readonly-field">
+              <strong>Email:</strong> {formData.mak_email || "N/A"}
+            </div>
+            <div className="readonly-field">
+              <strong>User Role:</strong> {formData.user_role || "N/A"}
+            </div>
+            <div className="readonly-field">
+              <strong>Student No:</strong> {formData.student_no || "N/A"}
+            </div>
+
+            {/* Editable fields */}
+            <label>
+              Gender:
+              <input
+                type="text"
+                name="gender"
+                value={formData.gender ?? ""}
+                onChange={handleInputChange}
+              />
+            </label>
+            <label>
+              Office:
+              <input
+                type="text"
+                name="office"
+                value={formData.office ?? ""}
+                onChange={handleInputChange}
+              />
+            </label>
+            <label>
+              Profile Picture URL:
+              <input
+                type="text"
+                name="profile_pic"
+                value={formData.profile_pic ?? ""}
+                onChange={handleInputChange}
+              />
+            </label>
+            <button type="submit">Save Changes</button>
+            <button
+              type="button"
+              onClick={() => setShowProfileForm(false)}
+              className="cancel-button"
+            >
+              Cancel
+            </button>
+          </form>
+        </div>
+      )}
+    </>
   );
 };
 
 export default Header;
-
-

@@ -154,6 +154,7 @@ class UserLoginSerializer(serializers.Serializer):
 # User Profile Serializer
 class UserProfileSerializer(serializers.ModelSerializer):
     college = CollegeSerializer(read_only=True)  # Include college details
+    student_no = serializers.SerializerMethodField()  # Add student_no field
 
     class Meta:
         model = User
@@ -165,8 +166,17 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'gender', 
             'profile_pic', 
             'office', 
-            'college'
+            'college',
+            'student_no'  # Include student_no in the response
         ]
+
+    def get_student_no(self, obj):
+        # Check if the user is a student and return the student_no
+        if obj.user_role == 'student':
+            student = Student.objects.filter(user=obj).first()
+            if student:
+                return student.student_no
+        return None
 
 class UserUpdateSerializers(serializers.ModelSerializer):
     class Meta:

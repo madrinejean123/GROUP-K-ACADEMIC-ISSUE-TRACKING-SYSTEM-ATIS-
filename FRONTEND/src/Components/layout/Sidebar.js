@@ -12,7 +12,7 @@ import {
 } from "react-icons/fa";
 import "../styles/sidebar.css";
 
-const Sidebar = ({ sidebarOpen, userRole }) => {
+const Sidebar = ({ sidebarOpen, userRole, profile }) => {
   const [activeNavItem, setActiveNavItem] = React.useState("dashboard");
 
   const getUserInitials = (name) => {
@@ -25,10 +25,10 @@ const Sidebar = ({ sidebarOpen, userRole }) => {
       .toUpperCase();
   };
 
-  // props or context
+  // Use dynamic profile data instead of hardcoded values
   const user = {
-    name: `John Doe (${userRole})`,
-    id: userRole === "Student" ? "Student #12345678" : userRole,
+    name: profile ? `${profile.username} (${userRole})` : "Loading...",
+    id: profile ? profile.student_no || userRole : "Loading...",
     avatar: "/placeholder.svg?height=80&width=80",
   };
 

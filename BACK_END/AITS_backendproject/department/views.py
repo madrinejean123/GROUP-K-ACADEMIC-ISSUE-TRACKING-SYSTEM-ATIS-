@@ -1,13 +1,14 @@
 from django.shortcuts import render
 from rest_framework import status, permissions
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import Department
-from .serializer import DepartmentSerializer
+from .models import Department, College
+from .serializer import DepartmentSerializer, CollegeSerializer
 
 
 class DepartmentView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [AllowAny]  # Changed from IsAuthenticated to AllowAny
     
     def get(self, request):
         departments = Department.objects.all()
@@ -23,7 +24,7 @@ class StudentDepartmentView(APIView):
             department = request.user.student.department
             serializer = DepartmentSerializer(department)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response({'error':'User is not a student'}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({'error': 'User is not a student'}, status=status.HTTP_401_UNAUTHORIZED)
     
     
 class RegisterDepartmentView(APIView):
@@ -34,7 +35,7 @@ class RegisterDepartmentView(APIView):
             department = request.user.register.department
             serializer = DepartmentSerializer(department)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response({'error':'User is not a register'}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({'error': 'User is not a register'}, status=status.HTTP_401_UNAUTHORIZED)
     
     
 class LecturerDepartmentView(APIView):
@@ -45,5 +46,15 @@ class LecturerDepartmentView(APIView):
             department = request.user.lecturer.department
             serializer = DepartmentSerializer(department)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response({'error':'User is not a lecturer'}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({'error': 'User is not a lecturer'}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+# New CollegeListView
+class CollegeListView(APIView):
     
+    permission_classes = [AllowAny] 
+    
+    def get(self, request):
+        colleges = College.objects.all()  # Fetch all colleges
+        serializer = CollegeSerializer(colleges, many=True)  # Serialize the data
+        return Response(serializer.data, status=status.HTTP_200_OK)
