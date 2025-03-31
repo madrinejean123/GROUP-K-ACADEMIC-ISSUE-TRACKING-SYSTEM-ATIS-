@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaTimes } from "react-icons/fa";
 import "../styles/create-issue.css";
+import axios from "axios";
 
 const CreateIssueForm = ({ onSubmit, onCancel }) => {
   const [newIssue, setNewIssue] = useState({
@@ -11,8 +12,49 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
     status: "Open",
     attachments: [],
   });
+  const [userData, setUserData] = useState({
+    name: "",
+    studentNo: "",
+    college: "",
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState(null);
+
+  // Fetch user data from the backend
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem("access_token"); // Get the token for authentication
+        const response = await axios.get("http://127.0.0.1:8000/users/profile/", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        console.log("User data fetched:", response.data); // Debug: Log the response
+
+        // If response.data is an array, get the first element, otherwise use the object directly
+        const user = Array.isArray(response.data)
+          ? response.data[0]
+          : response.data;
+        const { username, student_no, college } = user;
+        console.log("College Data:", college); // Debug: Log the college object
+
+        setUserData({
+          name: username,
+          studentNo: student_no,
+          college: college?.name || "N/A", // Use college.name if available
+        });
+      } catch (error) {
+        console.error("Error fetching user data:", error); // Debug: Log the error
+        setFormError("Failed to load user data. Please try again.");
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  // Optional: Log userData to verify state updates
+  useEffect(() => {
+    console.log("Updated userData:", userData);
+  }, [userData]);
 
   const handleNewIssueChange = (e) => {
     const { name, value } = e.target;
@@ -43,14 +85,11 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
     setFormError(null);
 
     try {
-      //  onSubmit function to handle the API call
+      // Call the onSubmit function to handle the API call
       await onSubmit(newIssue);
-      // Form submission was successful-handle ui
     } catch (error) {
       // Set form error to display to the user
-      setFormError(
-        error.message || "Failed to submit issue. Please try again."
-      );
+      setFormError(error.message || "Failed to submit issue. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -67,6 +106,20 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
         </div>
         {formError && <div className="form-error">{formError}</div>}
         <form onSubmit={handleSubmit}>
+          {/* User Information Section */}
+          <div className="user-info">
+            <p>
+              <strong>Name:</strong> {userData.name || "Loading..."}
+            </p>
+            <p>
+              <strong>Student No:</strong> {userData.studentNo || "Loading..."}
+            </p>
+            <p>
+              <strong>College:</strong> {userData.college || "Loading..."}
+            </p>
+          </div>
+
+          {/* Issue Form Fields */}
           <div className="form-group">
             <label htmlFor="title">Issue Title</label>
             <input
