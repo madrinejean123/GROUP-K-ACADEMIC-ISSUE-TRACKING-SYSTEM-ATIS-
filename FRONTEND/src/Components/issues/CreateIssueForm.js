@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
+import { FaTimes } from "react-icons/fa";
 import { FaTimes, FaExclamationTriangle } from "react-icons/fa";
 import "../styles/create-issue.css";
+import axios from "axios";
 
 const CreateIssueForm = ({ onSubmit, onCancel }) => {
   // Form state
@@ -12,6 +14,49 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
     status: "Open",
     attachments: [],
   });
+  const [userData, setUserData] = useState({
+    name: "",
+    studentNo: "",
+    college: "",
+  });
+  // Removed duplicate declaration of formError and setFormError
+
+  // Fetch user data from the backend
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem("access_token"); // Get the token for authentication
+        const response = await axios.get("http://127.0.0.1:8000/users/profile/", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        console.log("User data fetched:", response.data); // Debug: Log the response
+
+        // If response.data is an array, get the first element, otherwise use the object directly
+        const user = Array.isArray(response.data)
+          ? response.data[0]
+          : response.data;
+        const { username, student_no, college } = user;
+        console.log("College Data:", college); // Debug: Log the college object
+
+        setUserData({
+          name: username,
+          studentNo: student_no,
+          college: college?.name || "N/A", // Use college.name if available
+        });
+      } catch (error) {
+        console.error("Error fetching user data:", error); // Debug: Log the error
+        setFormError("Failed to load user data. Please try again.");
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  // Optional: Log userData to verify state updates
+  useEffect(() => {
+    console.log("Updated userData:", userData);
+  }, [userData]);
+
 
   // Validation state
   const [errors, setErrors] = useState({});
