@@ -3,7 +3,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
 from .models import User, Student, Lecturer, CollegeRegister
 from department.models import Department, College
-import re
+import re  
 
 User = get_user_model()
 
@@ -36,7 +36,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     confirm_password = serializers.CharField(write_only=True)  # Added confirm password field
     student_no = serializers.CharField(write_only=True, required=False)  # Optional by default
-    # Use the custom field for college.
     college = CustomPrimaryKeyRelatedField(queryset=College.objects.all(), required=False, write_only=True)
 
     class Meta:
@@ -60,7 +59,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         - For "registrar": Require college, remove student_no.
         """
         super().__init__(*args, **kwargs)
-        initial = self.initial_data or {}
+        initial = getattr(self, 'initial_data', {}) or {}
         role = initial.get('user_role', '').lower()
         if role == 'student':
             self.fields['student_no'].required = True
@@ -97,9 +96,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        # Debug print
-        print("Validated Data:", validated_data)
-
         password = validated_data.pop('password')
         validated_data.pop('confirm_password')
         student_no = validated_data.pop('student_no', None)  # Only for student role
@@ -190,10 +186,9 @@ class UserUpdateSerializers(serializers.ModelSerializer):
         model = User
         fields = ['username', 'gender', 'profile_pic', 'office', 'college']
         extra_kwargs = {
-            'username': {'required': False},
             'profile_pic': {'required': False},
-            'office': {'required': False},
-            'college': {'required': False},
+            'username': {'required': False},
+            'college': {'required': False}  
         }
 
 class StudentSerializer(serializers.ModelSerializer):
@@ -219,4 +214,4 @@ class UserSerializer(serializers.ModelSerializer):
     college = CollegeSerializer(read_only=True)  # Include college details
     class Meta:
         model = User
-        fields = ['id', 'username', 'mak_email', 'user_role', 'gender', 'profile_pic', 'office', 'college']
+        fields = ['id', 'username', 'mak

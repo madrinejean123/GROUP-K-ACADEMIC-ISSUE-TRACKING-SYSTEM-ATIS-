@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
 import { FaTimes } from "react-icons/fa";
+import { FaTimes, FaExclamationTriangle } from "react-icons/fa";
 import "../styles/create-issue.css";
 import axios from "axios";
 
 const CreateIssueForm = ({ onSubmit, onCancel }) => {
+  // Form state
   const [newIssue, setNewIssue] = useState({
     title: "",
-    courseCode: "",
     description: "",
+    courseCode: "",
     category: "Missing Marks",
     status: "Open",
     attachments: [],
@@ -17,8 +19,7 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
     studentNo: "",
     college: "",
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formError, setFormError] = useState(null);
+  // Removed duplicate declaration of formError and setFormError
 
   // Fetch user data from the backend
   useEffect(() => {
@@ -56,22 +57,91 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
     console.log("Updated userData:", userData);
   }, [userData]);
 
+
+  // Validation state
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState(null);
+
+  // File size limit in bytes (5MB)
+  const MAX_FILE_SIZE = 5 * 1024 * 1024;
+  // Allowed file types
+  const ALLOWED_FILE_TYPES = [
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ];
+
+  // Validate form on input change
+  useEffect(() => {
+    validateForm();
+  }, [newIssue]);
+
+  // Handle input changes
   const handleNewIssueChange = (e) => {
     const { name, value } = e.target;
+
     setNewIssue((prev) => ({
       ...prev,
       [name]: value,
     }));
-  };
 
-  const handleFileAttachment = (e) => {
-    const files = Array.from(e.target.files);
-    setNewIssue((prev) => ({
+    // Mark field as touched
+    setTouched((prev) => ({
       ...prev,
-      attachments: [...prev.attachments, ...files],
+      [name]: true,
     }));
   };
 
+  // Handle file attachment
+  const handleFileAttachment = (e) => {
+    const files = Array.from(e.target.files);
+    const validFiles = [];
+    const fileErrors = [];
+
+    // Validate each file
+    files.forEach((file) => {
+      // Check file size
+      if (file.size > MAX_FILE_SIZE) {
+        fileErrors.push(`${file.name} exceeds the 5MB size limit`);
+        return;
+      }
+
+      // Check file type
+      if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+        fileErrors.push(`${file.name} has an unsupported file type`);
+        return;
+      }
+
+      validFiles.push(file);
+    });
+
+    // Update attachments with valid files
+    setNewIssue((prev) => ({
+      ...prev,
+      attachments: [...prev.attachments, ...validFiles],
+    }));
+
+    // Set file errors if any
+    if (fileErrors.length > 0) {
+      setErrors((prev) => ({
+        ...prev,
+        attachments: fileErrors,
+      }));
+    }
+
+    // Mark attachments as touched
+    setTouched((prev) => ({
+      ...prev,
+      attachments: true,
+    }));
+  };
+
+  // Remove attachment
   const removeAttachment = (index) => {
     setNewIssue((prev) => ({
       ...prev,
@@ -79,17 +149,110 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
     }));
   };
 
+  // Validate form
+  const validateForm = () => {
+    const newErrors = {};
+
+    // Validate title
+    if (!newIssue.title.trim()) {
+      newErrors.title = "Title is required";
+    } else if (newIssue.title.length < 5) {
+      newErrors.title = "Title must be at least 5 characters";
+    } else if (newIssue.title.length > 100) {
+      newErrors.title = "Title must be less than 100 characters";
+    }
+
+    // Validate course code
+    if (!newIssue.courseCode.trim()) {
+      newErrors.courseCode = "Course code is required";
+    } else if (!/^[A-Z]{2,4}\d{3,4}$/.test(newIssue.courseCode.toUpperCase())) {
+      newErrors.courseCode = "Invalid course code format (e.g. CS101, MATH202)";
+    }
+
+    // Validate description
+    if (!newIssue.description.trim()) {
+      newErrors.description = "Description is required";
+    } else if (newIssue.description.length < 20) {
+      newErrors.description = "Description must be at least 20 characters";
+    } else if (newIssue.description.length > 2000) {
+      newErrors.description = "Description must be less than 2000 characters";
+    }
+
+    // Update errors state
+    setErrors(newErrors);
+
+    // Return whether form is valid
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Check if field has error and has been touched
+  const hasError = (field) => {
+    return errors[field] && touched[field];
+  };
+
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Mark all fields as touched
+    const touchedFields = {};
+    Object.keys(newIssue).forEach((key) => {
+      touchedFields[key] = true;
+    });
+    setTouched(touchedFields);
+
+    // Validate form
+    const isValid = validateForm();
+
+    if (!isValid) {
+      // Scroll to first error
+      const firstErrorField = document.querySelector(
+        ".form-group.error input, .form-group.error textarea, .form-group.error select"
+      );
+      if (firstErrorField) {
+        firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      return;
+    }
+
     setIsSubmitting(true);
     setFormError(null);
 
     try {
-      // Call the onSubmit function to handle the API call
-      await onSubmit(newIssue);
+      // Format the issue data for submission
+      const formattedIssue = {
+        ...newIssue,
+        courseCode: newIssue.courseCode.toUpperCase(), // Standardize course code format
+      };
+
+      // Call the onSubmit function which will handle the API call
+      await onSubmit(formattedIssue);
+
+      // Form submission was successful
+      // Reset form (not needed if modal is closed after submission)
+      // setNewIssue({
+      //   title: "",
+      //   description: "",
+      //   courseCode: "",
+      //   category: "Missing Marks",
+      //   status: "Open",
+      //   attachments: [],
+      // })
+      // setTouched({})
     } catch (error) {
+      console.error("Form submission error:", error);
       // Set form error to display to the user
-      setFormError(error.message || "Failed to submit issue. Please try again.");
+      setFormError(
+        error.message || "Failed to submit issue. Please try again."
+      );
+
+      // If there's a validation error from the server
+      if (error.validationErrors) {
+        setErrors((prev) => ({
+          ...prev,
+          ...error.validationErrors,
+        }));
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -104,24 +267,19 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
             <FaTimes />
           </button>
         </div>
-        {formError && <div className="form-error">{formError}</div>}
-        <form onSubmit={handleSubmit}>
-          {/* User Information Section */}
-          <div className="user-info">
-            <p>
-              <strong>Name:</strong> {userData.name || "Loading..."}
-            </p>
-            <p>
-              <strong>Student No:</strong> {userData.studentNo || "Loading..."}
-            </p>
-            <p>
-              <strong>College:</strong> {userData.college || "Loading..."}
-            </p>
-          </div>
 
-          {/* Issue Form Fields */}
-          <div className="form-group">
-            <label htmlFor="title">Issue Title</label>
+        {formError && (
+          <div className="form-error">
+            <FaExclamationTriangle className="error-icon" />
+            {formError}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} noValidate>
+          <div className={`form-group ${hasError("title") ? "error" : ""}`}>
+            <label htmlFor="title">
+              Issue Title <span className="required">*</span>
+            </label>
             <input
               type="text"
               id="title"
@@ -130,10 +288,22 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
               onChange={handleNewIssueChange}
               placeholder="Enter a descriptive title"
               required
+              aria-invalid={hasError("title")}
+              aria-describedby={hasError("title") ? "title-error" : undefined}
             />
+            {hasError("title") && (
+              <div className="error-message" id="title-error">
+                {errors.title}
+              </div>
+            )}
           </div>
-          <div className="form-group">
-            <label htmlFor="courseCode">Course Code</label>
+
+          <div
+            className={`form-group ${hasError("courseCode") ? "error" : ""}`}
+          >
+            <label htmlFor="courseCode">
+              Course Code <span className="required">*</span>
+            </label>
             <input
               type="text"
               id="courseCode"
@@ -142,10 +312,28 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
               onChange={handleNewIssueChange}
               placeholder="e.g. CS101, MATH202"
               required
+              aria-invalid={hasError("courseCode")}
+              aria-describedby={
+                hasError("courseCode") ? "courseCode-error" : undefined
+              }
             />
+            {hasError("courseCode") && (
+              <div className="error-message" id="courseCode-error">
+                {errors.courseCode}
+              </div>
+            )}
+            <div className="field-hint">
+              Format: Department code (2-4 letters) followed by course number
+              (3-4 digits)
+            </div>
           </div>
-          <div className="form-group">
-            <label htmlFor="description">Description</label>
+
+          <div
+            className={`form-group ${hasError("description") ? "error" : ""}`}
+          >
+            <label htmlFor="description">
+              Description <span className="required">*</span>
+            </label>
             <textarea
               id="description"
               name="description"
@@ -154,22 +342,41 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
               placeholder="Describe your issue in detail"
               rows="4"
               required
+              aria-invalid={hasError("description")}
+              aria-describedby={
+                hasError("description") ? "description-error" : undefined
+              }
             />
+            {hasError("description") && (
+              <div className="error-message" id="description-error">
+                {errors.description}
+              </div>
+            )}
+            <div className="character-count">
+              {newIssue.description.length}/2000 characters
+            </div>
           </div>
+
           <div className="form-group">
-            <label htmlFor="category">Category</label>
+            <label htmlFor="category">
+              Category <span className="required">*</span>
+            </label>
             <select
               id="category"
               name="category"
               value={newIssue.category}
               onChange={handleNewIssueChange}
+              required
             >
               <option value="Missing Marks">Missing Marks</option>
               <option value="Appeals">Appeals</option>
               <option value="Correction">Correction</option>
             </select>
           </div>
-          <div className="form-group">
+
+          <div
+            className={`form-group ${hasError("attachments") ? "error" : ""}`}
+          >
             <label htmlFor="attachments">Supporting Documents</label>
             <input
               type="file"
@@ -178,7 +385,20 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
               onChange={handleFileAttachment}
               multiple
               className="file-input"
+              accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx"
             />
+            <div className="field-hint">
+              Accepted file types: JPG, PNG, GIF, PDF, DOC, DOCX. Maximum size:
+              5MB per file.
+            </div>
+            {hasError("attachments") && Array.isArray(errors.attachments) && (
+              <div className="error-message">
+                {errors.attachments.map((error, index) => (
+                  <div key={index}>{error}</div>
+                ))}
+              </div>
+            )}
+
             {newIssue.attachments.length > 0 && (
               <div className="attachments-list">
                 <p>Attached files:</p>
@@ -190,6 +410,7 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
                         type="button"
                         className="remove-attachment-button"
                         onClick={() => removeAttachment(index)}
+                        aria-label={`Remove ${file.name}`}
                       >
                         <FaTimes />
                       </button>
@@ -199,6 +420,7 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
               </div>
             )}
           </div>
+
           <div className="form-actions">
             <button
               type="button"

@@ -15,20 +15,22 @@ COLLEGE_CHOICES = [
 
 # College Model
 class College(models.Model):
-    name = models.CharField(max_length=100, choices=COLLEGE_CHOICES, unique=True)
-    code = models.CharField(max_length=10, unique=True, default="COCIS")  # Default value
+    name = models.CharField(max_length=100, choices=COLLEGE_CHOICES, unique=True, default='')
+    code = models.CharField(max_length=50, unique=True, default='COCIS')  # Default value
 
     def __str__(self):
         return self.get_name_display()  # Returns the full name of the college
     
-
+class School(models.Model):
+    school_name = models.CharField(max_length=255, default='')
+    college = models.ForeignKey(College, related_name='schools', on_delete=models.CASCADE, default=1)
+    
+    def __str__(self):
+        return self.school_name
 class Department(models.Model):
     name = models.CharField(max_length=100, unique=True, default="Unnamed Department")  # Default value
     description = models.TextField(verbose_name='Department Description')
-    college = models.ForeignKey(College, on_delete=models.CASCADE, related_name='departments', default=1)
+    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='departments', default=1)
 
     def __str__(self):
-        return f"{self.name} ({self.college.name})"
-    
-
-    
+        return f"{self.name} ({self.school.school_name})"

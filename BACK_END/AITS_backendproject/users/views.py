@@ -1,5 +1,11 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
+from rest_framework.views import APIView
+from django.core.mail import send_mail
+from rest_framework.throttling import AnonRateThrottle
+from django.conf import settings
+from django.utils import timezone
+from datetime import timedelta
 from rest_framework.decorators import action
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate, get_user_model
@@ -12,7 +18,10 @@ from .serializers import (
     StudentSerializer,
     LecturerSerializer,
     CollegeRegisterSerializer,
+    ForgotPasswordSerializer,
+    ResetPasswordSerializer,
 )
+from .helpers.tokens import generate_reset_token, get_token_expiry, validate_token_expiry
 
 User = get_user_model()
 
@@ -102,29 +111,31 @@ class UserLoginViewSet(viewsets.ViewSet):
 
 
 # User Profile API
-class UserProfileViewSet(viewsets.ModelViewSet):
+class UserProfileViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
-    serializer_class = UserProfileSerializer
-    http_method_names = ['get', 'put']
 
-    def get_queryset(self):
-        # Return only the logged-in user's profile
-        return User.objects.filter(id=self.request.user.id)
+    @action(detail=False, methods=['GET'])
+    def me(self, request):
+        """GET /profile/me/ - View current user profile"""
+        serializer = UserProfileSerializer(request.user)
+        return Response(serializer.data)
 
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        print("Received data for user update:", request.data)  # Debugging: Print incoming data
-        serializer = UserUpdateSerializers(instance, data=request.data, partial=True)
-        
-        if not serializer.is_valid():
-            print("Serializer errors during update:", serializer.errors)  # Debugging: Print errors to console
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+    @action(detail=False, methods=['PUT', 'PATCH'])
+    def update_me(self, request):
+        """PUT/PATCH /profile/update_me/ - Update current user profile"""
+        is_partial = request.method == 'PATCH'
+        serializer = UserUpdateSerializers(
+            request.user,
+            data=request.data,
+            partial=is_partial,
+            context={'request': request}
+        )
+        serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
 
 
-# Role-Based User Retrieval API
+# User ViewSet
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserProfileSerializer
@@ -150,3 +161,54 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = CollegeRegisterSerializer(registrars, many=True)
         print("Returning registrars data:", serializer.data)  # Debugging: Print registrars data
         return Response(serializer.data)
+
+
+# Forgot Password API
+class ForgotPasswordView(APIView):
+    throttle_classes = [AnonRateThrottle]
+
+    def post(self, request):
+        serializer = ForgotPasswordSerializer(
+            data=request.data,
+            context={'user_exists': lambda email: User.objects.filter(mak_email=email).exists()}
+        )
+        
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=400)
+
+        user = User.objects.get(mak_email=serializer.validated_data['mak_email'])
+        user.reset_token = generate_reset_token()
+        user.reset_token_expiry = get_token_expiry()
+        user.save()
+
+        reset_link = f"{settings.FRONTEND_URL}/reset-password?token={user.reset_token}"
+        send_mail(
+            "Password Reset Request",
+            f"Use this link to reset your password: {reset_link}",
+            settings.DEFAULT_FROM_EMAIL,
+            [user.mak_email],
+            fail_silently=False,
+        )
+        return Response({"status": "reset_email_sent"})
+
+
+# Reset Password API
+class ResetPasswordView(APIView):
+    def post(self, request):
+        serializer = ResetPasswordSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=400)
+
+        try:
+            user = User.objects.get(reset_token=serializer.validated_data['token'])
+            if not validate_token_expiry(user.reset_token_expiry):
+                return Response({"error": "token_expired"}, status=400)
+
+            user.set_password(serializer.validated_data['new_password'])
+            user.reset_token = None
+            user.reset_token_expiry = None
+            user.save()
+            return Response({"status": "password_updated"})
+
+        except User.DoesNotExist:
+            return Response({"error": "invalid_token"}, status=400)
