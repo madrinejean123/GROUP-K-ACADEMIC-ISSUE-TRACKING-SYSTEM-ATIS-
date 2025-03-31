@@ -207,4 +207,4 @@ class UserSerializer(serializers.ModelSerializer):
     college = CollegeSerializer(read_only=True)  # Include college details
     class Meta:
         model = User
-        fields = ['id', 'username', 'mak
+        fields = ['id', 'username', 'mak_email']
