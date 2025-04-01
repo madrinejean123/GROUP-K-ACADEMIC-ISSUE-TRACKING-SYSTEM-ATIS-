@@ -56,7 +56,7 @@ class CreateSchoolView(APIView):
         college = get_object_or_404(College, id=college_id)
         serializer = SchoolSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.validate_data['college']=college
+            serializer.validated_data['college']=college
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -93,7 +93,7 @@ class StudentSchoolView(APIView):
 
     def get(self, request):
         if hasattr(request.user, 'student'):
-            school = request.user.student.college.school# ensuring college exists
+            school = request.user.student.department.school
             serializer = SchoolSerializer(school)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response({'error': 'User is not a student'}, status=status.HTTP_401_UNAUTHORIZED)
@@ -104,7 +104,7 @@ class StudentDepartmentView(APIView):
 
     def get(self, request):
         if hasattr(request.user, 'student') and hasattr(request.user.student, 'department'):
-            department = request.user.student.college.school.department#ensuring hierarchy
+            department = request.user.student.department
             serializer = DepartmentSerializer(department)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response({'error': 'User is not a student'}, status=status.HTTP_401_UNAUTHORIZED)
