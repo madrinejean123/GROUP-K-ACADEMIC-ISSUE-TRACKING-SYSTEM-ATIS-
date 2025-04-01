@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.core.exceptions import ValidationError
 from cloudinary.models import CloudinaryField
-from department.models import Department, College
+from department.models import Department, College, School
 import re
 
 # Custom validator for university email domain
@@ -35,7 +35,6 @@ class User(AbstractUser):
     mak_email = models.EmailField(unique=True)
     gender = models.CharField(max_length=8, choices=GENDER_CHOICES,default='Male')
     profile_pic = CloudinaryField('image', blank=True, null=True)
-    college = models.ForeignKey(College, on_delete=models.SET_NULL, null=True, blank=True)
     office = models.CharField(max_length=20, blank=True, null=True)
     notification_email = models.EmailField(blank=True, null=True)  # Optional notification email
 
@@ -55,6 +54,9 @@ class User(AbstractUser):
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student', unique=True, null=True)
     student_no = models.CharField(max_length=20, unique=True)
+    college = models.ForeignKey(College, on_delete=models.CASCADE, blank=False, default='')
+    school = models.ForeignKey(School, on_delete=models.SET_NULL, default='', null=True)
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, default='', null=True)
 
     def __str__(self):
         return self.user.username
@@ -66,16 +68,15 @@ class Student(models.Model):
 
 
 class Lecturer(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='lecturer', unique=True)
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, related_name='lecturer')
-
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='lecturers', unique=True)
+    college = models.ForeignKey(College, on_delete=models.CASCADE, blank=False, default='')
     def __str__(self):
-        return f"{self.user.username} - {self.department}"
+        return f"{self.user.username} - {self.college}"
 
 
 class CollegeRegister(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='registrar', unique=True)
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, related_name='register')
-
+    college = models.ForeignKey(College, on_delete=models.CASCADE, blank=False, default='') 
+    
     def __str__(self):
-        return f"{self.user.username} - {self.department}"
+        return f"{self.user.username} - {self.college}"

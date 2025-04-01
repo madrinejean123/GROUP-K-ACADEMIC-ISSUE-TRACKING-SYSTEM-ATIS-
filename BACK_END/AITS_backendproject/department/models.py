@@ -26,7 +26,7 @@ class School(models.Model):
     college = models.ForeignKey(College, related_name='schools', on_delete=models.CASCADE, default=1)
     
     def __str__(self):
-        return self.school_name
+        return f'{self.school_name} ({self.college.name})'
 class Department(models.Model):
     name = models.CharField(max_length=100, unique=True, default="Unnamed Department")  # Default value
     description = models.TextField(verbose_name='Department Description')
