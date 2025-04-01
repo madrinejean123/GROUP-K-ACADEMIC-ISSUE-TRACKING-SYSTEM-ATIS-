@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { FaTimes } from "react-icons/fa";
 import { FaTimes, FaExclamationTriangle } from "react-icons/fa";
 import "../styles/create-issue.css";
 import axios from "axios";
