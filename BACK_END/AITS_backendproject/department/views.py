@@ -79,3 +79,34 @@ class CollegeListView(APIView):
         colleges = College.objects.all()  # Fetch all colleges
         serializer = CollegeSerializer(colleges, many=True)  # Serialize the data
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class DepartmentView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        departments = Department.objects.all()
+        serializer = DepartmentSerializer(departments, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class RegisterDepartmentView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        if hasattr(request.user, 'register'):
+            department = request.user.register.department
+            serializer = DepartmentSerializer(department)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({'error': 'User is not a registrar'}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+class LecturerDepartmentView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        if hasattr(request.user, 'lecturer'):
+            department = request.user.lecturer.department
+            serializer = DepartmentSerializer(department)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({'error': 'User is not a lecturer'}, status=status.HTTP_401_UNAUTHORIZED)
