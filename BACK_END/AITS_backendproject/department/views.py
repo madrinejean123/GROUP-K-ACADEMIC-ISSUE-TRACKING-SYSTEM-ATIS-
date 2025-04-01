@@ -5,7 +5,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import College, School, Department
-from .serializer import CollegeSerializer, SchoolSerializer, DepartmentSerializer
+from .serializers import CollegeSerializer, SchoolSerializer, DepartmentSerializer
 
 
 class CollegeView(APIView):
@@ -56,7 +56,8 @@ class CreateSchoolView(APIView):
         college = get_object_or_404(College, id=college_id)
         serializer = SchoolSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(college=college)
+            serializer.validate_data['college']=college
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -67,7 +68,8 @@ class CreateDepartmentView(APIView):
         school = get_object_or_404(School, id=school_id)
         serializer = DepartmentSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(school=school)
+            serializer.validated_data['school']=school
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -91,7 +93,7 @@ class StudentSchoolView(APIView):
 
     def get(self, request):
         if hasattr(request.user, 'student'):
-            school = request.user.student.school
+            school = request.user.student.college.school# ensuring college exists
             serializer = SchoolSerializer(school)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response({'error': 'User is not a student'}, status=status.HTTP_401_UNAUTHORIZED)
@@ -102,7 +104,7 @@ class StudentDepartmentView(APIView):
 
     def get(self, request):
         if hasattr(request.user, 'student') and hasattr(request.user.student, 'department'):
-            department = request.user.student.department
+            department = request.user.student.college.school.department#ensuring hierarchy
             serializer = DepartmentSerializer(department)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response({'error': 'User is not a student'}, status=status.HTTP_401_UNAUTHORIZED)
