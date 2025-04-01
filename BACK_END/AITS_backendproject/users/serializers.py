@@ -163,7 +163,9 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'profile_pic', 
             'office', 
             'college',
-            'student_no'  # Include student_no in the response
+            'student_no'  
+            'school',
+            'department',
         ]
 
     def get_student_no(self, obj):
@@ -175,6 +177,13 @@ class UserProfileSerializer(serializers.ModelSerializer):
         return None
 
 class UserUpdateSerializers(serializers.ModelSerializer):
+    GENDER_CHOICES = [
+        ("M", "Male"),
+        ("F", "Female"),
+    ]
+
+    gender = serializers.ChoiceField(choices=GENDER_CHOICES, required=False)
+
     class Meta:
         model = User
         fields = ['username', 'gender', 'profile_pic', 'office']

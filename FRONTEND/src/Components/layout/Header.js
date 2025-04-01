@@ -13,11 +13,24 @@ const Header = ({ toggleSidebar, isMobile, sidebarOpen, userRole, profile }) => 
   const [profileOpen, setProfileOpen] = useState(false);
   const [showProfileForm, setShowProfileForm] = useState(false);
   const [formData, setFormData] = useState({});
+  const [colleges, setColleges] = useState([]); // State to store the list of colleges
 
-  // Whenever the profile prop changes, update profileData.
+  // Fetch colleges from the backend
   useEffect(() => {
-    console.log("Incoming profile prop:", profile);
-    // If profile is an array, use its first element; otherwise, use it directly.
+    const fetchColleges = async () => {
+      try {
+        const response = await axios.get("http://127.0.0.1:8000/department/colleges/");
+        setColleges(response.data); // Store the list of colleges
+      } catch (error) {
+        console.error("Error fetching colleges:", error);
+      }
+    };
+
+    fetchColleges();
+  }, []);
+
+  // Update profile data when the profile prop changes
+  useEffect(() => {
     const data = profile ? (Array.isArray(profile) ? profile[0] : profile) : {};
     setProfileData(data);
     setFormData(data);
@@ -63,13 +76,15 @@ const Header = ({ toggleSidebar, isMobile, sidebarOpen, userRole, profile }) => 
     e.preventDefault();
     try {
       const token = localStorage.getItem("access_token");
-      const response = await axios.put(
-        "http://127.0.0.1:8000/users/profile/",
-        formData,
+
+      // Exclude read-only fields from the payload.
+      const { username, mak_email, user_role, student_no, ...updateData } = formData;
+
+      await axios.put(
+        `http://127.0.0.1:8000/users/profile/${profileData.id}/`,
+        updateData,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
       alert("Profile updated successfully!");
@@ -160,6 +175,7 @@ const Header = ({ toggleSidebar, isMobile, sidebarOpen, userRole, profile }) => 
         <div className="profile-form-container">
           <form className="profile-form" onSubmit={handleFormSubmit}>
             <h2>Edit Profile</h2>
+
             {/* Read-only fields displayed as plain text */}
             <div className="readonly-field">
               <strong>Username:</strong> {formData.username || "N/A"}
@@ -176,20 +192,39 @@ const Header = ({ toggleSidebar, isMobile, sidebarOpen, userRole, profile }) => 
 
             {/* Editable fields */}
             <label>
-              Gender:
-              <input
-                type="text"
-                name="gender"
-                value={formData.gender ?? ""}
+              College:
+              <select
+                name="college"
+                value={formData.college || ""}
                 onChange={handleInputChange}
-              />
+              >
+                <option value="">Select a college</option>
+                {colleges.map((college) => (
+                  <option key={college.id} value={college.id}>
+                    {college.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Gender:
+              {/* Update the values to match the serializer's expected choices. */}
+              <select
+                name="gender"
+                value={formData.gender || ""}
+                onChange={handleInputChange}
+              >
+                <option value="">Select Gender</option>
+                <option value="M">Male</option>
+                <option value="F">Female</option>
+              </select>
             </label>
             <label>
               Office:
               <input
                 type="text"
                 name="office"
-                value={formData.office ?? ""}
+                value={formData.office || ""}
                 onChange={handleInputChange}
               />
             </label>
@@ -198,7 +233,7 @@ const Header = ({ toggleSidebar, isMobile, sidebarOpen, userRole, profile }) => 
               <input
                 type="text"
                 name="profile_pic"
-                value={formData.profile_pic ?? ""}
+                value={formData.profile_pic || ""}
                 onChange={handleInputChange}
               />
             </label>

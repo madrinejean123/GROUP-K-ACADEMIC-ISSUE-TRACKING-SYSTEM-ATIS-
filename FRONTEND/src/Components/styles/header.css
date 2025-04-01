@@ -247,3 +247,63 @@
   background: #f44336;
   color: white;
 }
+
+/* Style for the college dropdown label */
+.profile-form label[for="college"] {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 5px;
+  display: block;
+}
+
+/* Style for the college dropdown select field */
+.profile-form select[name="college"] {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  color: var(--text-primary);
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  margin-bottom: 15px;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+/* Hover and focus effects for the dropdown */
+.profile-form select[name="college"]:hover,
+.profile-form select[name="college"]:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 4px var(--accent-color);
+}
+
+/* Style for the gender dropdown label */
+.profile-form label[for="gender"] {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 5px;
+  display: block;
+}
+
+/* Style for the gender dropdown select field */
+.profile-form select[name="gender"] {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  color: var(--text-primary);
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  margin-bottom: 15px;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+/* Hover and focus effects for the dropdown */
+.profile-form select[name="gender"]:hover,
+.profile-form select[name="gender"]:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 4px var(--accent-color);
+}
