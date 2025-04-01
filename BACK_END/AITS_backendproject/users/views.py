@@ -9,6 +9,7 @@ from datetime import timedelta
 from rest_framework.decorators import action
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate, get_user_model
+from rest_framework.permissions import AllowAny
 from .models import Student, Lecturer, CollegeRegister
 from .serializers import (
     UserRegistrationSerializer,
@@ -114,15 +115,27 @@ class UserLoginViewSet(viewsets.ViewSet):
 class UserProfileViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
+    def list(self, request):
+        """GET /users/profile/ - Retrieve current user profile without requiring a pk"""
+        serializer = UserProfileSerializer(request.user)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        """GET /users/profile/ - Retrieve current user profile"""
+        if pk is None:  # Ensure no pk is required
+            serializer = UserProfileSerializer(request.user)
+            return Response(serializer.data)
+        return Response({"error": "This endpoint does not support pk-based retrieval."}, status=400)
+
     @action(detail=False, methods=['GET'])
     def me(self, request):
-        """GET /profile/me/ - View current user profile"""
+        """GET /users/profile/me/ - Alternate endpoint to view current user profile"""
         serializer = UserProfileSerializer(request.user)
         return Response(serializer.data)
 
     @action(detail=False, methods=['PUT', 'PATCH'])
     def update_me(self, request):
-        """PUT/PATCH /profile/update_me/ - Update current user profile"""
+        """PUT/PATCH /users/profile/update_me/ - Update current user profile"""
         is_partial = request.method == 'PATCH'
         serializer = UserUpdateSerializers(
             request.user,
@@ -148,7 +161,7 @@ class UserViewSet(viewsets.ModelViewSet):
         print("Returning students data:", serializer.data)  # Debugging: Print students data
         return Response(serializer.data)
 
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'],url_path="lecturers", url_name="lecturers")
     def lecturers(self, request):
         lecturers = Lecturer.objects.all()
         serializer = LecturerSerializer(lecturers, many=True)
@@ -165,6 +178,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 # Forgot Password API
 class ForgotPasswordView(APIView):
+    permission_classes = [AllowAny]  # Allow access to all users
     throttle_classes = [AnonRateThrottle]
 
     def post(self, request):

@@ -12,11 +12,35 @@ const LecturerDashboard = () => {
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [showIssueDetailModal, setShowIssueDetailModal] = useState(false);
   const [activeTab, setActiveTab] = useState("assigned");
+  const [lecturerName, setLecturerName] = useState(""); // State for lecturer's name
+
+  // Fetch lecturer's name from the backend
+  useEffect(() => {
+    const fetchLecturerName = async () => {
+      try {
+        const token = localStorage.getItem("access_token"); // Retrieve the JWT token
+        const response = await fetch("http://127.0.0.1:8000/users/profile/", {
+          headers: {
+            Authorization: `Bearer ${token}`, // Include the token in the request headers
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setLecturerName(`Dr. ${data.username}`); // Prepend "Dr." to the name
+        } else {
+          console.error("Failed to fetch lecturer name:", response.statusText);
+        }
+      } catch (error) {
+        console.error("Error fetching lecturer name:", error);
+      }
+    };
+
+    fetchLecturerName();
+  }, []);
 
   // Load issues with student information
   useEffect(() => {
-    //  API call here
-    // Filter issues to only show those assigned to this lecturer
     const assignedIssues = mockIssues
       .filter(
         (issue) => issue.status === "In Progress" || issue.status === "Open"
@@ -25,7 +49,7 @@ const LecturerDashboard = () => {
         ...issue,
         student: "John Doe", // Mock student name
         studentId: "STD" + Math.floor(Math.random() * 10000),
-        assignee: "Dr. Jane Smith", // Current lecturer
+        assignee: "Dr. Lecturer", // Current lecturer
       }));
 
     const resolvedIssues = mockIssues
@@ -36,7 +60,7 @@ const LecturerDashboard = () => {
         ...issue,
         student: "Jane Smith", // Mock student name
         studentId: "STD" + Math.floor(Math.random() * 10000),
-        assignee: "Dr. Jane Smith", // Current lecturer
+        assignee: "Dr. Lecturer", // Current lecturer
       }));
 
     setIssues([...assignedIssues, ...resolvedIssues]);
@@ -57,7 +81,7 @@ const LecturerDashboard = () => {
 
   const handleAddComment = (comment) => {
     const newComment = {
-      author: "Dr. Jane Smith",
+      author: "Dr. Lecturer",
       date: new Date().toISOString().split("T")[0],
       content: comment,
     };
@@ -75,7 +99,6 @@ const LecturerDashboard = () => {
     setSelectedIssue(updatedIssue);
   };
 
-  // Filter issues based on active tab
   const getFilteredIssues = () => {
     if (activeTab === "assigned") {
       return issues.filter(
@@ -90,7 +113,6 @@ const LecturerDashboard = () => {
 
   const filteredIssues = getFilteredIssues();
 
-  // Dashboard stats
   const stats = {
     assignedIssues: issues.filter(
       (issue) => issue.status === "Open" || issue.status === "In Progress"
@@ -106,7 +128,7 @@ const LecturerDashboard = () => {
       <div className="lecturer-dashboard">
         <div className="welcome-section">
           <div className="welcome-text">
-            <h2>Welcome, Dr. Jane Smith!</h2>
+            <h2>Welcome, {lecturerName || "Dr. Lecturer"}!</h2>
             <p>Manage and resolve student academic issues assigned to you.</p>
           </div>
           <div className="stats-cards">
@@ -153,7 +175,6 @@ const LecturerDashboard = () => {
         />
       </div>
 
-      {/* Issue Detail Modal */}
       {showIssueDetailModal && selectedIssue && (
         <IssueDetail
           issue={selectedIssue}

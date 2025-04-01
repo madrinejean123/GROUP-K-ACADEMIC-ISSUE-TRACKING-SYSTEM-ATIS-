@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
-import { FaTimes } from "react-icons/fa";
 import { FaTimes, FaExclamationTriangle } from "react-icons/fa";
 import "../styles/create-issue.css";
 import axios from "axios";
+import Select from "react-select";
+
+// Hardcoded academic years in the desired format
+const academicYears = ["2024/2025", "2023/2024", "2022/2023", "2021/2022"];
 
 const CreateIssueForm = ({ onSubmit, onCancel }) => {
-  // Form state
+  // Form state including new fields for year and lecturer
   const [newIssue, setNewIssue] = useState({
     title: "",
     description: "",
@@ -13,56 +16,23 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
     category: "Missing Marks",
     status: "Open",
     attachments: [],
+    yearOfSitting: "",
+    lecturer: ""
   });
   const [userData, setUserData] = useState({
     name: "",
     studentNo: "",
     college: "",
   });
-  // Removed duplicate declaration of formError and setFormError
-
-  // Fetch user data from the backend
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const token = localStorage.getItem("access_token"); // Get the token for authentication
-        const response = await axios.get("http://127.0.0.1:8000/users/profile/", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        console.log("User data fetched:", response.data); // Debug: Log the response
-
-        // If response.data is an array, get the first element, otherwise use the object directly
-        const user = Array.isArray(response.data)
-          ? response.data[0]
-          : response.data;
-        const { username, student_no, college } = user;
-        console.log("College Data:", college); // Debug: Log the college object
-
-        setUserData({
-          name: username,
-          studentNo: student_no,
-          college: college?.name || "N/A", // Use college.name if available
-        });
-      } catch (error) {
-        console.error("Error fetching user data:", error); // Debug: Log the error
-        setFormError("Failed to load user data. Please try again.");
-      }
-    };
-
-    fetchUserData();
-  }, []);
-
-  // Optional: Log userData to verify state updates
-  useEffect(() => {
-    console.log("Updated userData:", userData);
-  }, [userData]);
-
+  const [formError, setFormError] = useState(null);
 
   // Validation state
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formError, setFormError] = useState(null);
+
+  // Lecturers state starts as an empty array
+  const [lecturers, setLecturers] = useState([]);
 
   // File size limit in bytes (5MB)
   const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -76,21 +46,69 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   ];
 
+  // Fetch user data from the backend
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem("access_token"); // Get the token for authentication
+        const response = await axios.get("http://127.0.0.1:8000/users/profile/", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        console.log("User data fetched:", response.data);
+
+        const { username, student_no, college } = response.data;
+
+        setUserData({
+          name: username,
+          studentNo: student_no,
+          college: college?.name || "N/A", // Use college.name if available
+        });
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        setFormError("Failed to load user data. Please try again.");
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  // Fetch lecturers from the backend
+  useEffect(() => {
+    const fetchLecturers = async () => {
+      try {
+        const token = localStorage.getItem("access_token");
+        const response = await axios.get("http://127.0.0.1:8000/users/lecturers/", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        // Assuming response.data returns an array of lecturer objects,
+        // each with a nested "user" object containing "username"
+        setLecturers(response.data);
+      } catch (error) {
+        console.error("Error fetching lecturers:", error);
+        // Optionally set a fallback or display an error message here
+      }
+    };
+
+    fetchLecturers();
+  }, []);
+
+  // Optional: Log userData to verify state updates
+  useEffect(() => {
+    console.log("Updated userData:", userData);
+  }, [userData]);
+
   // Validate form on input change
   useEffect(() => {
     validateForm();
   }, [newIssue]);
 
-  // Handle input changes
+  // Handle input changes for text and select fields
   const handleNewIssueChange = (e) => {
     const { name, value } = e.target;
-
     setNewIssue((prev) => ({
       ...prev,
       [name]: value,
     }));
-
-    // Mark field as touched
     setTouched((prev) => ({
       ...prev,
       [name]: true,
@@ -103,38 +121,29 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
     const validFiles = [];
     const fileErrors = [];
 
-    // Validate each file
     files.forEach((file) => {
-      // Check file size
       if (file.size > MAX_FILE_SIZE) {
         fileErrors.push(`${file.name} exceeds the 5MB size limit`);
         return;
       }
-
-      // Check file type
       if (!ALLOWED_FILE_TYPES.includes(file.type)) {
         fileErrors.push(`${file.name} has an unsupported file type`);
         return;
       }
-
       validFiles.push(file);
     });
 
-    // Update attachments with valid files
     setNewIssue((prev) => ({
       ...prev,
       attachments: [...prev.attachments, ...validFiles],
     }));
 
-    // Set file errors if any
     if (fileErrors.length > 0) {
       setErrors((prev) => ({
         ...prev,
         attachments: fileErrors,
       }));
     }
-
-    // Mark attachments as touched
     setTouched((prev) => ({
       ...prev,
       attachments: true,
@@ -149,11 +158,10 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
     }));
   };
 
-  // Validate form
+  // Validate form inputs including new fields
   const validateForm = () => {
     const newErrors = {};
 
-    // Validate title
     if (!newIssue.title.trim()) {
       newErrors.title = "Title is required";
     } else if (newIssue.title.length < 5) {
@@ -162,14 +170,12 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
       newErrors.title = "Title must be less than 100 characters";
     }
 
-    // Validate course code
     if (!newIssue.courseCode.trim()) {
       newErrors.courseCode = "Course code is required";
     } else if (!/^[A-Z]{2,4}\d{3,4}$/.test(newIssue.courseCode.toUpperCase())) {
       newErrors.courseCode = "Invalid course code format (e.g. CS101, MATH202)";
     }
 
-    // Validate description
     if (!newIssue.description.trim()) {
       newErrors.description = "Description is required";
     } else if (newIssue.description.length < 20) {
@@ -178,14 +184,19 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
       newErrors.description = "Description must be less than 2000 characters";
     }
 
-    // Update errors state
-    setErrors(newErrors);
+    if (!newIssue.yearOfSitting) {
+      newErrors.yearOfSitting = "Year of sitting is required";
+    }
 
-    // Return whether form is valid
+    if (!newIssue.lecturer) {
+      newErrors.lecturer = "Please select a lecturer";
+    }
+
+    setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // Check if field has error and has been touched
+  // Helper to check for errors
   const hasError = (field) => {
     return errors[field] && touched[field];
   };
@@ -193,19 +204,14 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Mark all fields as touched
     const touchedFields = {};
     Object.keys(newIssue).forEach((key) => {
       touchedFields[key] = true;
     });
     setTouched(touchedFields);
 
-    // Validate form
     const isValid = validateForm();
-
     if (!isValid) {
-      // Scroll to first error
       const firstErrorField = document.querySelector(
         ".form-group.error input, .form-group.error textarea, .form-group.error select"
       );
@@ -219,34 +225,14 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
     setFormError(null);
 
     try {
-      // Format the issue data for submission
       const formattedIssue = {
         ...newIssue,
-        courseCode: newIssue.courseCode.toUpperCase(), // Standardize course code format
+        courseCode: newIssue.courseCode.toUpperCase(),
       };
-
-      // Call the onSubmit function which will handle the API call
       await onSubmit(formattedIssue);
-
-      // Form submission was successful
-      // Reset form (not needed if modal is closed after submission)
-      // setNewIssue({
-      //   title: "",
-      //   description: "",
-      //   courseCode: "",
-      //   category: "Missing Marks",
-      //   status: "Open",
-      //   attachments: [],
-      // })
-      // setTouched({})
     } catch (error) {
       console.error("Form submission error:", error);
-      // Set form error to display to the user
-      setFormError(
-        error.message || "Failed to submit issue. Please try again."
-      );
-
-      // If there's a validation error from the server
+      setFormError(error.message || "Failed to submit issue. Please try again.");
       if (error.validationErrors) {
         setErrors((prev) => ({
           ...prev,
@@ -275,6 +261,12 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
           </div>
         )}
 
+        <div className="user-info">
+          <p><strong>Name:</strong> {userData.name || "Loading..."}</p>
+          <p><strong>Student No:</strong> {userData.studentNo || "Loading..."}</p>
+          <p><strong>College:</strong> {userData.college || "Loading..."}</p>
+        </div>
+
         <form onSubmit={handleSubmit} noValidate>
           <div className={`form-group ${hasError("title") ? "error" : ""}`}>
             <label htmlFor="title">
@@ -298,9 +290,7 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
             )}
           </div>
 
-          <div
-            className={`form-group ${hasError("courseCode") ? "error" : ""}`}
-          >
+          <div className={`form-group ${hasError("courseCode") ? "error" : ""}`}>
             <label htmlFor="courseCode">
               Course Code <span className="required">*</span>
             </label>
@@ -313,9 +303,7 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
               placeholder="e.g. CS101, MATH202"
               required
               aria-invalid={hasError("courseCode")}
-              aria-describedby={
-                hasError("courseCode") ? "courseCode-error" : undefined
-              }
+              aria-describedby={hasError("courseCode") ? "courseCode-error" : undefined}
             />
             {hasError("courseCode") && (
               <div className="error-message" id="courseCode-error">
@@ -323,14 +311,11 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
               </div>
             )}
             <div className="field-hint">
-              Format: Department code (2-4 letters) followed by course number
-              (3-4 digits)
+              Format: Department code (2-4 letters) followed by course number (3-4 digits)
             </div>
           </div>
 
-          <div
-            className={`form-group ${hasError("description") ? "error" : ""}`}
-          >
+          <div className={`form-group ${hasError("description") ? "error" : ""}`}>
             <label htmlFor="description">
               Description <span className="required">*</span>
             </label>
@@ -343,9 +328,7 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
               rows="4"
               required
               aria-invalid={hasError("description")}
-              aria-describedby={
-                hasError("description") ? "description-error" : undefined
-              }
+              aria-describedby={hasError("description") ? "description-error" : undefined}
             />
             {hasError("description") && (
               <div className="error-message" id="description-error">
@@ -374,9 +357,61 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
             </select>
           </div>
 
-          <div
-            className={`form-group ${hasError("attachments") ? "error" : ""}`}
-          >
+          {/* Year of Sitting Field with Academic Year Format */}
+          <div className={`form-group ${hasError("yearOfSitting") ? "error" : ""}`}>
+            <label htmlFor="yearOfSitting">
+              Year of Sitting <span className="required">*</span>
+            </label>
+            <select
+              id="yearOfSitting"
+              name="yearOfSitting"
+              value={newIssue.yearOfSitting}
+              onChange={handleNewIssueChange}
+              required
+            >
+              <option value="">-- Select Year --</option>
+              {academicYears.map((yearOption) => (
+                <option key={yearOption} value={yearOption}>
+                  {yearOption}
+                </option>
+              ))}
+            </select>
+            {hasError("yearOfSitting") && (
+              <div className="error-message">
+                {errors.yearOfSitting}
+              </div>
+            )}
+          </div>
+
+          {/* Lecturer Search Field */}
+          <div className={`form-group ${hasError("lecturer") ? "error" : ""}`}>
+            <label htmlFor="lecturer">
+              Lecturer <span className="required">*</span>
+            </label>
+            <Select
+              id="lecturer"
+              name="lecturer"
+              options={lecturers.map((lecturer) => ({
+                value: lecturer.id,
+                label: lecturer.user?.username || "Unknown Lecturer",
+              }))}
+              onChange={(selectedOption) =>
+                setNewIssue((prev) => ({
+                  ...prev,
+                  lecturer: selectedOption ? selectedOption.value : "",
+                }))
+              }
+              placeholder="Search for a lecturer..."
+              isClearable
+            />
+            {hasError("lecturer") && (
+              <div className="error-message">
+                {errors.lecturer}
+              </div>
+            )}
+          </div>
+
+          <div className={`form-group ${hasError("attachments") ? "error" : ""}`}>
             <label htmlFor="attachments">Supporting Documents</label>
             <input
               type="file"
@@ -388,8 +423,7 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
               accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx"
             />
             <div className="field-hint">
-              Accepted file types: JPG, PNG, GIF, PDF, DOC, DOCX. Maximum size:
-              5MB per file.
+              Accepted file types: JPG, PNG, GIF, PDF, DOC, DOCX. Maximum size: 5MB per file.
             </div>
             {hasError("attachments") && Array.isArray(errors.attachments) && (
               <div className="error-message">
@@ -398,7 +432,6 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
                 ))}
               </div>
             )}
-
             {newIssue.attachments.length > 0 && (
               <div className="attachments-list">
                 <p>Attached files:</p>

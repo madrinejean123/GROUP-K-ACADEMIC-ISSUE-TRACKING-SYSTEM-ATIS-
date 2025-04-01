@@ -214,4 +214,27 @@ class UserSerializer(serializers.ModelSerializer):
     college = CollegeSerializer(read_only=True)  # Include college details
     class Meta:
         model = User
-        fields = ['id', 'username', 'mak
+        fields = ['id', 'username', 'mak_email']
+
+# Forgot Password Serializer
+class ForgotPasswordSerializer(serializers.Serializer):
+    mak_email = serializers.EmailField()
+
+    def validate_mak_email(self, value):
+        # Check if the email exists in the database
+        if not User.objects.filter(mak_email=value).exists():
+            raise serializers.ValidationError("No user is associated with this email.")
+        return value
+
+# Reset Password Serializer
+class ResetPasswordSerializer(serializers.Serializer):
+    mak_email = serializers.EmailField()
+    new_password = serializers.CharField(write_only=True)
+    confirm_password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        if data['new_password'] != data['confirm_password']:
+            raise serializers.ValidationError("Passwords do not match.")
+        if not User.objects.filter(mak_email=data['mak_email']).exists():
+            raise serializers.ValidationError("No user is associated with this email.")
+        return data
