@@ -56,8 +56,7 @@ class CreateSchoolView(APIView):
         college = get_object_or_404(College, id=college_id)
         serializer = SchoolSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.validated_data['college']=college
-            serializer.save()
+            serializer.save(college=college)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -68,8 +67,7 @@ class CreateDepartmentView(APIView):
         school = get_object_or_404(School, id=school_id)
         serializer = DepartmentSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.validated_data['school']=school
-            serializer.save()
+            serializer.save(school=school)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
