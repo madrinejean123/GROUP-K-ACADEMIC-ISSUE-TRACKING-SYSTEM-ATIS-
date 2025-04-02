@@ -87,6 +87,9 @@ class RegisterAssignIssueView(APIView):
             return Response({'error':'Both issue_id and lecturer_id are required '}, status=status.HTTP_400_BAD_REQUEST)
         try:
             issue = Issues.objects.get(pk=issue_id)
+        except Issues.DoesNotExist:
+            return Response({'error':'Issue not found'}, status=status.HTTP_404_NOT_FOUND)
+        try:
             lecturer = Lecturer.objects.get(pk=lecturer_id) 
         except Issues.DoesNotExist:
             return Response({'error':'Lecturer not found.'}, status=status.HTTP_404_NOT_FOUND)
