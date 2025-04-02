@@ -67,7 +67,12 @@ class LecturerIssueView(APIView):
 class StudentSendIssueView(APIView):
     def post(self, request):
         issue_id = request.data.get('issue_id')
-        issue = Issues.objects.get(pk=issue_id)
+        if not issue_id:
+            return Response({'error':'issue_id is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            issue = Issues.objects.get(pk=issue_id)
+        except Issues.DoesNotExist:
+            return Response({'error':'Issue not found.'}, status=status.HTTP_404_NOT_FOUND)
         issue.status = 'pending'
         issue.register = request.user.collegeregister
         issue.save()
@@ -78,9 +83,14 @@ class RegisterAssignIssueView(APIView):
     def post(self, request):
         issue_id = request.data.get('issue_id')
         lecturer_id = request.data.get('lecturer_id')
-        issue = Issues.objects.get(pk=lecturer_id)
-        lecturer = Lecturer.objects.get(pk=issue_id) 
-        issue.status = 'pending'
+        if not issue_id or not lecturer_id:
+            return Response({'error':'Both issue_id and lecturer_id are required '}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            issue = Issues.objects.get(pk=issue_id)
+            lecturer = Lecturer.objects.get(pk=lecturer_id) 
+        except Issues.DoesNotExist:
+            return Response({'error':'Lecturer not found.'}, status=status.HTTP_404_NOT_FOUND)
+        issue.status = 'in_progress'
         issue.assigned_lecturer = lecturer
         issue.save()
         return Response({'message':'Issue assigned to lecturer'}, status=status.HTTP_200_OK)
