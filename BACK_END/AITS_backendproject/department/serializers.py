@@ -7,14 +7,7 @@ class CollegeSerializer(serializers.ModelSerializer):
         model = College
         fields = ['id', 'name', 'code']
 #school serializer
-class SchoolSerializer(serializers.ModelSerializer):
-    college = CollegeSerializer(read_only=True)
-    class Meta:
-        model = School
-        fields = ['id', 'school_name', 'college']
-    
-        
-        
+
 class SchoolSerializer(serializers.ModelSerializer):
     college = CollegeSerializer(read_only=True)
     
