@@ -2,7 +2,8 @@ from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
 from .models import User, Student, Lecturer, CollegeRegister
-from department.models import Department, College
+from department.models import College, School, Department
+from department.serializers import DepartmentSerializer, CollegeSerializer, SchoolSerializer
 import re  
 
 User = get_user_model()
@@ -16,20 +17,6 @@ class CustomPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
             except ValueError:
                 self.fail('invalid', input=data)
         return super().to_internal_value(data)
-
-# College Serializer
-class CollegeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = College
-        fields = ['id', 'name', 'code']
-
-# Department Serializer
-class DepartmentSerializer(serializers.ModelSerializer):
-    college = CollegeSerializer(read_only=True)  # Include college details
-
-    class Meta:
-        model = Department
-        fields = ['id', 'name', 'college']
 
 # User Registration Serializer
 class UserRegistrationSerializer(serializers.ModelSerializer):
