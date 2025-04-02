@@ -17,7 +17,7 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
     status: "Open",
     attachments: [],
     yearOfSitting: "",
-    lecturer: ""
+    lecturer: "",
   });
   const [userData, setUserData] = useState({
     name: "",
@@ -51,9 +51,12 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
     const fetchUserData = async () => {
       try {
         const token = localStorage.getItem("access_token"); // Get the token for authentication
-        const response = await axios.get("http://127.0.0.1:8000/users/profile/", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axios.get(
+          "http://127.0.0.1:8000/users/profile/",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         console.log("User data fetched:", response.data);
 
         const { username, student_no, college } = response.data;
@@ -77,9 +80,12 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
     const fetchLecturers = async () => {
       try {
         const token = localStorage.getItem("access_token");
-        const response = await axios.get("http://127.0.0.1:8000/users/lecturers/", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axios.get(
+          "http://127.0.0.1:8000/users/lecturers/",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         // Assuming response.data returns an array of lecturer objects,
         // each with a nested "user" object containing "username"
         setLecturers(response.data);
@@ -232,7 +238,9 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
       await onSubmit(formattedIssue);
     } catch (error) {
       console.error("Form submission error:", error);
-      setFormError(error.message || "Failed to submit issue. Please try again.");
+      setFormError(
+        error.message || "Failed to submit issue. Please try again."
+      );
       if (error.validationErrors) {
         setErrors((prev) => ({
           ...prev,
@@ -262,9 +270,15 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
         )}
 
         <div className="user-info">
-          <p><strong>Name:</strong> {userData.name || "Loading..."}</p>
-          <p><strong>Student No:</strong> {userData.studentNo || "Loading..."}</p>
-          <p><strong>College:</strong> {userData.college || "Loading..."}</p>
+          <p>
+            <strong>Name:</strong> {userData.name || "Loading..."}
+          </p>
+          <p>
+            <strong>Student No:</strong> {userData.studentNo || "Loading..."}
+          </p>
+          <p>
+            <strong>College:</strong> {userData.college || "Loading..."}
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} noValidate>
@@ -290,7 +304,9 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
             )}
           </div>
 
-          <div className={`form-group ${hasError("courseCode") ? "error" : ""}`}>
+          <div
+            className={`form-group ${hasError("courseCode") ? "error" : ""}`}
+          >
             <label htmlFor="courseCode">
               Course Code <span className="required">*</span>
             </label>
@@ -303,7 +319,9 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
               placeholder="e.g. CS101, MATH202"
               required
               aria-invalid={hasError("courseCode")}
-              aria-describedby={hasError("courseCode") ? "courseCode-error" : undefined}
+              aria-describedby={
+                hasError("courseCode") ? "courseCode-error" : undefined
+              }
             />
             {hasError("courseCode") && (
               <div className="error-message" id="courseCode-error">
@@ -311,11 +329,14 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
               </div>
             )}
             <div className="field-hint">
-              Format: Department code (2-4 letters) followed by course number (3-4 digits)
+              Format: Department code (2-4 letters) followed by course number
+              (3-4 digits)
             </div>
           </div>
 
-          <div className={`form-group ${hasError("description") ? "error" : ""}`}>
+          <div
+            className={`form-group ${hasError("description") ? "error" : ""}`}
+          >
             <label htmlFor="description">
               Description <span className="required">*</span>
             </label>
@@ -328,7 +349,9 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
               rows="4"
               required
               aria-invalid={hasError("description")}
-              aria-describedby={hasError("description") ? "description-error" : undefined}
+              aria-describedby={
+                hasError("description") ? "description-error" : undefined
+              }
             />
             {hasError("description") && (
               <div className="error-message" id="description-error">
@@ -358,7 +381,9 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
           </div>
 
           {/* Year of Sitting Field with Academic Year Format */}
-          <div className={`form-group ${hasError("yearOfSitting") ? "error" : ""}`}>
+          <div
+            className={`form-group ${hasError("yearOfSitting") ? "error" : ""}`}
+          >
             <label htmlFor="yearOfSitting">
               Year of Sitting <span className="required">*</span>
             </label>
@@ -377,9 +402,7 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
               ))}
             </select>
             {hasError("yearOfSitting") && (
-              <div className="error-message">
-                {errors.yearOfSitting}
-              </div>
+              <div className="error-message">{errors.yearOfSitting}</div>
             )}
           </div>
 
@@ -405,13 +428,13 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
               isClearable
             />
             {hasError("lecturer") && (
-              <div className="error-message">
-                {errors.lecturer}
-              </div>
+              <div className="error-message">{errors.lecturer}</div>
             )}
           </div>
 
-          <div className={`form-group ${hasError("attachments") ? "error" : ""}`}>
+          <div
+            className={`form-group ${hasError("attachments") ? "error" : ""}`}
+          >
             <label htmlFor="attachments">Supporting Documents</label>
             <input
               type="file"
@@ -423,7 +446,8 @@ const CreateIssueForm = ({ onSubmit, onCancel }) => {
               accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx"
             />
             <div className="field-hint">
-              Accepted file types: JPG, PNG, GIF, PDF, DOC, DOCX. Maximum size: 5MB per file.
+              Accepted file types: JPG, PNG, GIF, PDF, DOC, DOCX. Maximum size:
+              5MB per file.
             </div>
             {hasError("attachments") && Array.isArray(errors.attachments) && (
               <div className="error-message">
