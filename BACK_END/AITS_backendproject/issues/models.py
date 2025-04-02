@@ -1,6 +1,6 @@
 from django.db import models
 from users.models import Student, Lecturer, CollegeRegister
-from department.models import Department, College
+from department.models import Department, College, School
 
 class Issues(models.Model):
     STATUS_CHOICE = [
@@ -23,6 +23,7 @@ class Issues(models.Model):
     author = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='submitted_issues')
     register = models.ForeignKey(CollegeRegister, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_issues')
     college = models.ForeignKey(College, on_delete=models.CASCADE, related_name='issues', default=1)  # Direct link to college
-
+    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='issues', default=1)
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='issues', default=1)
     def __str__(self):
-        return self.title
+        return f'{self.title} - {self.status}, (By {self.author})'
