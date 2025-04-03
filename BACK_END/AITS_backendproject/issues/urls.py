@@ -1,10 +1,10 @@
 from django.urls import path
-from .views import IssueView, IssueDetailView, CollegeRegisterIssueView, StudentSendIssueView, LecturerIssueView, StudentSendIssueView, RegisterAssignIssueView
+from .views import IssueView, IssueDetailView, CollegeRegisterIssueView, StudentSendIssueView, LecturerIssueView,  RegisterAssignIssueView
 
 
 urlpatterns = [
     path('issues/', IssueView.as_view(), name='issue-list'),
-    path('<int:pk>/', IssueDetailView.as_view(), name='issue-detail'),
+    path('issues/<int:pk>/', IssueDetailView.as_view(), name='issue-detail'),
     path('register/issues/', CollegeRegisterIssueView.as_view(), name='register-issues'),
     path('lecturer/issues/', LecturerIssueView.as_view(), name='lecturer-issues'),
     path('student/send-issue/', StudentSendIssueView.as_view(), name='student-send-issue'),
