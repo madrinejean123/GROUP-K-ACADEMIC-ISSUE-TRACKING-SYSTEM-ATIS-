@@ -9,7 +9,7 @@ from .serializers import CollegeSerializer, SchoolSerializer, DepartmentSerializ
 
 
 class CollegeView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     def get(self, request):
         colleges = College.objects.all()

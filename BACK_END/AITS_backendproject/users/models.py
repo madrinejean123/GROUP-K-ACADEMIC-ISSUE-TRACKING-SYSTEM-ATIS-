@@ -1,9 +1,11 @@
+from django.core.exceptions import ValidationError  # Add this import
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from cloudinary.models import CloudinaryField
 from department.models import Department, College, School
 import re
 
+# Custom validator for university email domain
 # Custom validator for university email domain
 def validate_email_domain(value, user_role):
     pattern = {
@@ -12,10 +14,11 @@ def validate_email_domain(value, user_role):
         'registrar': r'^[a-z]+\.[a-z]+@mak\.ac\.ug$'
     }.get(user_role)
 
-    if not pattern or not re.fullmatch(pattern, value.lower()):
+    if not pattern or not re.fullmatch(pattern, value.strip().lower()):
         raise ValidationError(
             f"Email must be in format: firstname.lastname@{'students.' if user_role=='student' else ''}mak.ac.ug"
         )
+
 
 class User(AbstractUser):
     USER_ROLES_CHOICES = [
@@ -74,7 +77,6 @@ class Lecturer(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.college}"
-
 
 
 class CollegeRegister(models.Model):
