@@ -67,7 +67,7 @@ class LecturerUpdateIssueStatusView(APIView):
     """
     Only lecturers can update the status of an issue.
     """
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     def patch(self, request, issue_id):
         user = request.user
