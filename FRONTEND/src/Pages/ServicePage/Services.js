@@ -157,7 +157,8 @@ const Services = () => {
               <div className="step-number">4</div>
               <h4>Feedback Provided</h4>
               <p>
-                Lecturer provides feedback to the student about the resolution.
+                Lecturer provides feedback to the student & Registrar about the
+                resolution.
               </p>
             </div>
             <div className="process-step">
