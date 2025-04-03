@@ -138,6 +138,7 @@ class UserLoginSerializer(serializers.Serializer):
 class UserProfileSerializer(serializers.ModelSerializer):
     college = CollegeSerializer(read_only=True)  # Include college details
     student_no = serializers.SerializerMethodField()  # Add student_no field
+    department = serializers.SerializerMethodField()  # Add department field
 
     class Meta:
         model = User
@@ -150,9 +151,9 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'profile_pic', 
             'office', 
             'college',
-            'student_no'  
+            'student_no',  
             'school',
-            'department',
+            'department',  # Include department in the fields list
         ]
 
     def get_student_no(self, obj):
@@ -162,6 +163,29 @@ class UserProfileSerializer(serializers.ModelSerializer):
             if student:
                 return student.student_no
         return None
+    def validate(self, attrs):
+        # Get the user role and college from the request data
+        user_role = attrs.get('user_role')
+        college = attrs.get('college')
+
+        # Check if the user role is 'registrar' and college is not provided
+        if user_role == 'registrar' and not college:
+            raise serializers.ValidationError({"college": "College is required for a registrar."})
+
+        return attrs
+
+    def get_department(self, obj):
+        # Get the department based on the user role (Student or Lecturer)
+        if obj.user_role == 'student':
+            student = Student.objects.filter(user=obj).first()
+            if student and student.department:
+                return student.department.name  # or student.department.id
+        elif obj.user_role == 'lecturer':
+            lecturer = Lecturer.objects.filter(user=obj).first()
+            if lecturer and lecturer.department:
+                return lecturer.department.name  # or lecturer.department.id
+        return None
+
 
 class UserUpdateSerializers(serializers.ModelSerializer):
     GENDER_CHOICES = [
@@ -206,20 +230,3 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'mak_email', 'user_role', 'gender', 'profile_pic', 'office','college']
         
         
-class ForgotPasswordSerializer(serializers.Serializer):
-    mak_email = serializers.EmailField()
-    
-    def validate_mak_email(self, value):
-        if not self.context['user_exists'](value):
-            raise serializers.ValidationError('No user with this email exists.')
-        return value
-    
-class ResetPasswordSerializer(serializers.Serializer):
-    token = serializers.CharField()
-    new_password = serializers.CharField(min_length=8)
-    confirm_password = serializers.CharField()
-    
-    def validate(self, data):
-        if data['new_password'] != data['confirm_password']:
-            raise serializers.ValidationError('Password must match')
-        return data
