@@ -91,7 +91,7 @@ class RegisterAssignIssueView(APIView):
             return Response({'error':'Issue not found'}, status=status.HTTP_404_NOT_FOUND)
         try:
             lecturer = Lecturer.objects.get(pk=lecturer_id) 
-        except Issues.DoesNotExist:
+        except Lecturer.DoesNotExist:
             return Response({'error':'Lecturer not found.'}, status=status.HTTP_404_NOT_FOUND)
         issue.status = 'in_progress'
         issue.assigned_lecturer = lecturer

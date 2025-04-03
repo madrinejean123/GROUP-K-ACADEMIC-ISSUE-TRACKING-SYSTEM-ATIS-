@@ -14,7 +14,7 @@ class IssueSerializers(serializers.ModelSerializer):
 
     def validate_status(self, value):
            #Ensure only lecturers can set 'resolved' or 'rejected'.
-        if value in ['resolved', 'rejected'] and not self.context.get['request'].user.is_lecturer:
+        if value in ['resolved', 'rejected'] and not self.context.get('request').user.is_lecturer:
             raise serializers.ValidationError("Only lecturers can resolve/reject issues.")
         return value
     
