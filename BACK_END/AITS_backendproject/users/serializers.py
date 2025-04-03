@@ -2,7 +2,8 @@ from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
 from .models import User, Student, Lecturer, CollegeRegister
-from department.models import Department, College
+from department.models import College, School, Department
+from department.serializers import DepartmentSerializer, CollegeSerializer, SchoolSerializer
 import re  
 
 User = get_user_model()
@@ -16,20 +17,6 @@ class CustomPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
             except ValueError:
                 self.fail('invalid', input=data)
         return super().to_internal_value(data)
-
-# College Serializer
-class CollegeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = College
-        fields = ['id', 'name', 'code']
-
-# Department Serializer
-class DepartmentSerializer(serializers.ModelSerializer):
-    college = CollegeSerializer(read_only=True)  # Include college details
-
-    class Meta:
-        model = Department
-        fields = ['id', 'name', 'college']
 
 # User Registration Serializer
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -164,6 +151,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'office', 
             'college',
             'student_no'  
+            'school',
+            'department',
         ]
 
     def get_student_no(self, obj):
@@ -184,7 +173,7 @@ class UserUpdateSerializers(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'gender', 'profile_pic', 'office', 'college']
+        fields = ['username', 'gender', 'profile_pic', 'office']
         extra_kwargs = {
             'profile_pic': {'required': False},
             'username': {'required': False},
@@ -195,46 +184,42 @@ class StudentSerializer(serializers.ModelSerializer):
     user = UserProfileSerializer()
     class Meta:
         model = Student
-        fields = ['id', 'user', 'student_no']
+        fields = ['id', 'user', 'student_no', 'college', 'school', 'department']
 
 class LecturerSerializer(serializers.ModelSerializer):
     user = UserProfileSerializer()
     class Meta:
         model = Lecturer
-        fields = ['id', 'user', 'department']
+        fields = ['id', 'user', 'college', 'is_lecturer']
 
 class CollegeRegisterSerializer(serializers.ModelSerializer):
     user = UserProfileSerializer()
     class Meta:
         model = CollegeRegister
-        fields = ['id', 'user', 'department']
+        fields = ['id', 'user', 'college']
 
 # User Serializer (for general use)
 class UserSerializer(serializers.ModelSerializer):
     college = CollegeSerializer(read_only=True)  # Include college details
     class Meta:
         model = User
-        fields = ['id', 'username', 'mak_email']
-
-# Forgot Password Serializer
+        fields = ['id', 'username', 'mak_email', 'user_role', 'gender', 'profile_pic', 'office','college']
+        
+        
 class ForgotPasswordSerializer(serializers.Serializer):
     mak_email = serializers.EmailField()
-
+    
     def validate_mak_email(self, value):
-        # Check if the email exists in the database
-        if not User.objects.filter(mak_email=value).exists():
-            raise serializers.ValidationError("No user is associated with this email.")
+        if not self.context['user_exists'](value):
+            raise serializers.ValidationError('No user with this email exists.')
         return value
-
-# Reset Password Serializer
+    
 class ResetPasswordSerializer(serializers.Serializer):
-    mak_email = serializers.EmailField()
-    new_password = serializers.CharField(write_only=True)
-    confirm_password = serializers.CharField(write_only=True)
-
+    token = serializers.CharField()
+    new_password = serializers.CharField(min_length=8)
+    confirm_password = serializers.CharField()
+    
     def validate(self, data):
         if data['new_password'] != data['confirm_password']:
-            raise serializers.ValidationError("Passwords do not match.")
-        if not User.objects.filter(mak_email=data['mak_email']).exists():
-            raise serializers.ValidationError("No user is associated with this email.")
+            raise serializers.ValidationError('Password must match')
         return data

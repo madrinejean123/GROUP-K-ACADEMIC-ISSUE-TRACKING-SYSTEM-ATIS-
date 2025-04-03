@@ -10,11 +10,11 @@ class IssueSerializers(serializers.ModelSerializer):
     class Meta:
         model = Issues
         fields = '__all__'
-        read_only_fields = ['author', 'college', 'register', 'created_at']  # Auto-set fields
+        read_only_fields = ['author', 'college', 'school', 'department', 'register', 'created_at']  # Auto-set fields
 
     def validate_status(self, value):
            #Ensure only lecturers can set 'resolved' or 'rejected'.
-        if value in ['resolved', 'rejected'] and not self.context['request'].user.is_lecturer:
+        if value in ['resolved', 'rejected'] and not self.context.get['request'].user.is_lecturer:
             raise serializers.ValidationError("Only lecturers can resolve/reject issues.")
         return value
     
