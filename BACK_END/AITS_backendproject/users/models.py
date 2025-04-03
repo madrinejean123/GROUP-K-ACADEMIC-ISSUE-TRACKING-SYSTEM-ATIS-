@@ -70,6 +70,7 @@ class Student(models.Model):
 class Lecturer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='lecturers', unique=True)
     college = models.ForeignKey(College, on_delete=models.CASCADE, blank=False, default='')
+    is_lecturer = models.BooleanField(default=True)
     def __str__(self):
         return f"{self.user.username} - {self.college}"
 
