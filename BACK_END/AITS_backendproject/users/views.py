@@ -1,11 +1,5 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
-from rest_framework.views import APIView
-from django.core.mail import send_mail
-from rest_framework.throttling import AnonRateThrottle
-from django.conf import settings
-from django.utils import timezone
-from datetime import timedelta
 from rest_framework.decorators import action
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate, get_user_model
@@ -18,11 +12,9 @@ from .serializers import (
     UserUpdateSerializers,
     StudentSerializer,
     LecturerSerializer,
-    CollegeRegisterSerializer,
-    ForgotPasswordSerializer,
-    ResetPasswordSerializer,
+    CollegeRegisterSerializer,   
 )
-from .helpers.tokens import generate_reset_token, get_token_expiry, validate_token_expiry
+
 
 User = get_user_model()
 
@@ -176,53 +168,4 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-# Forgot Password API
-class ForgotPasswordView(APIView):
-    permission_classes = [AllowAny]  # Allow access to all users
-    throttle_classes = [AnonRateThrottle]
 
-    def post(self, request):
-        serializer = ForgotPasswordSerializer(
-            data=request.data,
-            context={'user_exists': lambda email: User.objects.filter(mak_email=email).exists()}
-        )
-        
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=400)
-
-        user = User.objects.get(mak_email=serializer.validated_data['mak_email'])
-        user.reset_token = generate_reset_token()
-        user.reset_token_expiry = get_token_expiry()
-        user.save()
-
-        reset_link = f"{settings.FRONTEND_URL}/reset-password?token={user.reset_token}"
-        send_mail(
-            "Password Reset Request",
-            f"Use this link to reset your password: {reset_link}",
-            settings.DEFAULT_FROM_EMAIL,
-            [user.mak_email],
-            fail_silently=False,
-        )
-        return Response({"status": "reset_email_sent"})
-
-
-# Reset Password API
-class ResetPasswordView(APIView):
-    def post(self, request):
-        serializer = ResetPasswordSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=400)
-
-        try:
-            user = User.objects.get(reset_token=serializer.validated_data['token'])
-            if not validate_token_expiry(user.reset_token_expiry):
-                return Response({"error": "token_expired"}, status=400)
-
-            user.set_password(serializer.validated_data['new_password'])
-            user.reset_token = None
-            user.reset_token_expiry = None
-            user.save()
-            return Response({"status": "password_updated"})
-
-        except User.DoesNotExist:
-            return Response({"error": "invalid_token"}, status=400)
