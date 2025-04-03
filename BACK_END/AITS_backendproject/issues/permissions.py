@@ -1,18 +1,14 @@
+# permissions.py
 from rest_framework import permissions
 
 class IsStudent(permissions.BasePermission):
     def has_permission(self, request, view):
-        return request.user.user_role == 'student'
+        return hasattr(request.user, 'student')
 
 class IsLecturer(permissions.BasePermission):
     def has_permission(self, request, view):
-        return request.user.user_role == 'lecturer'
+        return hasattr(request.user, 'lecturer')
 
 class IsCollegeRegister(permissions.BasePermission):
-    
     def has_permission(self, request, view):
-        return request.user.user_role == 'registrar'  # Matches USER_ROLES choice
-    
-
-
-    
+        return hasattr(request.user, 'collegeregister')
