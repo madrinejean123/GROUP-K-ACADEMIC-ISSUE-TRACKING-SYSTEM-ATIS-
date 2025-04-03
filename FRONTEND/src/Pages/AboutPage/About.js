@@ -16,10 +16,10 @@ const About = () => {
           <div className="about-section">
             <h2>Our Mission</h2>
             <p>
-              Academic Issue Tracking System is designed to streamline the process of
-              addressing academic concerns within our institution. We believe
-              that every student deserves prompt attention to their academic
-              issues, and every staff member should have the tools to
+              Academic Issue Tracking System is designed to streamline the
+              process of addressing academic concerns within our institution. We
+              believe that every student deserves prompt attention to their
+              academic issues, and every staff member should have the tools to
               efficiently manage and resolve these concerns.
             </p>
           </div>
@@ -27,11 +27,11 @@ const About = () => {
           <div className="about-section">
             <h2>Who We Are</h2>
             <p>
-              Developed by a team of dedicated Computer Science students,
-              our system bridges the gap between students and
-              academic staff. We understand the challenges faced in academic
-              administration and have created a solution that benefits all
-              stakeholders in the educational ecosystem.
+              Developed by a team of dedicated Computer Science students, our
+              system bridges the gap between students and academic staff. We
+              understand the challenges faced in academic administration and
+              have created a solution that benefits all stakeholders in the
+              educational ecosystem.
             </p>
           </div>
 
@@ -53,8 +53,8 @@ const About = () => {
               </div>
               <h3>For Registrars</h3>
               <p>
-                Efficient tools to manage incoming student issues, assign them to
-                appropriate lecturers, and monitor resolution progress.
+                Efficient tools to manage incoming student issues, assign them
+                to appropriate lecturers, and monitor resolution progress.
               </p>
             </div>
 
@@ -65,7 +65,8 @@ const About = () => {
               <h3>For Lecturers</h3>
               <p>
                 A centralized system to view assigned issues, provide
-                resolutions, and communicate feedback to College registrar &students.
+                resolutions, and communicate feedback to College registrar
+                &students.
               </p>
             </div>
           </div>
@@ -85,15 +86,15 @@ const About = () => {
 
         <div className="about-stats">
           <div className="stat-item">
-            <h3>98%</h3>
+            <h3>90%</h3>
             <p>Issue Resolution Rate</p>
           </div>
           <div className="stat-item">
-            <h3>24h</h3>
+            <h3>24hr</h3>
             <p>Average Response Time</p>
           </div>
           <div className="stat-item">
-            <h3>5000+</h3>
+            <h3>3000+</h3>
             <p>Issues Resolved</p>
           </div>
         </div>
