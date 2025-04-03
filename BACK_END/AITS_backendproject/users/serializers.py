@@ -190,7 +190,7 @@ class LecturerSerializer(serializers.ModelSerializer):
     user = UserProfileSerializer()
     class Meta:
         model = Lecturer
-        fields = ['id', 'user', 'college']
+        fields = ['id', 'user', 'college', 'is_lecturer']
 
 class CollegeRegisterSerializer(serializers.ModelSerializer):
     user = UserProfileSerializer()
