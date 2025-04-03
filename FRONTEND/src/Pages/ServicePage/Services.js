@@ -29,7 +29,7 @@ const Services = () => {
               <li>User-friendly submission form</li>
               <li>File attachment capabilities</li>
               <li>Issue categorization</li>
-              <li>Automatic receipt confirmation</li>
+              <li>Automatic confirmation message</li>
             </ul>
           </div>
 
@@ -47,8 +47,8 @@ const Services = () => {
             <ul className="service-features">
               <li>Smart assignment recommendations</li>
               <li>Workload balancing</li>
-              <li>Priority flagging for urgent issues</li>
-              <li>Batch assignment capabilities</li>
+              <li>Easy search for urgent issues</li>
+              <li>Quick Means of Issue Assignment</li>
             </ul>
           </div>
 
@@ -59,15 +59,15 @@ const Services = () => {
             <h3>Issue Resolution</h3>
             <p>
               Lecturers can view, manage, and resolve assigned issues through a
-              dedicated dashboard. The system provides tools to document
-              resolution steps, request additional information, and mark issues
-              as resolved.
+              well designed dashboard. The system provides tools to resolution
+              steps, addition of comments on resolution of issues, and mark
+              issues as resolved.
             </p>
             <ul className="service-features">
               <li>Resolution tracking</li>
-              <li>Internal notes and documentation</li>
-              <li>Collaborative resolution options</li>
-              <li>Resolution templates</li>
+              <li>Internal comments and status Update</li>
+              <li>Resolution options</li>
+              <li>Updating other Users</li>
             </ul>
           </div>
 
@@ -103,7 +103,6 @@ const Services = () => {
               <li>Email notifications</li>
               <li>In-app alerts</li>
               <li>Customizable notification preferences</li>
-              <li>Reminder scheduling</li>
             </ul>
           </div>
 
