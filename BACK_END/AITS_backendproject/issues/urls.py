@@ -16,4 +16,12 @@ urlpatterns = [
 
     # 5️⃣ API to Retrieve a Specific Issue
     path('detail/<int:pk>/', RetrieveIssueView.as_view(), name='retrieve-issue'),
+
+    # Additional routes from the `main` branch, if needed
+    path('issues/', IssueView.as_view(), name='issue-list'),
+    path('issues/<int:pk>/', IssueDetailView.as_view(), name='issue-detail'),
+    path('register/issues/', CollegeRegisterIssueView.as_view(), name='register-issues'),
+    path('lecturer/issues/', LecturerIssueView.as_view(), name='lecturer-issues'),
+    path('student/send-issue/', StudentSendIssueView.as_view(), name='student-send-issue'),
+    path('register/assign-issue/', RegisterAssignIssueView.as_view(), name='register-assign-issue'),
 ]

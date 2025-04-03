@@ -69,11 +69,12 @@ class Student(models.Model):
 class Lecturer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='lecturers', unique=True)
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, default='', null=True)
-    # The college field is optional for lecturers
-    college = models.ForeignKey(College, on_delete=models.SET_NULL, blank=True, null=True)
+    college = models.ForeignKey(College, on_delete=models.CASCADE, blank=False, default='')  # Non-optional for lecturers
+    is_lecturer = models.BooleanField(default=True)  # This can help to distinguish lecturers
 
     def __str__(self):
         return f"{self.user.username} - {self.college}"
+
 
 
 class CollegeRegister(models.Model):

@@ -75,17 +75,21 @@ class LecturerUpdateIssueStatusView(APIView):
         if not lecturer:
             return Response({"error": "Only lecturers can update issue status."}, status=status.HTTP_403_FORBIDDEN)
 
+        # Ensure the issue exists and is assigned to the lecturer
         try:
             issue = Issues.objects.get(id=issue_id, assigned_lecturer=lecturer)
         except Issues.DoesNotExist:
             return Response({"error": "Issue not found or not assigned to you."}, status=status.HTTP_404_NOT_FOUND)
 
+        # Validate status update
         new_status = request.data.get('status')
         if new_status not in ['resolved', 'rejected', 'in_progress']:
             return Response({"error": "Invalid status update."}, status=status.HTTP_400_BAD_REQUEST)
 
+        # Update the issue status
         issue.status = new_status
         issue.save()
+
         return Response({"message": f"Issue status updated to {new_status}."}, status=status.HTTP_200_OK)
 
 # 4️⃣ API to List Issues (For All Users)

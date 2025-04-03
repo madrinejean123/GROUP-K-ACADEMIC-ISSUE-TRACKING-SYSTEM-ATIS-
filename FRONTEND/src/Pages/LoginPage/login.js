@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
+import { Link, useNavigate } from "react-router-dom"; // Import useNavigate for navigation
 import axios from "axios";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast"; // Correct import for toast
@@ -111,6 +111,11 @@ const LoginPage = () => {
           >
             Reset it here
           </span>
+        </p>
+      </div>
+      <div className="register">
+        <p>
+          Don't have an account? <Link to="/signup">Sign Up</Link>
         </p>
       </div>
     </div>

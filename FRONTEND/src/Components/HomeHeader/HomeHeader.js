@@ -3,6 +3,7 @@ import "./HomeHeader.css";
 import { FaUser } from "react-icons/fa";
 import { Link } from "react-router-dom"; 
 import MakLogo from "../assets/logo.png";
+// import Services from "../../Pages/ServicePage/Services";
 
 const HomeHeader = () => {
   return (
@@ -15,12 +16,11 @@ const HomeHeader = () => {
           </h2>
         </div>
         <div className="page-links">
-          <a href="#">HOME</a>
-          <a href="#"> SERVICES</a>
-          <a href="#"> ABOUT</a>
+          <Link to="/">HOME</Link>
+          <Link to="/services">SERVICES</Link>
+          <Link to="/About">ABOUT</Link>
         </div>
         <div className="btns">
-          
           <Link to="/login">
             <button className="login" type="submit">
               <FaUser /> Login

@@ -48,6 +48,38 @@ const HeroPage = () => {
           </button>
         </div>
       </main>
+      <div className="features-section">
+        <h2>Key Features</h2>
+        <div className="features-grid">
+          <div className="feature-card">
+            <div className="feature-icon">📝</div>
+            <h3>Issue Tracking</h3>
+            <p>
+              Submit and track academic issues with real-time status updates.
+            </p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-icon">👨‍🏫</div>
+            <h3>Role-Based Access</h3>
+            <p>
+              Tailored dashboards for students, lecturers, registrars, and
+              administrators.
+            </p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-icon">📊</div>
+            <h3>Analytics</h3>
+            <p>Comprehensive reporting and analytics for administrators.</p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-icon">🔔</div>
+            <h3>Notifications</h3>
+            <p>
+              Stay updated with real-time notifications on issue status changes.
+            </p>
+          </div>
+        </div>
+      </div>
       <Footer />
     </>
   );
