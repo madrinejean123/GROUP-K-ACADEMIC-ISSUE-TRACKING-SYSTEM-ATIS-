@@ -8,10 +8,7 @@ from django.core.exceptions import ValidationError
 # Custom validator for university email domain
 from django.core.exceptions import ValidationError
 
-def validate_email_domain(value, user_role=None, is_superuser=False):
-    if is_superuser:
-        return  # Allow any email for superusers
-    
+def validate_email_domain(value, user_role=None): 
     pattern = {
         'student': r'^[a-z]+\.[a-z]+@students\.mak\.ac\.ug$',
         'lecturer': r'^[a-z]+\.[a-z]+@mak\.ac\.ug$',
@@ -37,7 +34,7 @@ class User(AbstractUser):
     full_name = models.CharField(max_length=255, blank=True, null=True)
     user_role = models.CharField(max_length=25, choices=USER_ROLES_CHOICES, default='student')
     mak_email = models.EmailField(unique=True)
-    gender = models.CharField(max_length=8, choices=GENDER_CHOICES, default='Male')
+    gender = models.CharField(max_length=8, choices=GENDER_CHOICES, default='male')
     profile_pic = CloudinaryField('image', blank=True, null=True)
     office = models.CharField(max_length=20, blank=True, null=True)
     notification_email = models.EmailField(blank=True, null=True)  # Optional notification email
@@ -48,9 +45,13 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.username
+    
+    def clean(self):
+        if not self.is_superuser:
+            validate_email_domain(self.mak_email, self.user_role)
 
     def save(self, *args, **kwargs):
-        validate_email_domain(self.mak_email, self.user_role)
+        self.full_clean()
         super().save(*args, **kwargs)
 
 
@@ -66,9 +67,10 @@ class Student(models.Model):
         return self.user.username
 
     def save(self, *args, **kwargs):
-        if self.user.user_role != 'student':
-            self.student_no = None
+        if not self.is_superuser:
+            validate_email_domain(self.mak_email, self.user_role)
         super().save(*args, **kwargs)
+        
 
 
 class Lecturer(models.Model):

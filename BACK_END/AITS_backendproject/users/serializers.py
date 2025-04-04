@@ -63,24 +63,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         confirm_password = data.get('confirm_password')
         if password != confirm_password:
             raise serializers.ValidationError("Passwords do not match.")
-        
-        role = data.get('user_role', '').lower()
-
-        # Email validation based on user role
-        email = data.get('mak_email', '').lower()
-        if role == 'student':
-            if not re.match(r'^[a-zA-Z]+\.[a-zA-Z]+@students\.mak\.ac\.ug$', email):
-                raise serializers.ValidationError({"mak_email": "Student email must be in the format: firstname.lastname@students.mak.ac.ug."})
-        elif role in ['lecturer', 'registrar']:
-            if not re.match(r'^[a-zA-Z]+\.[a-zA-Z]+@mak\.ac\.ug$', email):
-                raise serializers.ValidationError({"mak_email": "Email must be in the format: firstname.lastname@mak.ac.ug."})
-
-        if role == 'student' and not data.get('student_no'):
-            raise serializers.ValidationError({"student_no": "Student number is required for students."})
-        if role == 'registrar' and not data.get('college'):
-            raise serializers.ValidationError({"college": "College is required for registrars."})
-        
         return data
+    
+    
 
     def create(self, validated_data):
         password = validated_data.pop('password')
@@ -115,15 +100,9 @@ class UserLoginSerializer(serializers.Serializer):
     mak_email = serializers.EmailField()  # Changed email to mak_email
     password = serializers.CharField(write_only=True)
 
-    def validate(self, data):
-        password = data.get('password')
-        confirm_password = data.get('confirm_password')
-        if password != confirm_password:
-            raise serializers.ValidationError('Password dont match')
-        
-        role = data.get('user_role', '').lower()
+    def validate(self, data): 
         email = data.get('mak_email', '').lower()
-        
+        role = data.get('user_role', '')
         
         if 'is_superuser' in self.context and self.context['is_superuser']:
             return data
