@@ -1,99 +1,123 @@
-from django.shortcuts import render
+from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import status
-from .serializers import IssueSerializers
-from users.models import Student, Lecturer, CollegeRegister
 from .models import Issues
-class IssueView(APIView):
-    def get(self, request):
-        issues = Issues.objects.all()
-        serializer = IssueSerializers(issues, many=True)
-        return Response(serializer.data)
-    
-    
-    def post(self, request):
-        serializer = IssueSerializers(data=request.data)
-        if serializer.is_valid():
-            serializer.save(author=request.user.student)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    
-class IssueDetailView(APIView):
-    def get(self, request, pk):
-        try:
-            issue = Issues.objects.get(pk=pk)
-            serializer = IssueSerializers(issue)
-            return Response(serializer.data)
-        except Issues.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        
-    def put(self, request, pk):
-        try:
-            issue = Issues.objects.get(pk=pk)
-            serializer = IssueSerializers(issue, data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Issues.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        
-        
-    def delete(self, request, pk):
-        try:
-            issue = Issues.objects.get(pk=pk)
-            issue.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except Issues.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        
-        
-class CollegeRegisterIssueView(APIView):
-    def get(self, request):
-        issues = Issues.objects.filter(register=request.user.collegeregister)
-        serializer = IssueSerializers(issues, many=True)
-        return Response(serializer.data)
-    
-    
-class LecturerIssueView(APIView):
-    def get(self, request):
-        issues = Issues.objects.filter(assigned_lecturer=request.user.lecturer)
-        serializer = IssueSerializers(issues, many=True)
-        return Response(serializer.data)
+from .serializers import IssueCreateSerializer, IssueAssignSerializer, IssueStatusUpdateSerializer, IssueDetailSerializer
+from users.models import CollegeRegister, Lecturer
 
+# 1️⃣ API for Students to Create an Issue
+class CreateIssueView(generics.CreateAPIView):
+    """
+    Students create and submit issues.
+    Issue is assigned to CollegeRegister automatically.
+    """
+    serializer_class = IssueCreateSerializer  # Corrected to IssueCreateSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
-class StudentSendIssueView(APIView):
-    def post(self, request):
-        issue_id = request.data.get('issue_id')
-        if not issue_id:
-            return Response({'error':'issue_id is required.'}, status=status.HTTP_400_BAD_REQUEST)
+    def perform_create(self, serializer):
+        user = self.request.user
+        student = getattr(user, 'student', None)  # Ensure user is a student
+        if not student:
+            return Response({"error": "Only students can create issues."}, status=status.HTTP_403_FORBIDDEN)
+
+        # Assign issue to the CollegeRegister of the student's college
+        college_register = CollegeRegister.objects.filter(college=student.college).first()
+        if not college_register:
+            return Response({"error": "No College Register found for your college."}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer.save(
+            author=student,
+            college=student.college,
+            school=student.school,
+            department=student.department,
+            register=college_register
+        )
+
+# 2️⃣ API for College Register to View & Assign Issues
+class CollegeRegisterAssignView(APIView):
+    """
+    College Register assigns an issue to a lecturer.
+    Only the College Register can perform this action.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, issue_id):
+        user = request.user
+        register = getattr(user, 'collegeregister', None)
+        if not register:
+            return Response({"error": "Only College Registers can assign issues."}, status=status.HTTP_403_FORBIDDEN)
+
         try:
-            issue = Issues.objects.get(pk=issue_id)
+            issue = Issues.objects.get(id=issue_id, register=register)
         except Issues.DoesNotExist:
-            return Response({'error':'Issue not found.'}, status=status.HTTP_404_NOT_FOUND)
-        issue.status = 'pending'
-        issue.register = request.user.collegeregister
-        issue.save()
-        return Response({'message':'Issue sent to register'}, status=status.HTTP_200_OK)
-    
-    
-class RegisterAssignIssueView(APIView):
-    def post(self, request):
-        issue_id = request.data.get('issue_id')
+            return Response({"error": "Issue not found or not assigned to you."}, status=status.HTTP_404_NOT_FOUND)
+
         lecturer_id = request.data.get('lecturer_id')
-        if not issue_id or not lecturer_id:
-            return Response({'error':'Both issue_id and lecturer_id are required '}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            issue = Issues.objects.get(pk=issue_id)
-        except Issues.DoesNotExist:
-            return Response({'error':'Issue not found'}, status=status.HTTP_404_NOT_FOUND)
-        try:
-            lecturer = Lecturer.objects.get(pk=lecturer_id) 
+            lecturer = Lecturer.objects.get(id=lecturer_id)
         except Lecturer.DoesNotExist:
-            return Response({'error':'Lecturer not found.'}, status=status.HTTP_404_NOT_FOUND)
-        issue.status = 'in_progress'
+            return Response({"error": "Invalid Lecturer ID."}, status=status.HTTP_400_BAD_REQUEST)
+
         issue.assigned_lecturer = lecturer
         issue.save()
-        return Response({'message':'Issue assigned to lecturer'}, status=status.HTTP_200_OK)
+        return Response({"message": f"Issue assigned to {lecturer} successfully."}, status=status.HTTP_200_OK)
+
+# 3️⃣ API for Lecturers to Update Issue Status
+class LecturerUpdateIssueStatusView(APIView):
+    """
+    Only lecturers can update the status of an issue.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def patch(self, request, issue_id):
+        user = request.user
+        lecturer = getattr(user, 'lecturer', None)
+        if not lecturer:
+            return Response({"error": "Only lecturers can update issue status."}, status=status.HTTP_403_FORBIDDEN)
+
+        # Ensure the issue exists and is assigned to the lecturer
+        try:
+            issue = Issues.objects.get(id=issue_id, assigned_lecturer=lecturer)
+        except Issues.DoesNotExist:
+            return Response({"error": "Issue not found or not assigned to you."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Validate status update
+        new_status = request.data.get('status')
+        if new_status not in ['resolved', 'rejected', 'in_progress']:
+            return Response({"error": "Invalid status update."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Update the issue status
+        issue.status = new_status
+        issue.save()
+
+        return Response({"message": f"Issue status updated to {new_status}."}, status=status.HTTP_200_OK)
+
+# 4️⃣ API to List Issues (For All Users)
+class ListIssuesView(generics.ListAPIView):
+    """
+    List all issues. Different users see different issues:
+    - Students see only their issues.
+    - College Register sees issues in their college.
+    - Lecturers see only assigned issues.
+    """
+    serializer_class = IssueDetailSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if hasattr(user, 'student'):
+            return Issues.objects.filter(author=user.student)
+        elif hasattr(user, 'collegeregister'):
+            return Issues.objects.filter(college=user.collegeregister.college)
+        elif hasattr(user, 'lecturer'):
+            return Issues.objects.filter(assigned_lecturer=user.lecturer)
+        return Issues.objects.none()  # Default to empty if user role is unknown
+
+# 5️⃣ API to Retrieve a Specific Issue
+class RetrieveIssueView(generics.RetrieveAPIView):
+    """
+    Retrieve details of a specific issue.
+    """
+    queryset = Issues.objects.all()
+    serializer_class = IssueDetailSerializer
+    permission_classes = [permissions.IsAuthenticated]
