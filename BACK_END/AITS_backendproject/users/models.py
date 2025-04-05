@@ -4,9 +4,9 @@ from cloudinary.models import CloudinaryField
 from department.models import Department, College, School
 import re
 from django.core.exceptions import ValidationError
-
+from django.contrib.auth.models import BaseUserManager
 # Custom validator for university email domain
-from django.core.exceptions import ValidationError
+
 
 def validate_email_domain(value, user_role=None): 
     pattern = {
@@ -19,6 +19,37 @@ def validate_email_domain(value, user_role=None):
         raise ValidationError(
             f"Email must be in format: firstname.lastname@{'students.' if user_role=='student' else ''}mak.ac.ug"
         )
+        
+class UserManager(BaseUserManager):
+    def create_user(self, username, email, password=None, **extra_fields):
+        """Create and return a regular user."""
+        if not email:
+            raise ValueError("The Email field must be set")
+        email = self.normalize_email(email)
+        user = self.model(username=username, email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, username, email, password=None, **extra_fields):
+        """Create and return a superuser with only username, email, and password."""
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
+        # Remove fields that should NOT be required for superusers
+        extra_fields.pop("mak_email", None)  # Ignore mak_email
+        extra_fields.pop("college", None)  # Ignore college
+        extra_fields.pop("user_role", None)  # Ignore role
+        extra_fields.pop("full_name", None)  # Ignore full_name
+        extra_fields.pop("gender", None)  # Ignore gender
+        extra_fields.pop("profile_pic", None)  # Ignore profile_pic
+        extra_fields.pop("office", None)  # Ignore office
+        extra_fields.pop("notification_email", None)  # Ignore notification_email
+        extra_fields.pop("school", None)  # Ignore school
+        extra_fields.pop("full_name", None)
+        extra_fields.pop("groups", None)
+        extra_fields.pop("department", None)
+        return self.create_user(username, email, password, **extra_fields)
+
 class User(AbstractUser):
     USER_ROLES_CHOICES = [
         ('student', 'Student'),
@@ -32,8 +63,8 @@ class User(AbstractUser):
     ]
 
     full_name = models.CharField(max_length=255, blank=True, null=True)
-    user_role = models.CharField(max_length=25, choices=USER_ROLES_CHOICES, default='student')
-    mak_email = models.EmailField(unique=True)
+    user_role = models.CharField(max_length=25, choices=USER_ROLES_CHOICES, blank=True, null=True)
+    mak_email = models.EmailField(unique=True, blank=True, null=True)
     gender = models.CharField(max_length=8, choices=GENDER_CHOICES, default='male')
     profile_pic = CloudinaryField('image', blank=True, null=True)
     office = models.CharField(max_length=20, blank=True, null=True)
@@ -47,10 +78,14 @@ class User(AbstractUser):
         return self.username
     
     def clean(self):
-        if not self.is_superuser:
+        if not self.is_superuser and self.mak_email:
             validate_email_domain(self.mak_email, self.user_role)
 
     def save(self, *args, **kwargs):
+        if not self.is_superuser and not self.college:
+            raise ValidationError('Non superuse users need to be in a certain  college')
+        if self.is_superuser and self.college:
+            self.college = None
         self.full_clean()
         super().save(*args, **kwargs)
 

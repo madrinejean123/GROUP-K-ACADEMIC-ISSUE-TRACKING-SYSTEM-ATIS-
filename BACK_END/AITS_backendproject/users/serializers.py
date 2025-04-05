@@ -47,7 +47,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         """
         super().__init__(*args, **kwargs)
         initial = getattr(self, 'initial_data', {}) or {}
-        role = initial.get('user_role', '').lower()
+        role = initial.getattr('user_role', '').lower()
         if role == 'student':
             self.fields['student_no'].required = True
             self.fields.pop('college', None)
@@ -59,11 +59,11 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             self.fields.pop('student_no', None)
 
     def validate(self, data):
-        password = data.get('password')
-        confirm_password = data.get('confirm_password')
-        if password != confirm_password:
-            raise serializers.ValidationError("Passwords do not match.")
+        if data.get('user_role') == 'register' and not data.get('college'):
+            if not self.context.get('is_superuser'):
+                raise serializers.ValidationError({'college': 'College is required for a registrar.'})
         return data
+
     
     
 
@@ -74,12 +74,21 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         college = validated_data.pop('college', None)  # Only for registrar role
 
         # Create the user with basic fields.
-        user = User.objects.create(
-            username=validated_data['full_name'],  # Using full_name as username
-            mak_email=validated_data['mak_email'],   # The user enters their own email
-            password=make_password(password),         # Hash password
-            user_role=validated_data['user_role'],
-            college=college  # Set for registrar; None for others
+        if self.context.get('is_superuser'):
+            user = User.objests.create(
+                username=validated_data.get('username', ''),
+                mak_email=validated_data['mak_email'],
+                password=make_password(password),
+                user_role=validated_data['user_role'],
+                college=college
+            )
+        else:
+            user = User.objects.create(
+                username=validated_data['full_name'],  # Using full_name as username
+                mak_email=validated_data['mak_email'],   # The user enters their own email
+                password=make_password(password),         # Hash password
+                user_role=validated_data['user_role'],
+                college=college  # Set for registrar; None for others
         )
 
         # Save the user with the entered email.
