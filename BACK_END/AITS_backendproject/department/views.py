@@ -37,43 +37,6 @@ class SchoolDepartmentView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
 
-class CreateCollegeView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def post(self, request):
-        serializer = CollegeSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-    
-class CreateSchoolView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def post(self, request, college_id):
-        college = get_object_or_404(College, id=college_id)
-        serializer = SchoolSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(college=college)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-class CreateDepartmentView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def post(self, request, school_id):
-        school = get_object_or_404(School, id=school_id)
-        serializer = DepartmentSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(school=school)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    
-        
-
 
 class StudentCollegeView(APIView):
     permission_classes = [permissions.IsAuthenticated]
