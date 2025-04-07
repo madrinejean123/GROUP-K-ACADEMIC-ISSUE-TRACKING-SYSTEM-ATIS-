@@ -47,7 +47,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         """
         super().__init__(*args, **kwargs)
         initial = getattr(self, 'initial_data', {}) or {}
-        role = initial.getattr('user_role', '').lower()
+        role = initial.get('user_role', '').lower()
         if role == 'student':
             self.fields['student_no'].required = True
             self.fields.pop('college', None)
