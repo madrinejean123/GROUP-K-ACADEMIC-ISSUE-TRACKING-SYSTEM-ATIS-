@@ -14,5 +14,9 @@ class IsCollegeRegister(permissions.BasePermission):
         return request.user.user_role == 'registrar'  # Matches USER_ROLES choice
     
 
+class IsSuperAdmin(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_superuser
+
 
     

@@ -33,4 +33,4 @@ class Department(models.Model):
     school = models.ForeignKey(School, on_delete=models.CASCADE, related_name='departments', default=1)
 
     def __str__(self):
-        return f"{self.name} ({self.school.school_name})"
+        return f"{self.name} ({self.school.school_name}--{self.school.college.name})"

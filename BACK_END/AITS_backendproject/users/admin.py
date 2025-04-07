@@ -1,3 +1,9 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import Student, CollegeRegister, Lecturer
+
+admin.site.register(Student)
+admin.site.register(CollegeRegister)
+admin.site.register(Lecturer)
+
+

@@ -17,5 +17,5 @@ urlpatterns = [
     # 5️⃣ API to Retrieve a Specific Issue
     path('detail/<int:pk>/', RetrieveIssueView.as_view(), name='retrieve-issue'),
 
-    #
+    
 ]
