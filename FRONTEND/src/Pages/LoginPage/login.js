@@ -18,7 +18,7 @@ const LoginPage = () => {
 
     try {
       // Assuming the login API is at this URL
-      const response = await axios.post("http://127.0.0.1:8000/users/login/", data);
+      const response = await axios.post("http://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/login/", data);
 
       console.log(response);
       if (response.data && response.data.tokens) {
