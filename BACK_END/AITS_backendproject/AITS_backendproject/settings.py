@@ -97,11 +97,14 @@ WSGI_APPLICATION = 'AITS_backendproject.wsgi.application'
 
 # Use Heroku PostgreSQL or fallback to SQLite for local development
 DATABASES = {
-    'default': dj_database_url.config(
-        default='sqlite:///' + str(BASE_DIR / 'db.sqlite3'),
-        conn_max_age=600,
-        ssl_require=True
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'Jonah',
+        'PASSWORD': 'tugume',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
 }
 
 
