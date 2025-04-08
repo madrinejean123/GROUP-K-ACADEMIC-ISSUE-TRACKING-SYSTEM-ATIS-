@@ -2,7 +2,7 @@ from django.urls import path
 from .views import CreateIssueView, CollegeRegisterAssignView, LecturerUpdateIssueStatusView, ListIssuesView, RetrieveIssueView
 
 urlpatterns = [
-    # 1️⃣ API for Students to Create an Issue
+    # 1️⃣ API for Students to Create an Issuegit
     path('create/', CreateIssueView.as_view(), name='create-issue'),
 
     # 2️⃣ API for College Register to View & Assign Issues

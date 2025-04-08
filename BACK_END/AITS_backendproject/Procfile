@@ -1,0 +1,2 @@
+web: gunicorn AITS_backendproject.wsgi
+
