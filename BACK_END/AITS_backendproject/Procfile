@@ -1,1 +1,2 @@
-web: gunicorn backend.wsgi --log-file -
+web: gunicorn AITS_backendproject.wsgi
+

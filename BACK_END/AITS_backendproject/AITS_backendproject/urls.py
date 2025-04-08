@@ -16,10 +16,19 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.shortcuts import render
 
+# Define the home view
+def home(request):
+    return render(request, 'home.html')
+
+# URL patterns
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('department/', include('department.urls')),
     path('users/', include('users.urls')),
     path('issues/', include('issues.urls')),
+    
+    # Add the home view for the root URL
+    path('', home, name='home'),  # This is where the home view is linked to the root URL
 ]
