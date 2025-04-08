@@ -29,7 +29,7 @@ const StudentDashboard = () => {
         }
         console.log("Access Token:", token);
 
-        const response = await axios.get("http://127.0.0.1:8000/users/profile/", {
+        const response = await axios.get("http://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/profile/", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
