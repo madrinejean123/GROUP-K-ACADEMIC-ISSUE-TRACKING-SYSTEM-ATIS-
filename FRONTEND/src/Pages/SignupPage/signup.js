@@ -61,7 +61,7 @@ const SignUp = () => {
     };
 
     try {
-      const response = await axios.post("http://127.0.0.1:8000/users/register/", requestData);
+      const response = await axios.post("https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/register/", requestData);
 
       console.log(response);
       if (response) {
