@@ -41,7 +41,7 @@ const Header = ({ toggleSidebar, isMobile, sidebarOpen, userRole, profile }) => 
     console.log("Profile Data:", profileData);
   }, [profileData]);
 
-  // Compute initials from the username using only the first two words.
+  // Compute initials from the full name using only the first two words.
   const getInitials = (name) => {
     if (!name || name.trim() === "") return "U"; // Fallback if name is undefined or empty
     const names = name.trim().split(" ");
@@ -144,7 +144,7 @@ const Header = ({ toggleSidebar, isMobile, sidebarOpen, userRole, profile }) => 
               onClick={() => setProfileOpen(!profileOpen)}
             >
               <div className="profile-initials">
-                {getInitials(profileData.username)}
+                {getInitials(profileData.full_name)} {/* Changed to full_name */}
               </div>
             </button>
             {profileOpen && (
@@ -178,7 +178,7 @@ const Header = ({ toggleSidebar, isMobile, sidebarOpen, userRole, profile }) => 
 
             {/* Read-only fields displayed as plain text */}
             <div className="readonly-field">
-              <strong>Username:</strong> {formData.username || "N/A"}
+              <strong>Full Name:</strong> {formData.full_name || "N/A"} {/* Changed to full_name */}
             </div>
             <div className="readonly-field">
               <strong>Email:</strong> {formData.mak_email || "N/A"}
@@ -208,7 +208,6 @@ const Header = ({ toggleSidebar, isMobile, sidebarOpen, userRole, profile }) => 
             </label>
             <label>
               Gender:
-              {/* Update the values to match the serializer's expected choices. */}
               <select
                 name="gender"
                 value={formData.gender || ""}

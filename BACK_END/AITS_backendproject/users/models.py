@@ -1,4 +1,4 @@
-from django.core.exceptions import ValidationError  # Add this import
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission, BaseUserManager
 from cloudinary.models import CloudinaryField
@@ -20,7 +20,6 @@ def validate_email_domain(value, user_role=None):
         
 class UserManager(BaseUserManager):
     def create_user(self, username, email, password=None, **extra_fields):
-        """Create and return a regular user."""
         if not email:
             raise ValueError("The Email field must be set")
         email = self.normalize_email(email)
@@ -30,10 +29,9 @@ class UserManager(BaseUserManager):
         return user
 
     def create_superuser(self, username, email, password=None, **extra_fields):
-        """Create and return a superuser with only username, email, and password."""
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
-        # Remove fields that should NOT be required for superusers
+        # Remove fields not required for superusers
         for fld in [
             "mak_email","college","user_role","full_name","gender",
             "profile_pic","office","notification_email","school",
@@ -49,7 +47,6 @@ class User(AbstractUser):
         ('registrar', 'Registrar'),
         ('lecturer', 'Lecturer'),
     ]
-
     GENDER_CHOICES = [
         ('male', 'Male'),
         ('female', 'Female'),
@@ -61,8 +58,13 @@ class User(AbstractUser):
     gender = models.CharField(max_length=8, choices=GENDER_CHOICES, default='male')
     profile_pic = CloudinaryField('image', blank=True, null=True)
     office = models.CharField(max_length=20, blank=True, null=True)
-    notification_email = models.EmailField(blank=True, null=True)  # Optional notification email
-    college = models.ForeignKey(College, on_delete=models.CASCADE, blank=True, null=True)  # Optional for students and lecturers
+    notification_email = models.EmailField(blank=True, null=True)
+    college = models.ForeignKey(
+        College,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True
+    )  # Optional for students and lecturers
     groups = models.ManyToManyField(Group, related_name="custom_user_groups")
     user_permissions = models.ManyToManyField(Permission, related_name="custom_user_permissions")
     school = models.ForeignKey(School, on_delete=models.SET_NULL, null=True, blank=True)
@@ -90,13 +92,34 @@ class User(AbstractUser):
 
 
 class Student(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student', unique=True, null=True)
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='student',
+        unique=True,
+        null=True
+    )
     student_no = models.CharField(max_length=20, unique=True)
-    # Changed default='' to default=None
-    school = models.ForeignKey(School, on_delete=models.SET_NULL, default=None, null=True, blank=True)
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, default=None, null=True, blank=True)
-    # The college field is optional for students
-    college = models.ForeignKey(College, on_delete=models.SET_NULL, blank=True, null=True)
+    school = models.ForeignKey(
+        School,
+        on_delete=models.SET_NULL,
+        default=None,
+        null=True,
+        blank=True
+    )
+    department = models.ForeignKey(
+        Department,
+        on_delete=models.SET_NULL,
+        default=None,
+        null=True,
+        blank=True
+    )
+    college = models.ForeignKey(
+        College,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True
+    )  # Now optional
 
     def __str__(self):
         return self.user.username
@@ -109,21 +132,42 @@ class Student(models.Model):
 
 
 class Lecturer(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='lecturers', unique=True)
-    # Changed default='' to default=None
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, default=None, null=True)
-    # Non-optional for lecturers; removed default=''
-    college = models.ForeignKey(College, on_delete=models.CASCADE)
-    is_lecturer = models.BooleanField(default=True)  # This can help to distinguish lecturers
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='lecturers',
+        unique=True
+    )
+    department = models.ForeignKey(
+        Department,
+        on_delete=models.SET_NULL,
+        default=None,
+        null=True,
+        blank=True
+    )
+    college = models.ForeignKey(
+        College,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )  # Changed: now optional
+    is_lecturer = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.user.username} - {self.college}"
 
 
 class CollegeRegister(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='registrar', unique=True)
-    # Mandatory for registrars; removed default='1'
-    college = models.ForeignKey(College, on_delete=models.CASCADE)
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='registrar',
+        unique=True
+    )
+    college = models.ForeignKey(
+        College,
+        on_delete=models.CASCADE
+    )  # Still required
 
     def __str__(self):
         return f"{self.user.username} - {self.college}"

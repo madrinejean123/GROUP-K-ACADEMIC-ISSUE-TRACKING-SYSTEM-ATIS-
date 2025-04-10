@@ -6,37 +6,38 @@ import IssueList from "../../Components/issues/IssueList";
 import IssueDetail from "../../Components/issues/IssueDetail";
 import { mockIssues } from "../../mock-data";
 import "./lecturer-dashboard.css";
+import axios from "axios";  // 📌 ADDED
 
 const LecturerDashboard = () => {
   const [issues, setIssues] = useState([]);
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [showIssueDetailModal, setShowIssueDetailModal] = useState(false);
   const [activeTab, setActiveTab] = useState("assigned");
-  const [lecturerName, setLecturerName] = useState(""); // State for lecturer's name
+  // 📌 NEW state to hold the fetched profile
+  const [lecturerProfile, setLecturerProfile] = useState({});
 
-  // Fetch lecturer's name from the backend
+  // 📌 Fetch the lecturer's full profile from the backend
   useEffect(() => {
-    const fetchLecturerName = async () => {
+    const fetchLecturerProfile = async () => {
       try {
-        const token = localStorage.getItem("access_token"); // Retrieve the JWT token
-        const response = await fetch("http://127.0.0.1:8000/users/profile/", {
-          headers: {
-            Authorization: `Bearer ${token}`, // Include the token in the request headers
-          },
-        });
+        const token = localStorage.getItem("access_token");
+        if (!token) return console.error("No access token found");
 
-        if (response.ok) {
-          const data = await response.json();
-          setLecturerName(`Dr. ${data.full_name}`); // Prepend "Dr." to the name
-        } else {
-          console.error("Failed to fetch lecturer name:", response.statusText);
-        }
+        const response = await axios.get(
+          "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/profile/",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        const data = response.data;
+        // handle array vs object
+        const profileData = Array.isArray(data) ? data[0] : data;
+        setLecturerProfile(profileData);
       } catch (error) {
-        console.error("Error fetching lecturer name:", error);
+        console.error("Error fetching lecturer profile:", error);
       }
     };
 
-    fetchLecturerName();
+    fetchLecturerProfile();
   }, []);
 
   // Load issues with student information
@@ -47,9 +48,11 @@ const LecturerDashboard = () => {
       )
       .map((issue) => ({
         ...issue,
-        student: "John Doe", // Mock student name
+        student: "John Doe",
         studentId: "STD" + Math.floor(Math.random() * 10000),
-        assignee: "Dr. Lecturer", // Current lecturer
+        assignee: lecturerProfile.full_name
+          ? `Dr. ${lecturerProfile.full_name}`
+          : "Dr. Lecturer",
       }));
 
     const resolvedIssues = mockIssues
@@ -58,13 +61,15 @@ const LecturerDashboard = () => {
       )
       .map((issue) => ({
         ...issue,
-        student: "Jane Smith", // Mock student name
+        student: "Jane Smith",
         studentId: "STD" + Math.floor(Math.random() * 10000),
-        assignee: "Dr. Lecturer", // Current lecturer
+        assignee: lecturerProfile.full_name
+          ? `Dr. ${lecturerProfile.full_name}`
+          : "Dr. Lecturer",
       }));
 
     setIssues([...assignedIssues, ...resolvedIssues]);
-  }, []);
+  }, [lecturerProfile]);  // 📌 re-run when profile arrives
 
   const handleViewIssue = (issue) => {
     setSelectedIssue(issue);
@@ -81,7 +86,9 @@ const LecturerDashboard = () => {
 
   const handleAddComment = (comment) => {
     const newComment = {
-      author: "Dr. Lecturer",
+      author: lecturerProfile.full_name
+        ? `Dr. ${lecturerProfile.full_name}`
+        : "Dr. Lecturer",
       date: new Date().toISOString().split("T")[0],
       content: comment,
     };
@@ -124,15 +131,18 @@ const LecturerDashboard = () => {
   };
 
   return (
-    <DashboardLayout userRole="Lecturer">
+    <DashboardLayout userRole="Lecturer" profile={lecturerProfile}> {/* 📌 PASS profile down if needed */}
       <div className="lecturer-dashboard">
         <div className="welcome-section">
           <div className="welcome-text">
-            <h2>Welcome, {lecturerName || "Dr. Lecturer"}!</h2>
-            <p>
-              Manage and resolve student related academic issues assigned to
-              you.
-            </p>
+            <h2>
+              Welcome,{" "}
+              {lecturerProfile.full_name
+                ? `Dr. ${lecturerProfile.full_name}`
+                : "Dr. Lecturer"}
+              !
+            </h2>
+            <p>Manage and resolve student academic issues assigned to you.</p>
           </div>
           <div className="stats-cards">
             <div className="stat-card">
