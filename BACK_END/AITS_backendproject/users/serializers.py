@@ -1,10 +1,10 @@
 from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth import authenticate
 from .models import User, Student, Lecturer, CollegeRegister
 from department.models import College
 from department.serializers import CollegeSerializer
 import re  
-from django.contrib.auth import authenticate
 
 # Custom field to allow string representations for college primary key.
 class CustomPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
@@ -15,6 +15,7 @@ class CustomPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
             except ValueError:
                 self.fail('invalid', input=data)
         return super().to_internal_value(data)
+
 
 # User Registration Serializer
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -70,34 +71,35 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        # Remove write-only fields
+        # Extract and remove write-only fields
         password = validated_data.pop('password')
         validated_data.pop('confirm_password')
         student_no = validated_data.pop('student_no', None)
         college = validated_data.pop('college', None)
+        role = validated_data.get('user_role')
 
-        # Use mak_email as the username (always valid)
-        username = validated_data['mak_email']
-
-        # Create the user, including full_name
+        # Create the User
         user = User.objects.create(
-            username=username,
+            username=validated_data['mak_email'],
             full_name=validated_data.get('full_name', ''),
             mak_email=validated_data['mak_email'],
             password=make_password(password),
-            user_role=validated_data['user_role'],
-            college=college
+            user_role=role,
+            # Only assign college on the User if registrar
+            college=college if role == 'registrar' else None
         )
 
         # Role‑specific profile
-        if user.user_role == 'student':
+        if role == 'student':
             Student.objects.create(user=user, student_no=student_no)
-        elif user.user_role == 'lecturer':
+        elif role == 'lecturer':
+            # NOTE: Your Lecturer model must allow college=null
             Lecturer.objects.create(user=user)
         else:  # registrar
-            CollegeRegister.objects.create(user=user)
+            CollegeRegister.objects.create(user=user, college=college)
 
         return user
+
 
 # User Login Serializer
 class UserLoginSerializer(serializers.Serializer):
@@ -128,6 +130,7 @@ class UserLoginSerializer(serializers.Serializer):
                 raise serializers.ValidationError({
                     'student_no': 'Student number is required for students.'
                 })
+
         elif role in ['lecturer', 'registrar']:
             if not re.match(r'^[a-zA-Z]+\.[a-zA-Z]+@mak\.ac\.ug$', email):
                 raise serializers.ValidationError({
@@ -138,17 +141,15 @@ class UserLoginSerializer(serializers.Serializer):
                     'college': 'College is required for registrars.'
                 })
 
-        # ————————————————
-        # 🔧 **ADDED AUTHENTICATION CHECK HERE** 🔧
-        password = data.get('password')
-        user = authenticate(username=email, password=password)
+        # Authentication check
+        user = authenticate(username=email, password=data.get('password'))
         if user is None:
             raise serializers.ValidationError({
                 'non_field_errors': ['Invalid credentials. Please try again.']
             })
-        # ————————————————
 
         return data
+
 
 # User Profile Serializer
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -192,6 +193,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             })
         return attrs
 
+
 # User Update Serializer
 class UserUpdateSerializers(serializers.ModelSerializer):
     GENDER_CHOICES = [
@@ -209,6 +211,7 @@ class UserUpdateSerializers(serializers.ModelSerializer):
             'college': {'required': False},
         }
 
+
 # Student, Lecturer, Registrar serializers
 class StudentSerializer(serializers.ModelSerializer):
     user = UserProfileSerializer()
@@ -216,17 +219,20 @@ class StudentSerializer(serializers.ModelSerializer):
         model = Student
         fields = ['id', 'user', 'student_no', 'college', 'school', 'department']
 
+
 class LecturerSerializer(serializers.ModelSerializer):
     user = UserProfileSerializer()
     class Meta:
         model = Lecturer
         fields = ['id', 'user', 'college', 'is_lecturer']
 
+
 class CollegeRegisterSerializer(serializers.ModelSerializer):
     user = UserProfileSerializer()
     class Meta:
         model = CollegeRegister
         fields = ['id', 'user', 'college']
+
 
 # General User Serializer
 class UserSerializer(serializers.ModelSerializer):
