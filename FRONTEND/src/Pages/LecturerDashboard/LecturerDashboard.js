@@ -129,7 +129,10 @@ const LecturerDashboard = () => {
         <div className="welcome-section">
           <div className="welcome-text">
             <h2>Welcome, {lecturerName || "Dr. Lecturer"}!</h2>
-            <p>Manage and resolve student academic issues assigned to you.</p>
+            <p>
+              Manage and resolve student related academic issues assigned to
+              you.
+            </p>
           </div>
           <div className="stats-cards">
             <div className="stat-card">
