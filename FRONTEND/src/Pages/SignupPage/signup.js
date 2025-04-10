@@ -33,7 +33,7 @@ const SignUp = () => {
   useEffect(() => {
     const fetchColleges = async () => {
       try {
-        const response = await axios.get("http://127.0.0.1:8000/department/colleges/");
+        const response = await axios.get("https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/colleges/");
         setColleges(response.data);
       } catch (error) {
         console.error("Error fetching colleges:", error);
