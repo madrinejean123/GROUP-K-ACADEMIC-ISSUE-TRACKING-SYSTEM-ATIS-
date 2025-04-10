@@ -25,9 +25,8 @@ const Sidebar = ({ sidebarOpen, userRole, profile }) => {
       .toUpperCase();
   };
 
-  // Use dynamic profile data instead of hardcoded values
   const user = {
-    name: profile ? `${profile.username} (${userRole})` : "Loading...",
+    name: profile ? `${profile.full_name} (${userRole})` : "Loading...",
     id: profile ? profile.student_no || userRole : "Loading...",
     avatar: "/placeholder.svg?height=80&width=80",
   };
@@ -35,14 +34,12 @@ const Sidebar = ({ sidebarOpen, userRole, profile }) => {
   const handleNavItemClick = (item) => {
     setActiveNavItem(item);
 
-    // Dispatch a custom event
     const event = new CustomEvent("sidebarNavigation", {
       detail: { navItem: item },
     });
     window.dispatchEvent(event);
   };
 
-  // navigation items based on user role
   const getNavItems = () => {
     const commonItems = [
       { id: "dashboard", label: "Dashboard", icon: <FaHome /> },
@@ -53,11 +50,7 @@ const Sidebar = ({ sidebarOpen, userRole, profile }) => {
         return [
           ...commonItems,
           { id: "users", label: "Manage Users", icon: <FaUsers /> },
-          {
-            id: "lecturers",
-            label: "Lecturers",
-            icon: <FaChalkboardTeacher />,
-          },
+          { id: "lecturers", label: "Lecturers", icon: <FaChalkboardTeacher /> },
           { id: "students", label: "Students", icon: <FaUserGraduate /> },
           { id: "settings", label: "System Settings", icon: <FaUserCog /> },
         ];
@@ -66,23 +59,15 @@ const Sidebar = ({ sidebarOpen, userRole, profile }) => {
           ...commonItems,
           { id: "issues", label: "All Issues", icon: <FaClipboardList /> },
           { id: "assigned", label: "Assigned Issues", icon: <FaHistory /> },
-          {
-            id: "lecturers",
-            label: "Lecturers",
-            icon: <FaChalkboardTeacher />,
-          },
+          { id: "lecturers", label: "Lecturers", icon: <FaChalkboardTeacher /> },
         ];
       case "Lecturer":
         return [
           ...commonItems,
-          {
-            id: "assigned",
-            label: "Assigned Issues",
-            icon: <FaClipboardList />,
-          },
+          { id: "assigned", label: "Assigned Issues", icon: <FaClipboardList /> },
           { id: "resolved", label: "Resolved Issues", icon: <FaHistory /> },
         ];
-      default: // Student
+      default: 
         return [
           ...commonItems,
           { id: "issues", label: "My Issues", icon: <FaClipboardList /> },
