@@ -1,28 +1,32 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from .views import (
-    CollegeView,
-    StudentCollegeView,
-    RegisterCollegeView,
-    LecturerCollegeView,
-    StudentDepartmentView,
-    StudentSchoolView,
-    CollegeSchoolsView,
-    SchoolDepartmentView, 
-    CreateCollegeView,
-    CreateSchoolView,
-    CreateDepartmentView,
+    CollegeViewSet,
+    CollegeSchoolsViewSet,
+    SchoolDepartmentViewSet,
+    StudentCollegeViewSet,
+    StudentSchoolViewSet,
+    StudentDepartmentViewSet,
+    RegisterCollegeViewSet,
+    LecturerCollegeViewSet,
+    CreateCollegeViewSet,
+    CreateSchoolViewSet,
+    CreateDepartmentViewSet,
 )
 
+router = DefaultRouter()
+router.register(r'colleges', CollegeViewSet, basename='college')
+router.register(r'college/(?P<college_id>\d+)/schools', CollegeSchoolsViewSet, basename='college-schools')
+router.register(r'school/(?P<school_id>\d+)/departments', SchoolDepartmentViewSet, basename='school-departments')
+router.register(r'student/college', StudentCollegeViewSet, basename='student-college')
+router.register(r'student/school', StudentSchoolViewSet, basename='student-school')
+router.register(r'student/department', StudentDepartmentViewSet, basename='student-department')
+router.register(r'register/college', RegisterCollegeViewSet, basename='register-college')
+router.register(r'lecturer/colleges', LecturerCollegeViewSet, basename='lecturer-college')
+router.register(r'admin/create-college', CreateCollegeViewSet, basename='create-college')
+router.register(r'admin/create-school', CreateSchoolViewSet, basename='create-school')
+router.register(r'admin/create-department', CreateDepartmentViewSet, basename='create-department')
+
 urlpatterns = [
-    path('student/department/', StudentDepartmentView.as_view(), name='student-department'),
-    path('colleges/', CollegeView.as_view(), name='college-list'),
-    path('register/college/', RegisterCollegeView.as_view(), name='register-college'),
-    path('student/college/', StudentCollegeView.as_view(), name='student-college'),
-    path('student/school/', StudentSchoolView.as_view(), name='student-school'),
-    path('lecturer/colleges/', LecturerCollegeView.as_view(), name='lecturer-college'),
-    path('college/<int:college_id>/schools/',CollegeSchoolsView.as_view(), name='college-schools' ),
-    path('school/<int:school_id>/departments/', SchoolDepartmentView.as_view(), name='school-departments'),
-    path('admin/create-college/',CreateCollegeView.as_view(), name='create-college'),
-    path('admin/create-school/',CreateSchoolView.as_view(), name='create-school'),
-    path('admin/create-department/',CreateDepartmentView.as_view(), name='create-department'),
+    path('', include(router.urls)),
 ]

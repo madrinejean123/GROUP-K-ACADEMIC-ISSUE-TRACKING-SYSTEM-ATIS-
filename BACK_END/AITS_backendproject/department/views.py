@@ -1,126 +1,123 @@
-from django.shortcuts import render
-from rest_framework import status, permissions
-from django.shortcuts import get_object_or_404
+from rest_framework import viewsets, permissions
 from rest_framework.response import Response
-from rest_framework.views import APIView
+from django.shortcuts import get_object_or_404
 from .models import College, School, Department
-from users.permissions import IsSuperAdmin
 from .serializers import CollegeSerializer, SchoolSerializer, DepartmentSerializer
+from users.permissions import IsSuperAdmin
 
-class CreateCollegeView(APIView):
-    permission_classes = [permissions.IsAuthenticated, IsSuperAdmin]
-    
-    def post(self, request):
-        serializer = CollegeSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-   
-
-class CreateSchoolView(APIView):
-    permission_classes = [permissions.IsAuthenticated, IsSuperAdmin]
-    
-    def post(self, request):
-        serializer = SchoolSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            
-        
-    
-class CreateDepartmentView(APIView):
-    permission_classes = [permissions.IsAuthenticated, IsSuperAdmin]
-    
-    def post(self, request):
-        serializer = DepartmentSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-class CollegeView(APIView):
+class CollegeViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]
+    queryset = College.objects.all()
+    serializer_class = CollegeSerializer
 
-    def get(self, request):
-        colleges = College.objects.all()
-        serializer = CollegeSerializer(colleges, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    
-    
-class CollegeSchoolsView(APIView):
+
+class CollegeSchoolsViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
     
-    def get(self, request, college_id):
+    def list(self, request, college_id=None):
         college = get_object_or_404(College, id=college_id)
         schools = college.schools.all()
         serializer = SchoolSerializer(schools, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    
-    
-class SchoolDepartmentView(APIView):
+        return Response(serializer.data)
+
+
+class SchoolDepartmentViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
-    
-    def get(self, request, school_id):
+
+    def list(self, request, school_id=None):
         school = get_object_or_404(School, id=school_id)
         departments = school.departments.all()
         serializer = DepartmentSerializer(departments, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    
+        return Response(serializer.data)
 
 
-class StudentCollegeView(APIView):
+class StudentCollegeViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request):
+    def list(self, request):
         if hasattr(request.user, 'student'):
             college = request.user.student.college
             serializer = CollegeSerializer(college)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response({'error': 'User is not a student'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(serializer.data)
+        return Response({'error': 'User is not a student'}, status=401)
 
 
-class StudentSchoolView(APIView):
+class StudentSchoolViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request):
+    def list(self, request):
         if hasattr(request.user, 'student'):
             school = request.user.student.department.school
             serializer = SchoolSerializer(school)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response({'error': 'User is not a student'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(serializer.data)
+        return Response({'error': 'User is not a student'}, status=401)
 
 
-class StudentDepartmentView(APIView):
+class StudentDepartmentViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request):
+    def list(self, request):
         if hasattr(request.user, 'student') and hasattr(request.user.student, 'department'):
             department = request.user.student.department
             serializer = DepartmentSerializer(department)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response({'error': 'User is not a student'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(serializer.data)
+        return Response({'error': 'User is not a student'}, status=401)
 
 
-class RegisterCollegeView(APIView):
+class RegisterCollegeViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request):
+    def list(self, request):
         if hasattr(request.user, 'register'):
             college = request.user.register.college
             serializer = CollegeSerializer(college)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response({'error': 'User is not a registrar'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(serializer.data)
+        return Response({'error': 'User is not a registrar'}, status=401)
 
 
-class LecturerCollegeView(APIView):
+class LecturerCollegeViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request):
+    def list(self, request):
         if hasattr(request.user, 'lecturer'):
             colleges = request.user.lecturer.college_set.all()
             serializer = CollegeSerializer(colleges, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response({'error': 'User is not a lecturer'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(serializer.data)
+        return Response({'error': 'User is not a lecturer'}, status=401)
 
 
+# Admin views for creating colleges, schools, and departments
+class CreateCollegeViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticated, IsSuperAdmin]
+    serializer_class = CollegeSerializer
+
+    def create(self, request):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
+
+
+class CreateSchoolViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticated, IsSuperAdmin]
+    serializer_class = SchoolSerializer
+
+    def create(self, request):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
+
+
+class CreateDepartmentViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticated, IsSuperAdmin]
+    serializer_class = DepartmentSerializer
+
+    def create(self, request):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
