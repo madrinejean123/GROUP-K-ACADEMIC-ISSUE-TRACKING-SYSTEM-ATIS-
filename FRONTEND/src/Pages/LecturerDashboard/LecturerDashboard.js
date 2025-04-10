@@ -27,7 +27,7 @@ const LecturerDashboard = () => {
 
         if (response.ok) {
           const data = await response.json();
-          setLecturerName(`Dr. ${data.username}`); // Prepend "Dr." to the name
+          setLecturerName(`Dr. ${data.full_name}`); // Prepend "Dr." to the name
         } else {
           console.error("Failed to fetch lecturer name:", response.statusText);
         }
