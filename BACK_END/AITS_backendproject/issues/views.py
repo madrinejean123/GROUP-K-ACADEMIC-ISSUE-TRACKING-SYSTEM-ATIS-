@@ -16,11 +16,11 @@ class CreateIssueView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         user = self.request.user
-        student = getattr(user, 'student', None)  # Ensure user is a student
+        student = getattr(user, 'student', None)
         if not student:
             return Response({"error": "Only students can create issues."}, status=status.HTTP_403_FORBIDDEN)
 
-        # Assign issue to the CollegeRegister of the student's college
+        # Get CollegeRegister based on the student's college
         college_register = CollegeRegister.objects.filter(college=student.college).first()
         if not college_register:
             return Response({"error": "No College Register found for your college."}, status=status.HTTP_400_BAD_REQUEST)
@@ -30,8 +30,9 @@ class CreateIssueView(generics.CreateAPIView):
             college=student.college,
             school=student.school,
             department=student.department,
-            register=college_register
+            register=college_register  # This links the issue to the college's register
         )
+
 
 # 2️⃣ API for College Register to View & Assign Issues
 class CollegeRegisterAssignView(APIView):

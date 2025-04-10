@@ -204,12 +204,26 @@ class UserUpdateSerializers(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'gender', 'profile_pic', 'office']
+        fields = ['username', 'gender', 'profile_pic', 'office', 'college']
         extra_kwargs = {
             'profile_pic': {'required': False},
             'username': {'required': False},
             'college': {'required': False},
         }
+
+    def update(self, instance, validated_data):
+        # Handle updating the user data first
+        college = validated_data.get('college', None)
+        instance = super().update(instance, validated_data)
+
+        # If the college was updated, link to the CollegeRegister
+        if college:
+            college_register = CollegeRegister.objects.filter(college=college).first()
+            if college_register:
+                instance.linked_register = college_register
+                instance.save()
+
+        return instance
 
 
 # Student, Lecturer, Registrar serializers
