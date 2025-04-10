@@ -78,7 +78,7 @@ const Header = ({ toggleSidebar, isMobile, sidebarOpen, userRole, profile }) => 
       const token = localStorage.getItem("access_token");
 
       // Exclude read-only fields from the payload.
-      const { username, mak_email, user_role, student_no, ...updateData } = formData;
+      const { full_name, mak_email, user_role, student_no, ...updateData } = formData;
 
       await axios.put(
         `http://127.0.0.1:8000/users/profile/${profileData.id}/`,

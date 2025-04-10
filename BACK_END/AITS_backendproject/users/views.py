@@ -15,7 +15,6 @@ from .serializers import (
     CollegeRegisterSerializer,   
 )
 
-
 User = get_user_model()
 
 
@@ -68,7 +67,7 @@ class UserLoginViewSet(viewsets.ViewSet):
 
         # Check if the user exists using mak_email
         try:
-            user = User.objects.get(email=mak_email)
+            user = User.objects.get(mak_email=mak_email)
             print("User found:", user)  # Debugging: Print user details
         except User.DoesNotExist:
             print("User does not exist for mak_email:", mak_email)  # Debugging: Print user not found
@@ -166,6 +165,3 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = CollegeRegisterSerializer(registrars, many=True)
         print("Returning registrars data:", serializer.data)  # Debugging: Print registrars data
         return Response(serializer.data)
-
-
-

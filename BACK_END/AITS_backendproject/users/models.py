@@ -1,14 +1,11 @@
 from django.core.exceptions import ValidationError  # Add this import
 from django.db import models
-from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.contrib.auth.models import AbstractUser, Group, Permission, BaseUserManager
 from cloudinary.models import CloudinaryField
 from department.models import Department, College, School
 import re
-from django.core.exceptions import ValidationError
-from django.contrib.auth.models import BaseUserManager
+
 # Custom validator for university email domain
-
-
 def validate_email_domain(value, user_role=None): 
     pattern = {
         'student': r'^[a-z]+\.[a-z]+@students\.mak\.ac\.ug$',
@@ -37,18 +34,12 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
         # Remove fields that should NOT be required for superusers
-        extra_fields.pop("mak_email", None)  # Ignore mak_email
-        extra_fields.pop("college", None)  # Ignore college
-        extra_fields.pop("user_role", None)  # Ignore role
-        extra_fields.pop("full_name", None)  # Ignore full_name
-        extra_fields.pop("gender", None)  # Ignore gender
-        extra_fields.pop("profile_pic", None)  # Ignore profile_pic
-        extra_fields.pop("office", None)  # Ignore office
-        extra_fields.pop("notification_email", None)  # Ignore notification_email
-        extra_fields.pop("school", None)  # Ignore school
-        extra_fields.pop("full_name", None)
-        extra_fields.pop("groups", None)
-        extra_fields.pop("department", None)
+        for fld in [
+            "mak_email","college","user_role","full_name","gender",
+            "profile_pic","office","notification_email","school",
+            "groups","department"
+        ]:
+            extra_fields.pop(fld, None)
         return self.create_user(username, email, password, **extra_fields)
 
 
@@ -76,6 +67,8 @@ class User(AbstractUser):
     user_permissions = models.ManyToManyField(Permission, related_name="custom_user_permissions")
     school = models.ForeignKey(School, on_delete=models.SET_NULL, null=True, blank=True)
 
+    objects = UserManager()
+
     def __str__(self):
         return self.username
     
@@ -84,10 +77,14 @@ class User(AbstractUser):
             validate_email_domain(self.mak_email, self.user_role)
 
     def save(self, *args, **kwargs):
-        if not self.is_superuser and not self.college:
-            raise ValidationError('Non superuse users need to be in a certain  college')
+        # Only enforce college requirement for registrars (non-superusers)
+        if not self.is_superuser:
+            if self.user_role == 'registrar' and not self.college:
+                raise ValidationError('Registrar users must have a college.')
+        # Ensure superusers never retain a college
         if self.is_superuser and self.college:
             self.college = None
+
         self.full_clean()
         super().save(*args, **kwargs)
 
@@ -95,8 +92,9 @@ class User(AbstractUser):
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student', unique=True, null=True)
     student_no = models.CharField(max_length=20, unique=True)
-    school = models.ForeignKey(School, on_delete=models.SET_NULL, default='', null=True)
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, default='', null=True)
+    # Changed default='' to default=None
+    school = models.ForeignKey(School, on_delete=models.SET_NULL, default=None, null=True, blank=True)
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, default=None, null=True, blank=True)
     # The college field is optional for students
     college = models.ForeignKey(College, on_delete=models.SET_NULL, blank=True, null=True)
 
@@ -104,16 +102,18 @@ class Student(models.Model):
         return self.user.username
 
     def save(self, *args, **kwargs):
-        if not self.is_superuser:
-            validate_email_domain(self.mak_email, self.user_role)
+        if not self.user.is_superuser:
+            validate_email_domain(self.user.mak_email, self.user.user_role)
         super().save(*args, **kwargs)
         
 
 
 class Lecturer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='lecturers', unique=True)
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, default='', null=True)
-    college = models.ForeignKey(College, on_delete=models.CASCADE, blank=False, default='')  # Non-optional for lecturers
+    # Changed default='' to default=None
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, default=None, null=True)
+    # Non-optional for lecturers; removed default=''
+    college = models.ForeignKey(College, on_delete=models.CASCADE)
     is_lecturer = models.BooleanField(default=True)  # This can help to distinguish lecturers
 
     def __str__(self):
@@ -122,8 +122,8 @@ class Lecturer(models.Model):
 
 class CollegeRegister(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='registrar', unique=True)
-    # The college field is mandatory for registrars
-    college = models.ForeignKey(College, on_delete=models.CASCADE, blank=False, default='1')
+    # Mandatory for registrars; removed default='1'
+    college = models.ForeignKey(College, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"{self.user.username} - {self.college}"

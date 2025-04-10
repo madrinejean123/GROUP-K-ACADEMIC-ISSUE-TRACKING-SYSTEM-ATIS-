@@ -88,7 +88,7 @@ const StudentDashboard = () => {
           <div className="welcome-section">
             <div className="welcome-text">
               <h2>
-                Welcome, {getFirstTwoNames(studentProfile.username)}!
+                Welcome, {getFirstTwoNames(studentProfile.full_name)}!
               </h2>
               <p>Log, track and manage your academic-related issues here.</p>
               <div className="student-details">
