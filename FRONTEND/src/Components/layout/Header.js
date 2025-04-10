@@ -19,7 +19,7 @@ const Header = ({ toggleSidebar, isMobile, sidebarOpen, userRole, profile }) => 
   useEffect(() => {
     const fetchColleges = async () => {
       try {
-        const response = await axios.get("http://127.0.0.1:8000/department/colleges/");
+        const response = await axios.get("http://aits-group-k-backend-7ede8a18ee73.herokuapp.com/department/colleges/");
         setColleges(response.data); // Store the list of colleges
       } catch (error) {
         console.error("Error fetching colleges:", error);
@@ -81,7 +81,7 @@ const Header = ({ toggleSidebar, isMobile, sidebarOpen, userRole, profile }) => 
       const { full_name, mak_email, user_role, student_no, ...updateData } = formData;
 
       await axios.put(
-        `http://127.0.0.1:8000/users/profile/${profileData.id}/`,
+        `http://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/profile/${profileData.id}/`,
         updateData,
         {
           headers: { Authorization: `Bearer ${token}` },
