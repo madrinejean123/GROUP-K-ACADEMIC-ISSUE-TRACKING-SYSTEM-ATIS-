@@ -19,7 +19,9 @@ const SignUp = () => {
     reset,
     formState: { errors },
     watch,
-  } = useForm();
+  } = useForm({
+    shouldUnregister: true,    // ← ADD THIS
+  });
   const [loading, setLoading] = useState(false);
   const [role, setRole] = useState("student"); // Default role as student
   const [colleges, setColleges] = useState([]); // State to store colleges
@@ -32,61 +34,51 @@ const SignUp = () => {
     const fetchColleges = async () => {
       try {
         const response = await axios.get("http://127.0.0.1:8000/department/colleges/");
-        setColleges(response.data); // Set the fetched colleges in state
+        setColleges(response.data);
       } catch (error) {
         console.error("Error fetching colleges:", error);
         toast.error("Failed to fetch colleges", {
           position: "top-center",
           duration: 3000,
-          style: {
-            backgroundColor: "red",
-            color: "white",
-          },
+          style: { backgroundColor: "red", color: "white" },
         });
       }
     };
-
     fetchColleges();
   }, []);
 
   // Handle form submission
   const onSubmit = async (data) => {
     setLoading(true);
-    console.log(data);
+    console.log("payload before request:", data);
 
     // Include the role in the data being sent to the backend
     const requestData = {
       ...data,
-      user_role: role, // Add role to the form data
+      user_role: role,
     };
 
     try {
-      const response = await axios.post("https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/register/", requestData);
-
+      const response = await axios.post(
+        "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/register/",
+        requestData
+      );
       console.log(response);
-      if (response) {
-        setLoading(false);
-        reset();
-        toast.success("Signed Up Successfully", {
-          position: "top-center",
-          duration: 3000,
-          style: {
-            backgroundColor: "green",
-            color: "white",
-          },
-        });
-        window.location.href = "/login"; // Redirect to login page
-      }
+      setLoading(false);
+      reset();
+      toast.success("Signed Up Successfully", {
+        position: "top-center",
+        duration: 3000,
+        style: { backgroundColor: "green", color: "white" },
+      });
+      window.location.href = "/login";
     } catch (error) {
-      console.error("Error during signup:", error);
+      console.error("Error during signup:", error.response?.data || error);
       setLoading(false);
       toast.error("Failed to Sign Up", {
         position: "top-center",
         duration: 3000,
-        style: {
-          backgroundColor: "red",
-          color: "white",
-        },
+        style: { backgroundColor: "red", color: "white" },
       });
     }
   };
@@ -106,7 +98,7 @@ const SignUp = () => {
       </div>
 
       <form className="signup-form" onSubmit={handleSubmit(onSubmit)}>
-        {/* Full Name Field */}
+        {/* Full Name */}
         <label htmlFor="full_name">Full Name:</label>
         <div className="input-group">
           <FaUser className="icon" />
@@ -122,7 +114,7 @@ const SignUp = () => {
         </div>
         {errors.full_name && <p style={{ color: "red" }}>{errors.full_name.message}</p>}
 
-        {/* User ID Field (Only for Students) */}
+        {/* Student No (only when role=student) */}
         {role === "student" && (
           <>
             <label htmlFor="student_no">Student No:</label>
@@ -142,7 +134,7 @@ const SignUp = () => {
           </>
         )}
 
-        {/* MAK Email Field (Compulsory for all) */}
+        {/* MAK Email */}
         <label htmlFor="mak_email">MAK Email:</label>
         <div className="input-group">
           <FaEnvelope className="icon" />
@@ -155,11 +147,14 @@ const SignUp = () => {
         </div>
         {errors.mak_email && <p style={{ color: "red" }}>{errors.mak_email.message}</p>}
 
-        {/* Conditional College Field for Registrar */}
+        {/* College (only for registrar) */}
         {role === "registrar" && (
           <div className="input-group">
             <label htmlFor="college">College:</label>
-            <select id="college" {...register("college", { required: "College selection is required" })}>
+            <select
+              id="college"
+              {...register("college", { required: "College selection is required" })}
+            >
               <option value="">Select College</option>
               {colleges.map((college) => (
                 <option key={college.id} value={college.id}>
@@ -171,7 +166,7 @@ const SignUp = () => {
           </div>
         )}
 
-        {/* Password Field */}
+        {/* Password */}
         <label htmlFor="password">Password:</label>
         <div className="input-group">
           <FaLock className="icon" />
@@ -191,7 +186,7 @@ const SignUp = () => {
         </div>
         {errors.password && <p style={{ color: "red" }}>{errors.password.message}</p>}
 
-        {/* Confirm Password Field */}
+        {/* Confirm Password */}
         <label htmlFor="confirm_password">Confirm Password:</label>
         <div className="input-group">
           <FaLock className="icon" />
@@ -205,9 +200,11 @@ const SignUp = () => {
             })}
           />
         </div>
-        {errors.confirm_password && <p style={{ color: "red" }}>{errors.confirm_password.message}</p>}
+        {errors.confirm_password && (
+          <p style={{ color: "red" }}>{errors.confirm_password.message}</p>
+        )}
 
-        {/* Submit Button */}
+        {/* Submit */}
         {loading ? (
           <button disabled className="signup-button-loading">
             Signing up...
