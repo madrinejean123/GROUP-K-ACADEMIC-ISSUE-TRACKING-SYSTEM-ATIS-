@@ -465,8 +465,8 @@ const Header = ({
                 onChange={handleInputChange}
               >
                 <option value="">Select Gender</option>
-                <option value="M">Male</option>
-                <option value="F">Female</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
               </select>
             </label>
             <label>
