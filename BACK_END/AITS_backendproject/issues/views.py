@@ -20,19 +20,17 @@ class CreateIssueView(generics.CreateAPIView):
         if not student:
             return Response({"error": "Only students can create issues."}, status=status.HTTP_403_FORBIDDEN)
 
-        # Get CollegeRegister based on the student's college
         college_register = CollegeRegister.objects.filter(college=student.college).first()
         if not college_register:
             return Response({"error": "No College Register found for your college."}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer.save(
             author=student,
+            register=college_register,
             college=student.college,
             school=student.school,
             department=student.department,
-            register=college_register  # This links the issue to the college's register
         )
-
 
 # 2️⃣ API for College Register to View & Assign Issues
 class CollegeRegisterAssignView(APIView):
