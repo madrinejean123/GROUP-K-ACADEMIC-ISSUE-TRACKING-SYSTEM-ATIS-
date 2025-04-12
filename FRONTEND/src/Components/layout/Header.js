@@ -277,7 +277,7 @@ const Header = ({
       );
 
       await axios.put(
-        `https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/profile/${profileData.id}/`,
+        `https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/profile/update_me/`,
         {
           ...payload,
           college: collegeObj ? collegeObj.id : null,
