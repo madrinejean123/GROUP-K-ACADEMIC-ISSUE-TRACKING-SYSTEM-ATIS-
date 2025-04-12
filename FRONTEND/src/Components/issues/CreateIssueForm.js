@@ -22,7 +22,7 @@ const CreateIssueForm = ({ onCancel }) => {
     const fetchUserData = async () => {
       try {
         const token = localStorage.getItem("access_token");
-        const response = await axios.get("http://127.0.0.1:8000/users/profile/", {
+        const response = await axios.get("http://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/profile/", {
           headers: { Authorization: `Bearer ${token}` },
         });
         const { username, student_no, college } = response.data;
@@ -71,7 +71,7 @@ const CreateIssueForm = ({ onCancel }) => {
       }
 
       const response = await axios.post(
-        'http://127.0.0.1:8000/issues/create/',
+        'http://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/create/',
         formData,
         {
           headers: {
