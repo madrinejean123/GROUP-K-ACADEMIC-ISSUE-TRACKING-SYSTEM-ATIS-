@@ -1,15 +1,21 @@
 // src/components/Header.js
 import { useState, useEffect } from "react";
-import { FaBell, FaBars, FaTimes, FaSignOutAlt, FaUser } from "react-icons/fa";
+import {
+  FaBell,
+  FaBars,
+  FaTimes,
+  FaSignOutAlt,
+  FaUser,
+} from "react-icons/fa";
 import { FiSettings } from "react-icons/fi";
 import { MdEmail } from "react-icons/md";
 import axios from "axios";
 import "../styles/header.css";
 import MakLogo from "../assets/logo.png";
 
-// ——————————
-// 1. Front‑end hierarchy mapping
-// ——————————
+// ——————————————————————————————————————————————
+// 1. Front‑end hierarchy: keys = college.code.toUpperCase()
+// ——————————————————————————————————————————————
 const hierarchy = {
   CAES: {
     "The School of Agricultural Sciences": [
@@ -35,7 +41,7 @@ const hierarchy = {
     ],
     "The East African School of Higher Education Studies and Development (EASHESD)": [],
   },
-  SEDAT: {
+  CEDAT: {
     "School of Engineering": [
       "The Department of Civil and Environmental Engineering",
       "The Department of Electrical and Computer Engineering",
@@ -122,7 +128,7 @@ const hierarchy = {
     ],
     "Makerere Institute of Social Research (MISR)": [],
   },
-  CoNAS: {
+  CONAS: {
     "The School of Physical Sciences": [
       "Department of Physics",
       "Department of Chemistry",
@@ -135,11 +141,7 @@ const hierarchy = {
       "Department of Zoology, Entomology and Fisheries Sciences",
     ],
   },
-  CoVAB: {
-    "The School of Bio-security, Biotechnical and Laboratory Sciences": [],
-    "The School of Veterinary and Animal Resources": [],
-  },
-  CoBAMS: {
+  COBAMS: {
     "The School of Economics": [
       "The Department of Economic Theory and Analysis",
       "The Department of Policy and Development Economics",
@@ -154,7 +156,11 @@ const hierarchy = {
       "Department of Statistics and Actuarial Science",
     ],
   },
-  CoCIS: {
+  COVAB: {
+    "The School of Bio-security, Biotechnical and Laboratory Sciences": [],
+    "The School of Veterinary and Animal Resources": [],
+  },
+  COCIS: {
     "School of Computing and Informatics Technology (CIT)": [
       "The Department of Computer Science",
       "The Department of Information Technology",
@@ -176,33 +182,25 @@ const Header = ({
   profile,
 }) => {
   // ——————————
-  // Backend & UI state
+  // State
   // ——————————
   const [profileData, setProfileData] = useState({});
   const [colleges, setColleges] = useState([]);
-
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [showProfileForm, setShowProfileForm] = useState(false);
-
-  // Form fields
   const [formData, setFormData] = useState({});
 
   // ——————————
-  // 2. Fetch colleges once
+  // 2. Fetch colleges from backend
   // ——————————
   useEffect(() => {
-    const fetchColleges = async () => {
-      try {
-        const { data } = await axios.get(
-          "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/department/colleges/"
-        );
-        setColleges(data);
-      } catch (err) {
-        console.error("Error fetching colleges:", err);
-      }
-    };
-    fetchColleges();
+    axios
+      .get(
+        "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/department/colleges/"
+      )
+      .then(({ data }) => setColleges(data))
+      .catch((err) => console.error("Error fetching colleges:", err));
   }, []);
 
   // ——————————
@@ -215,23 +213,32 @@ const Header = ({
         : profile
       : {};
     setProfileData(initial);
-    setFormData(initial);
+
+    // If your profile object has a college code field (e.g. initial.college_code),
+    // map that; otherwise leave empty and let user pick.
+    setFormData({
+      ...initial,
+      college: initial.college_code
+        ? initial.college_code.toUpperCase()
+        : "",
+      school: initial.school || "",
+      department: initial.department || "",
+    });
   }, [profile]);
 
   // ——————————
-  // Helpers
+  // Helpers for cascading options
   // ——————————
-  const getInitials = (name) => {
-    if (!name) return "U";
-    return name
-      .trim()
-      .split(" ")
-      .slice(0, 2)
-      .map((n) => n[0].toUpperCase())
-      .join("");
-  };
+  const getInitials = (name) =>
+    name
+      ? name
+          .trim()
+          .split(" ")
+          .slice(0, 2)
+          .map((w) => w[0].toUpperCase())
+          .join("")
+      : "U";
 
-  // Cascading options:
   const schoolOptions = formData.college
     ? Object.keys(hierarchy[formData.college] || {})
     : [];
@@ -243,6 +250,49 @@ const Header = ({
   // ——————————
   // Handlers
   // ——————————
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => {
+      const upd = { ...prev, [name]: value };
+      if (name === "college") {
+        upd.school = "";
+        upd.department = "";
+      } else if (name === "school") {
+        upd.department = "";
+      }
+      return upd;
+    });
+  };
+
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem("access_token");
+      const { full_name, mak_email, user_role, student_no, ...payload } =
+        formData;
+
+      // Map college code back to its numeric ID
+      const collegeObj = colleges.find(
+        (c) => c.code.toUpperCase() === payload.college
+      );
+
+      await axios.put(
+        `https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/profile/${profileData.id}/`,
+        {
+          ...payload,
+          college: collegeObj ? collegeObj.id : null,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      alert("Profile updated!");
+      setShowProfileForm(false);
+    } catch (err) {
+      console.error(err);
+      alert("Update failed.");
+    }
+  };
+
   const handleLogout = () => {
     alert("Logout clicked");
     setProfileOpen(false);
@@ -255,42 +305,12 @@ const Header = ({
     alert("Settings clicked");
     setProfileOpen(false);
   };
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => {
-      const updated = { ...prev, [name]: value };
-      // Reset dependents
-      if (name === "college") {
-        updated.school = "";
-        updated.department = "";
-      } else if (name === "school") {
-        updated.department = "";
-      }
-      return updated;
-    });
-  };
-  const handleFormSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const token = localStorage.getItem("access_token");
-      const { full_name, mak_email, user_role, student_no, ...payload } =
-        formData;
-      await axios.put(
-        `https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/profile/${profileData.id}/`,
-        payload,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      alert("Profile updated!");
-      setShowProfileForm(false);
-    } catch (err) {
-      console.error(err);
-      alert("Update failed.");
-    }
-  };
 
+  // ——————————
+  // Render
+  // ——————————
   return (
     <>
-      {/* —————————— Header Bar —————————— */}
       <header className="header">
         <div className="header-left">
           {isMobile && (
@@ -345,16 +365,10 @@ const Header = ({
               <div className="dropdown-menu profile-menu">
                 <div className="profile-options">
                   <h2 style={{ color: "black" }}>My Account</h2>
-                  <button
-                    className="profile-option"
-                    onClick={handleMyAccount}
-                  >
+                  <button className="profile-option" onClick={handleMyAccount}>
                     <FaUser /> My profile
                   </button>
-                  <button
-                    className="profile-option"
-                    onClick={handleSettings}
-                  >
+                  <button className="profile-option" onClick={handleSettings}>
                     <FiSettings /> Settings
                   </button>
                   <button
@@ -370,13 +384,12 @@ const Header = ({
         </div>
       </header>
 
-      {/* —————————— Profile Form —————————— */}
       {showProfileForm && (
         <div className="profile-form-container">
           <form className="profile-form" onSubmit={handleFormSubmit}>
             <h2>Edit Profile</h2>
 
-            {/* Read‑only fields */}
+            {/* Read‑only */}
             <div className="readonly-field">
               <strong>Full Name:</strong> {formData.full_name}
             </div>
@@ -390,7 +403,7 @@ const Header = ({
               <strong>Student No:</strong> {formData.student_no}
             </div>
 
-            {/* Editable fields */}
+            {/* College */}
             <label>
               College:
               <select
@@ -400,13 +413,14 @@ const Header = ({
               >
                 <option value="">Select a college</option>
                 {colleges.map((c) => (
-                  <option key={c.id} value={c.id}>
+                  <option key={c.id} value={c.code.toUpperCase()}>
                     {c.name}
                   </option>
                 ))}
               </select>
             </label>
 
+            {/* School */}
             <label>
               School:
               <select
@@ -424,6 +438,7 @@ const Header = ({
               </select>
             </label>
 
+            {/* Department */}
             <label>
               Department:
               <select
@@ -441,6 +456,7 @@ const Header = ({
               </select>
             </label>
 
+            {/* Other fields */}
             <label>
               Gender:
               <select
