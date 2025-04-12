@@ -8,34 +8,55 @@ from users.models import Lecturer,CollegeRegister
 class IssueCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Issues
-        fields = ['title', 'description', 'attachment']  # Student only provides these fields
-    def create(self, validated_data):  
-        student = self.context['request'].user.student  
-        if not student:  
-            raise serializers.ValidationError({"error": "Only students can create issues."})  
-
-        # Debug: Print student's college  
-        print(f"Student College: {student.college}")  
-
-        college_register = CollegeRegister.objects.filter(college=student.college).first()  
-        if not college_register:  
-            raise serializers.ValidationError({"error": "No registrar found for your college."})  
-
-        # Debug: Print registrar  
-        print(f"Registrar: {college_register}")  
-
-        # Force-save the issue  
-        issue = Issues.objects.create(  
-            author=student,  
-            register=college_register,  
-            college=student.college,  
-            school=student.school,  
-            department=student.department,  
-            **validated_data  
-        )  
-        print(f"Issue created (ID: {issue.id})")  # Debug  
-        return issue  
+        fields = ['title', 'description', 'attachment']
     
+    def create(self, validated_data):
+        request = self.context['request']
+        student = request.user.student
+        
+        if not student:
+            raise serializers.ValidationError(
+                {"error": "Only students can create issues"},
+                code='student_required'
+            )
+
+        # Debug prints - remove in production
+        print(f"Creating issue for student: {student}")
+        print(f"Student college: {student.college}")
+        
+        try:
+            college_register = CollegeRegister.objects.get(college=student.college)
+        except CollegeRegister.DoesNotExist:
+            raise serializers.ValidationError(
+                {"error": "No registrar available for your college"},
+                code='no_registrar'
+            )
+
+        # Build issue data dict
+        issue_data = {
+            'author': student,
+            'register': college_register,
+            'college': student.college,
+            'school': student.school,
+            'department': student.department,
+            **validated_data
+        }
+        
+        # Debug print issue data
+        print(f"Issue data: {issue_data}")
+        
+        # Create and save issue
+        try:
+            issue = Issues(**issue_data)
+            issue.full_clean()  # Validate model fields
+            issue.save()
+            return issue
+        except Exception as e:
+            print(f"Error creating issue: {str(e)}")
+            raise serializers.ValidationError(
+                {"error": f"Failed to create issue: {str(e)}"},
+                code='creation_failed'
+            )
 
 # 2️⃣ Serializer for College Register Assigning Lecturer
 class IssueAssignSerializer(serializers.ModelSerializer):
@@ -75,6 +96,8 @@ class IssueStatusUpdateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Invalid status update.")
 
         return value
+    from users.models import User
+
 
 # 4️⃣ Serializer for Listing & Viewing Issues
 class IssueDetailSerializer(serializers.ModelSerializer):
