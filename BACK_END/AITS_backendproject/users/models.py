@@ -119,7 +119,8 @@ class Student(models.Model):
         on_delete=models.SET_NULL,
         blank=True,
         null=True
-    )  # Now optional
+    )
+    
 
     def __str__(self):
         return self.user.username

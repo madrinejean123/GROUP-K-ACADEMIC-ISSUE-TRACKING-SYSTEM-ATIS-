@@ -196,11 +196,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 # User Update Serializer
 class UserUpdateSerializers(serializers.ModelSerializer):
-    GENDER_CHOICES = [
-        ("M", "Male"),
-        ("F", "Female"),
-    ]
-    gender = serializers.ChoiceField(choices=GENDER_CHOICES, required=False)
+    gender = serializers.ChoiceField(choices=User.GENDER_CHOICES, required=False)
 
     class Meta:
         model = User
@@ -211,21 +207,56 @@ class UserUpdateSerializers(serializers.ModelSerializer):
             'college': {'required': False},
         }
 
+    def validate_username(self, value):
+        """Skip validation if username is unchanged"""
+        if value == self.instance.username:
+            return value
+        if not re.match(r'^[\w.@+-]+$', value):
+            raise serializers.ValidationError(
+                "Username may only contain letters, numbers and @/./+/-/_ characters."
+            )
+        return value
+
+    def validate_gender(self, value):
+        """Normalize gender input to match model's lowercase choices"""
+        if not value:
+            return None
+            
+        # Case-insensitive conversion to model's format
+        conversion_map = {
+            'male': 'male',
+            'female': 'female',
+            'm': 'male',
+            'f': 'female',
+            'male': 'male',  # Explicit lowercase variants
+            'female': 'female',
+            'Male': 'male',
+            'Female': 'female'
+        }
+        
+        normalized = conversion_map.get(value.lower())
+        if not normalized:
+            raise serializers.ValidationError(
+                f"Invalid gender. Must be one of: {[v for k,v in User.GENDER_CHOICES]}"
+            )
+        return normalized
+
     def update(self, instance, validated_data):
-        # Handle updating the user data first
-        college = validated_data.get('college', None)
-        instance = super().update(instance, validated_data)
+        college = validated_data.get('college')  
+        if college and hasattr(instance, 'student'):  
+            instance.student.college = college  
+            instance.student.save()  
+        return super().update(instance, validated_data)
 
-        # If the college was updated, link to the CollegeRegister
-        if college:
-            college_register = CollegeRegister.objects.filter(college=college).first()
-            if college_register:
-                instance.linked_register = college_register
-                instance.save()
-
-        return instance
-
-
+class CustomPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
+    def to_internal_value(self, data):
+        try:
+            if isinstance(data, dict):
+                return super().to_internal_value(data.get('id'))
+            return super().to_internal_value(data)
+        except Exception as e:
+            raise serializers.ValidationError(str(e))
+     
 # Student, Lecturer, Registrar serializers
 class StudentSerializer(serializers.ModelSerializer):
     user = UserProfileSerializer()
