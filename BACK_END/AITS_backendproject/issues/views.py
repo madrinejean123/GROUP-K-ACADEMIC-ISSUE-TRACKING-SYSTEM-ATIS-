@@ -4,8 +4,10 @@ from rest_framework.views import APIView
 from .models import Issues
 from .serializers import IssueCreateSerializer, IssueAssignSerializer, IssueStatusUpdateSerializer, IssueDetailSerializer
 from users.models import CollegeRegister, Lecturer
+from utils.email_utils import send_notification_email
 
-# 1️⃣ API for Students to Create an Issue
+
+#  API for Students to Create an Issue
 class CreateIssueView(generics.CreateAPIView):
     """
     Students create and submit issues.
@@ -31,8 +33,14 @@ class CreateIssueView(generics.CreateAPIView):
             school=student.school,
             department=student.department,
         )
+        #  Send email to registrar
+        send_notification_email(
+            subject="New Student Issue Submitted",
+            message=f"{student.user.student_no} submitted a new issue.",
+            notification_email=college_register.user.email
+    )
 
-# 2️⃣ API for College Register to View & Assign Issues
+#  API for College Register to View & Assign Issues
 class CollegeRegisterAssignView(APIView):
     """
     College Register assigns an issue to a lecturer.
@@ -59,6 +67,12 @@ class CollegeRegisterAssignView(APIView):
 
         issue.assigned_lecturer = lecturer
         issue.save()
+        # send email notification to lecturer
+        send_notification_email(
+            subject='Issue Assigned to You',
+            message=f'A new issue has been assigned to you by {register.user.get_full_name()}.',
+            recipient_email=lecturer.user.notification_email
+        )
         return Response({"message": f"Issue assigned to {lecturer} successfully."}, status=status.HTTP_200_OK)
 
 # 3️⃣ API for Lecturers to Update Issue Status
