@@ -162,10 +162,10 @@ const hierarchy = {
   },
   COCIS: {
     "School of Computing and Informatics Technology (CIT)": [
-      "The Department of Computer Science",
-      "The Department of Information Technology",
-      "The Department of Information Systems",
-      "The Department of Networks",
+      " Department of Computer Science",
+      " Department of Information Technology",
+      " Department of Information Systems",
+      " Department of Networks",
     ],
     "East African School of Library and Information Science (EASLIS)": [
       "The Department of Library and Information Sciences",
