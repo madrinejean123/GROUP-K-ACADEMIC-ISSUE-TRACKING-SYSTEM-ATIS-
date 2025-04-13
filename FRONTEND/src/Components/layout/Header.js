@@ -162,8 +162,8 @@ const hierarchy = {
   },
   COCIS: {
     "School of Computing and Informatics Technology (CIT)": [
-      " Department of Computer Science",
-      " Department of Information Technology",
+      " Computer Science",
+      " Information Technology",
       " Department of Information Systems",
       " Department of Networks",
     ],
