@@ -12,3 +12,4 @@ def send_notification_email(subject, message, recipient_email):
         [recipient_email],
         fail_silently=False,
     )
+    

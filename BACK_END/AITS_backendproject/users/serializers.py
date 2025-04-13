@@ -158,7 +158,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'username', 'full_name', 'mak_email', 'user_role',
             'gender', 'profile_pic', 'office', 'college',
-            'student_no', 'school', 'department',
+            'student_no', 'school', 'department', 'notification_email',
         ]
 
     def get_student_no(self, obj):
@@ -272,4 +272,4 @@ class UserSerializer(serializers.ModelSerializer):
     college = CollegeSerializer(read_only=True)
     class Meta:
         model = User
-        fields = ['id', 'username', 'full_name', 'mak_email', 'user_role', 'gender', 'profile_pic', 'office', 'college']
+        fields = ['id', 'username', 'full_name', 'mak_email', 'user_role', 'gender', 'profile_pic', 'office', 'college', 'notification_email']
