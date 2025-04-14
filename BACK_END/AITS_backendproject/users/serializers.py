@@ -148,14 +148,66 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'username', 'full_name', 'mak_email', 'user_role',
-            'gender', 'profile_pic', 'office',
-            'student_no',
-            # read fields
-            'college', 'school', 'department',
-            # write fields
-            'college_id', 'school_id', 'department_id',
+            'gender', 'profile_pic', 'office', 'college',
+            'student_no', 'school', 'department', 'notification_email',
         ]
-        read_only_fields = ['id', 'mak_email', 'user_role', 'student_no']
+
+    def get_student_no(self, obj):
+        if obj.user_role == 'student' and hasattr(obj, 'student'):
+            return obj.student.student_no
+        return None
+
+    def get_department(self, obj):
+        if obj.user_role == 'student' and hasattr(obj, 'student'):
+            return obj.student.department.department_name if obj.student.department else None
+        if obj.user_role == 'lecturer' and hasattr(obj, 'lecturers'):
+            return obj.lecturers.department.department_name if obj.lecturers.department else None
+        return None
+
+    def validate(self, attrs):
+        if attrs.get('user_role') == 'registrar' and not attrs.get('college'):
+            raise serializers.ValidationError({'college': 'College is required for a registrar.'})
+        return attrs
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# User Update Serializer
+class UserUpdateSerializers(serializers.ModelSerializer):
+    gender = serializers.ChoiceField(choices=User.GENDER_CHOICES, required=False)
+    college = CustomPrimaryKeyRelatedField(queryset=College.objects.all(), required=False)
+    school = CustomPrimaryKeyRelatedField(queryset=School.objects.all(), required=False)
+    department = CustomPrimaryKeyRelatedField(queryset=Department.objects.all(), required=False)
+
+    class Meta:
+        model = User
+        fields = ['username', 'gender', 'profile_pic', 'office', 'college', 'school', 'department']
+        extra_kwargs = {
+            'profile_pic': {'required': False},
+            'username': {'required': False},
+            'college': {'required': False},
+            'school': {'required': False},
+            'department': {'required': False},
+        }
+
+    def validate_username(self, value):
+        if value == self.instance.username:
+            return value
+        if not re.match(r'^[\w.@+-]+$', value):
+            raise serializers.ValidationError(
+                "Username may only contain letters, numbers and @/./+/-/_ characters."
+            )
+        return value
+
+    def validate_gender(self, value):
+        if not value:
+            return None
+        conversion_map = {'m': 'male', 'male': 'male', 'f': 'female', 'female': 'female'}
+        normalized = conversion_map.get(value.lower())
+        if not normalized:
+            raise serializers.ValidationError(
+                f"Invalid gender. Must be one of: {[v for _, v in User.GENDER_CHOICES]}"
+            )
+        return normalized
 
     def update(self, instance, validated_data):
         student_data = validated_data.pop('student', {})
@@ -201,7 +253,4 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = [
-            'id', 'username', 'full_name', 'mak_email',
-            'user_role', 'gender', 'profile_pic', 'office', 'college'
-        ]
+        fields = ['id', 'username', 'full_name', 'mak_email', 'user_role', 'gender', 'profile_pic', 'office', 'college', 'notification_email']
