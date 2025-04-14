@@ -45,7 +45,7 @@ const StudentDashboard = () => {
           setStudentProfile(data); // Store profile directly if not an array
         }
 
-        // Set mock issues for now
+        // Set mock issues for now....replace this
         setIssues(mockIssues);
       } catch (error) {
         console.error("Error fetching student details:", error);
