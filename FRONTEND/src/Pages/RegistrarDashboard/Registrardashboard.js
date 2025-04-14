@@ -12,11 +12,32 @@ const RegistrarDashboard = () => {
   const [issues, setIssues] = useState([]);
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [showIssueDetailModal, setShowIssueDetailModal] = useState(false);
+  // API to fetch lecturers here
   const [lecturers, setLecturers] = useState([
-    { id: 1, name: "Dr. Jane Doe", department: "Computer Science", assignedIssues: 3 },
-    { id: 2, name: "Prof. Michael Mutebi", department: "Mathematics", assignedIssues: 5 },
-    { id: 3, name: "Dr. Sarah Williams", department: "Engineering", assignedIssues: 2 },
-    { id: 4, name: "Prof. Robert Kato", department: "Physics", assignedIssues: 0 },
+    {
+      id: 1,
+      name: "Dr. Jane Doe",
+      department: "Computer Science",
+      assignedIssues: 3,
+    },
+    {
+      id: 2,
+      name: "Prof. Michael Mutebi",
+      department: "Mathematics",
+      assignedIssues: 5,
+    },
+    {
+      id: 3,
+      name: "Dr. Sarah Williams",
+      department: "Engineering",
+      assignedIssues: 2,
+    },
+    {
+      id: 4,
+      name: "Prof. Robert Kato",
+      department: "Physics",
+      assignedIssues: 0,
+    },
   ]);
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [selectedLecturer, setSelectedLecturer] = useState(null);
@@ -68,7 +89,8 @@ const RegistrarDashboard = () => {
       }
     };
     window.addEventListener("sidebarNavigation", handleSidebarNav);
-    return () => window.removeEventListener("sidebarNavigation", handleSidebarNav);
+    return () =>
+      window.removeEventListener("sidebarNavigation", handleSidebarNav);
   }, []);
 
   const handleViewIssue = (issue) => {
@@ -117,7 +139,11 @@ const RegistrarDashboard = () => {
     );
     setIssues(updatedIssues);
     setLecturers(updatedLecturers);
-    setSelectedIssue({ ...selectedIssue, status: "In Progress", assignee: lecturer.name });
+    setSelectedIssue({
+      ...selectedIssue,
+      status: "In Progress",
+      assignee: lecturer.name,
+    });
     setShowAssignModal(false);
     setSelectedLecturer(null);
   };
@@ -169,7 +195,9 @@ const RegistrarDashboard = () => {
                     <p className="lecturer-department">{lecturer.department}</p>
                     <div className="lecturer-stats-full">
                       <div className="stat-item">
-                        <span className="stat-value">{lecturer.assignedIssues}</span>
+                        <span className="stat-value">
+                          {lecturer.assignedIssues}
+                        </span>
                         <span className="stat-label">Assigned Issues</span>
                       </div>
                       <div className="stat-item">
@@ -213,7 +241,9 @@ const RegistrarDashboard = () => {
                     : "Registrar"}
                   !
                 </h2>
-                <p>Manage and assign student issues to appropriate lecturers.</p>
+                <p>
+                  Manage and assign student issues to appropriate lecturers.
+                </p>
               </div>
               <div className="stats-cards">
                 <div className="stat-card">
@@ -273,9 +303,10 @@ const RegistrarDashboard = () => {
   };
 
   return (
-    <DashboardLayout userRole="Registrar" profile={registrarProfile}> {/* 📌 PASS profile */}
+    <DashboardLayout userRole="Registrar" profile={registrarProfile}>
+      {" "}
+      {/* 📌 PASS profile */}
       <div className="registrar-dashboard">{renderContent()}</div>
-
       {/* Issue Detail Modal */}
       {showIssueDetailModal && selectedIssue && (
         <IssueDetail
@@ -286,7 +317,6 @@ const RegistrarDashboard = () => {
           userRole="Registrar"
         />
       )}
-
       {/* Assign Issue Modal */}
       {showAssignModal && (
         <div className="modal-overlay">
