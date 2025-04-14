@@ -1,3 +1,4 @@
+// src/components/CreateIssueForm.jsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
@@ -12,9 +13,11 @@ const CreateIssueForm = ({ onCancel }) => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [userData, setUserData] = useState({
-    name: "",
+    fullName: "",
     studentNo: "",
     college: "",
+    school: "",
+    department: "",
   });
 
   // Fetch user data from the backend profile
@@ -22,16 +25,30 @@ const CreateIssueForm = ({ onCancel }) => {
     const fetchUserData = async () => {
       try {
         const token = localStorage.getItem("access_token");
-        const response = await axios.get("http://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/profile/", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const { username, student_no, college } = response.data;
+        const response = await axios.get(
+          "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/profile/",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        // Destructure the new fields
+        const {
+          full_name,
+          student_no,
+          college,
+          school,
+          department,
+        } = response.data;
+
         setUserData({
-          name: username,
+          fullName: full_name,
           studentNo: student_no,
-          college: college?.name || "N/A",
+          college,
+          school,
+          department,
         });
       } catch (error) {
+        console.error("Fetch profile error:", error);
         toast.error("Failed to fetch user profile.");
       }
     };
@@ -48,7 +65,6 @@ const CreateIssueForm = ({ onCancel }) => {
   // Handle file attachment change
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    // Optionally validate file type here (image or PDF)
     if (file && !file.type.startsWith("image/") && file.type !== "application/pdf") {
       toast.error("Please upload a valid image or PDF file.");
       return;
@@ -71,7 +87,7 @@ const CreateIssueForm = ({ onCancel }) => {
       }
 
       const response = await axios.post(
-        'http://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/create/',
+        "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/create/",
         formData,
         {
           headers: {
@@ -103,17 +119,14 @@ const CreateIssueForm = ({ onCancel }) => {
               X
             </button>
           </div>
+
           {/* Display User Profile Info */}
           <div className="user-info">
-            <p>
-              <strong>Name:</strong> {userData.name || "Loading..."}
-            </p>
-            <p>
-              <strong>Student No:</strong> {userData.studentNo || "Loading..."}
-            </p>
-            <p>
-              <strong>College:</strong> {userData.college || "Loading..."}
-            </p>
+            <p><strong>Name:</strong> {userData.fullName || "Loading..."}</p>
+            <p><strong>Student No:</strong> {userData.studentNo || "Loading..."}</p>
+            <p><strong>College:</strong> {userData.college || "Loading..."}</p>
+            <p><strong>School:</strong> {userData.school || "Loading..."}</p>
+            <p><strong>Department:</strong> {userData.department || "Loading..."}</p>
           </div>
 
           <form onSubmit={handleSubmit} noValidate>

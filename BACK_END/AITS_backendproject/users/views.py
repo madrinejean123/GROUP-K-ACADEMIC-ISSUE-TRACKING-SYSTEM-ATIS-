@@ -1,10 +1,9 @@
-from rest_framework import viewsets, mixins, permissions, status
+from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate, get_user_model
-from rest_framework.permissions import AllowAny
-
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from .models import Student, Lecturer, CollegeRegister
 from .serializers import (
     UserRegistrationSerializer,
@@ -29,11 +28,17 @@ class UserRegistrationViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
+
+        # Build tokens dict
         refresh = RefreshToken.for_user(user)
-        return Response({
-            'user': UserProfileSerializer(user).data,
+        tokens = {
             'refresh': str(refresh),
             'access': str(refresh.access_token),
+        }
+
+        return Response({
+            'user': UserProfileSerializer(user).data,
+            'tokens': tokens,
         }, status=status.HTTP_201_CREATED)
 
 
@@ -49,32 +54,47 @@ class UserLoginViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data['mak_email'].lower()
         password = serializer.validated_data['password']
+
         user = authenticate(username=email, password=password)
         if not user:
-            return Response({'detail': 'Invalid credentials'},
-                            status=status.HTTP_401_UNAUTHORIZED)
+            return Response(
+                {'detail': 'Invalid credentials'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        # Build tokens dict
         refresh = RefreshToken.for_user(user)
-        return Response({
-            'user': UserProfileSerializer(user).data,
+        tokens = {
             'refresh': str(refresh),
             'access': str(refresh.access_token),
+        }
+
+        return Response({
+            'user': UserProfileSerializer(user).data,
+            'tokens': tokens,
         }, status=status.HTTP_200_OK)
 
 
 class UserProfileViewSet(viewsets.ViewSet):
     """
-    GET  /users/profile/profile/    → profile()
-    PUT  /users/profile/update_me/  → update_me()
-    PATCH /users/profile/update_me/
+    GET    /users/profile/          → list()
+    PUT    /users/profile/update_me/ → update_me()
+    PATCH  /users/profile/update_me/
     """
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
-    @action(detail=False, methods=['get'])
-    def profile(self, request):
+    def list(self, request):
+        """
+        Retrieve the profile of the authenticated user.
+        (This is now wired to GET /users/profile/)
+        """
         return Response(UserProfileSerializer(request.user).data)
 
     @action(detail=False, methods=['put', 'patch'], url_path='update_me')
     def update_me(self, request):
+        """
+        Update the authenticated user's profile.
+        """
         partial = request.method.lower() == 'patch'
         serializer = UserProfileSerializer(
             request.user, data=request.data, partial=partial
