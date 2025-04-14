@@ -5,7 +5,7 @@ import re
 
 from .models import User, Student, Lecturer, CollegeRegister
 from department.models import College, School, Department
-from department.serializers import CollegeSerializer
+from department.serializers import CollegeSerializer, SchoolSerializer, DepartmentSerializer
 
 
 class CustomPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
@@ -19,13 +19,13 @@ class CustomPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
     }
 
     def to_internal_value(self, data):
+        # allow {"id": 3} or "Engineering" lookups
         if isinstance(data, dict):
             data = data.get('id')
         if isinstance(data, str) and not data.isdigit():
             qs = self.get_queryset()
             model = qs.model
-            # try known name fields
-            for field in ('school_name', 'department_name', 'name'):
+            for field in ('name', 'school_name', 'department_name'):
                 if hasattr(model, field):
                     try:
                         return qs.get(**{field: data})
@@ -48,7 +48,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'id', 'full_name', 'mak_email', 'password', 'confirm_password',
+            'id', 'full_name', 'mak_email',
+            'password', 'confirm_password',
             'user_role', 'student_no', 'college',
         ]
 
@@ -68,6 +69,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         student_no = validated_data.pop('student_no', None)
         college = validated_data.pop('college', None)
         role = validated_data.get('user_role')
+
         user = User.objects.create(
             username=validated_data['mak_email'],
             full_name=validated_data.get('full_name', ''),
@@ -76,6 +78,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             user_role=role,
             college=college if role == 'registrar' else None
         )
+
         if role == 'student':
             Student.objects.create(user=user, student_no=student_no)
         elif role == 'lecturer':
@@ -109,24 +112,34 @@ class UserLoginSerializer(serializers.Serializer):
 
 class UserProfileSerializer(serializers.ModelSerializer):
     """
-    Unified serializer for profile GET and update_me PUT/PATCH.
+    profile GET and update_me PUT/PATCH
     """
     student_no = serializers.CharField(source='student.student_no', read_only=True)
-    college = CustomPrimaryKeyRelatedField(
+
+    # —— READ: nested serializers for full detail —— #
+    college = CollegeSerializer(source='student.college', read_only=True)
+    school = SchoolSerializer(source='student.school', read_only=True)
+    department = DepartmentSerializer(source='student.department', read_only=True)
+
+    # —— WRITE: still accept PK/dict/name via CustomPK —— #
+    college_id = CustomPrimaryKeyRelatedField(
         source='student.college',
         queryset=College.objects.all(),
+        write_only=True,
         required=False,
         allow_null=True
     )
-    school = CustomPrimaryKeyRelatedField(
+    school_id = CustomPrimaryKeyRelatedField(
         source='student.school',
         queryset=School.objects.all(),
+        write_only=True,
         required=False,
         allow_null=True
     )
-    department = CustomPrimaryKeyRelatedField(
+    department_id = CustomPrimaryKeyRelatedField(
         source='student.department',
         queryset=Department.objects.all(),
+        write_only=True,
         required=False,
         allow_null=True
     )
@@ -136,7 +149,11 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'username', 'full_name', 'mak_email', 'user_role',
             'gender', 'profile_pic', 'office',
-            'student_no', 'college', 'school', 'department'
+            'student_no',
+            # read fields
+            'college', 'school', 'department',
+            # write fields
+            'college_id', 'school_id', 'department_id',
         ]
         read_only_fields = ['id', 'mak_email', 'user_role', 'student_no']
 
@@ -184,4 +201,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'full_name', 'mak_email', 'user_role', 'gender', 'profile_pic', 'office', 'college']
+        fields = [
+            'id', 'username', 'full_name', 'mak_email',
+            'user_role', 'gender', 'profile_pic', 'office', 'college'
+        ]
