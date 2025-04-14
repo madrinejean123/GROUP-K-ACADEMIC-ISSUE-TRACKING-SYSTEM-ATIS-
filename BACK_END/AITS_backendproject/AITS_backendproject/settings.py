@@ -175,7 +175,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 django_heroku.settings(locals())
 
-LOGIN_REDIRECT_URL = '/'
+
 
 # ----------------------------------------------------------------------------
 # Email (Gmail SMTP Configuration)
@@ -186,5 +186,5 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'aitswebsite576@gmail.com')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'yzhgibfihrddajcz')  # 👈 Use App Password from Gmail
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'yzhgibfihrddajcz')  
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

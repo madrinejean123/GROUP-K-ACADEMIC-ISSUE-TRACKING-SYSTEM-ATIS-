@@ -4,7 +4,10 @@ from rest_framework.views import APIView
 from .models import Issues
 from .serializers import IssueCreateSerializer, IssueAssignSerializer, IssueStatusUpdateSerializer, IssueDetailSerializer
 from users.models import CollegeRegister, Lecturer
-from utils.email_utils import send_notification_email
+from .utils import send_notification_email
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 #  API for Students to Create an Issue
@@ -37,7 +40,7 @@ class CreateIssueView(generics.CreateAPIView):
         send_notification_email(
             subject="New Student Issue Submitted",
             message=f"{student.user.student_no} submitted a new issue.",
-            notification_email=college_register.user.email
+            recipient_email=college_register.user.notification_email
     )
 
 #  API for College Register to View & Assign Issues
@@ -68,14 +71,18 @@ class CollegeRegisterAssignView(APIView):
         issue.assigned_lecturer = lecturer
         issue.save()
         # send email notification to lecturer
-        send_notification_email(
+        success = send_notification_email(
             subject='Issue Assigned to You',
             message=f'A new issue has been assigned to you by {register.user.get_full_name()}.',
             recipient_email=lecturer.user.notification_email
         )
-        return Response({"message": f"Issue assigned to {lecturer} successfully."}, status=status.HTTP_200_OK)
+        if success:
+            logger.info(f'Issue successfully assigned to {lecturer.user.get_full_name()} ({lecturer.user.notification_email})')
+        else:
+            logger.warning(f'Failed to notify {lecturer.user.get_full_name()} about the issue')
+            return Response({"message": f"Issue assigned to {lecturer.user.get_full_name()} successfully."}, status=status.HTTP_200_OK)
 
-# 3️⃣ API for Lecturers to Update Issue Status
+#  API for Lecturers to Update Issue Status
 class LecturerUpdateIssueStatusView(APIView):
     """
     Only lecturers can update the status of an issue.
@@ -105,7 +112,7 @@ class LecturerUpdateIssueStatusView(APIView):
 
         return Response({"message": f"Issue status updated to {new_status}."}, status=status.HTTP_200_OK)
 
-# 4️⃣ API to List Issues (For All Users)
+#  API to List Issues (For All Users)
 class ListIssuesView(generics.ListAPIView):
     """
     List all issues. Different users see different issues:
