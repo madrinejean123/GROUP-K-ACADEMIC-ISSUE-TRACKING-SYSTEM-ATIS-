@@ -39,7 +39,7 @@ class CreateIssueView(generics.CreateAPIView):
         #  Send email to registrar
         send_notification_email(
             subject="New Student Issue Submitted",
-            message=f"{student.user.student_no} submitted a new issue.",
+            message=f"{student.user.student} submitted a new issue.",
             recipient_email=college_register.user.notification_email
     )
 
