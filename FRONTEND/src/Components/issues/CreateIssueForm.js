@@ -31,7 +31,10 @@ const CreateIssueForm = ({ onCancel }) => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        // Destructure the new fields
+        // API now returns nested objects:
+        //   response.data.college = { id, name, code }
+        //   response.data.school = { id, school_name, college }
+        //   response.data.department = { id, department_name, school }
         const {
           full_name,
           student_no,
@@ -43,9 +46,9 @@ const CreateIssueForm = ({ onCancel }) => {
         setUserData({
           fullName: full_name,
           studentNo: student_no,
-          college,
-          school,
-          department,
+          college: college?.name || "N/A",
+          school: school?.school_name || "N/A",
+          department: department?.department_name || "N/A",
         });
       } catch (error) {
         console.error("Fetch profile error:", error);
