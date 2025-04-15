@@ -273,7 +273,7 @@ const RegistrarDashboard = () => {
   };
 
   return (
-    <DashboardLayout userRole="Registrar" profile={registrarProfile}> {/* 📌 PASS profile */}
+    <DashboardLayout userRole="Registrar" profile={registrarProfile}>
       <div className="registrar-dashboard">{renderContent()}</div>
 
       {/* Issue Detail Modal */}
@@ -293,6 +293,39 @@ const RegistrarDashboard = () => {
           {/* ... assign modal unchanged ... */}
         </div>
       )}
+
+      {/* 📌 Temporary Section to Test Fetched Issues from API */}
+      <div style={{ marginTop: "2rem", padding: "1rem", border: "1px solid #ccc" }}>
+        <h3>🔍 API Issue Fetch Tester</h3>
+        <button
+          onClick={async () => {
+            try {
+              const token = localStorage.getItem("access_token");
+              const response = await axios.get(
+                "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/list/",
+                { headers: { Authorization: `Bearer ${token}` } }
+              );
+              console.log("✅ Fetched API issues:", response.data);
+              alert(`Fetched ${response.data.length} issues. Check console.`);
+            } catch (err) {
+              console.error("❌ Error fetching issues from API:", err);
+              alert("Error fetching issues! See console.");
+            }
+          }}
+          style={{
+            padding: "0.5rem 1rem",
+            marginBottom: "1rem",
+            background: "#007bff",
+            color: "white",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+          }}
+        >
+          Fetch Issues from API
+        </button>
+        <p>This section is only for API testing. Open the browser console to inspect results.</p>
+      </div>
     </DashboardLayout>
   );
 };
