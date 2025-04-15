@@ -48,7 +48,7 @@ const CreateIssueForm = ({ onCancel }) => {
           studentNo: student_no,
           college: college?.name || "N/A",
           school: school?.school_name || "N/A",
-          department: department?.department_name || "N/A",
+          department: department?.name || "N/A",
         });
       } catch (error) {
         console.error("Fetch profile error:", error);
