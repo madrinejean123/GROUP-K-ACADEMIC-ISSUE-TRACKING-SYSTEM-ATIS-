@@ -108,67 +108,87 @@ class UserLoginSerializer(serializers.Serializer):
 
 class UserProfileSerializer(serializers.ModelSerializer):
     """
-    GET /users/profile/  → nested college/school/department
-    PUT/PATCH /users/profile/update_me/  → accepts college_id/school_id/department_id
+    GET /users/profile/        → nested college/school/department
+    PUT/PATCH /users/profile/update_me/  → accepts college, school, department as IDs or names
     """
     student_no = serializers.CharField(source='student.student_no', read_only=True)
 
-    # — READ —
-    college    = serializers.SerializerMethodField()
-    school     = SchoolSerializer(source='student.school',    read_only=True)
-    department = DepartmentSerializer(source='student.department', read_only=True)
-
-    # — WRITE for students (maps into student.*) —
-    college_id    = CustomPrimaryKeyRelatedField(
-                       source='student.college',
-                       queryset=College.objects.all(),
-                       write_only=True, required=False, allow_null=True
-                    )
-    school_id     = CustomPrimaryKeyRelatedField(
-                       source='student.school',
-                       queryset=School.objects.all(),
-                       write_only=True, required=False, allow_null=True
-                    )
-    department_id = CustomPrimaryKeyRelatedField(
-                       source='student.department',
-                       queryset=Department.objects.all(),
-                       write_only=True, required=False, allow_null=True
-                    )
+    # ─── Single fields that do BOTH read (nested) and write (PK/name) ───
+    college    = CustomPrimaryKeyRelatedField(
+                     queryset=College.objects.all(),
+                     required=False, allow_null=True
+                 )
+    school     = CustomPrimaryKeyRelatedField(
+                     queryset=School.objects.all(),
+                     required=False, allow_null=True
+                 )
+    department = CustomPrimaryKeyRelatedField(
+                     queryset=Department.objects.all(),
+                     required=False, allow_null=True
+                 )
 
     class Meta:
         model  = User
         fields = [
             'id', 'username', 'full_name', 'mak_email', 'user_role',
             'gender', 'profile_pic', 'office',
-            'college',    'college_id',
+            'college',       # read/write via the same field
             'student_no',
-            'school',     'school_id',
-            'department', 'department_id',
+            'school',        # read/write via the same field
+            'department',    # read/write via the same field
             'notification_email',
         ]
 
-    def get_college(self, obj):
-        # student → read from student.college
-        if obj.user_role == 'student' and hasattr(obj, 'student'):
-            return CollegeSerializer(obj.student.college).data if obj.student.college else None
-        # registrar or lecturer → read from user.college
-        return CollegeSerializer(obj.college).data if obj.college else None
+    def to_representation(self, instance):
+        """
+        On GET: return nested serializers instead of raw PK.
+        """
+        data = super().to_representation(instance)
+
+        # choose where to read from
+        if instance.user_role == 'student' and hasattr(instance, 'student'):
+            col = instance.student.college
+            sch = instance.student.school
+            dep = instance.student.department
+        else:
+            col = instance.college
+            sch = None
+            dep = None
+
+        data['college']    = CollegeSerializer(col).data if col else None
+        data['school']     = SchoolSerializer(sch).data if sch else None
+        data['department'] = DepartmentSerializer(dep).data if dep else None
+        return data
 
     def update(self, instance, validated_data):
-        # 1) pull out student.* updates
-        student_data = validated_data.pop('student', {})
+        """
+        On PATCH/PUT: assign incoming college/school/department to Student (if student),
+        or to User.college (if registrar/lecturer).
+        """
+        col = validated_data.pop('college', serializers.empty)
+        sch = validated_data.pop('school', serializers.empty)
+        dep = validated_data.pop('department', serializers.empty)
 
-        # 2) update any direct User fields (none here for students)
+        # 1) Update any other User fields
         for attr, val in validated_data.items():
             setattr(instance, attr, val)
         instance.save()
 
-        # 3) apply to Student
-        if student_data:
+        # 2) Assign to student or user
+        if instance.user_role == 'student':
             student, _ = Student.objects.get_or_create(user=instance)
-            for attr, val in student_data.items():
-                setattr(student, attr, val)
+            if col is not serializers.empty:
+                student.college = col
+            if sch is not serializers.empty:
+                student.school = sch
+            if dep is not serializers.empty:
+                student.department = dep
             student.save()
+        else:
+            # registrar or lecturer → update User.college
+            if col is not serializers.empty:
+                instance.college = col
+                instance.save()
 
         return instance
 
