@@ -20,7 +20,6 @@ const IssueTable = ({ issues, onViewIssue, userRole }) => {
   // Add a function to get category badge class
   const getCategoryClass = (category) => {
     if (!category) return "";
-
     switch (category.toLowerCase()) {
       case "missing marks":
         return "category-missing-marks";
@@ -39,8 +38,7 @@ const IssueTable = ({ issues, onViewIssue, userRole }) => {
       { id: "id", label: "ID" },
       { id: "title", label: "Title" },
       { id: "description", label: "Description" },
-      { id: "date", label: "Date" },
-      { id: "category", label: "Category" },
+      { id: "date", label: "Submitted At" },
       { id: "status", label: "Status" },
       { id: "actions", label: "Actions" },
     ];
@@ -83,15 +81,14 @@ const IssueTable = ({ issues, onViewIssue, userRole }) => {
                 <td>#{issue.id}</td>
                 <td>{issue.title}</td>
                 <td className="description-cell">{issue.description}</td>
-                <td>{issue.date}</td>
                 <td>
-                  <span
-                    className={`category-badge ${getCategoryClass(
-                      issue.category
-                    )}`}
-                  >
-                    {issue.category || "Not specified"}
-                  </span>
+                  {new Date(issue.created_at).toLocaleString(undefined, {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
                 </td>
                 <td>
                   <span
@@ -100,12 +97,23 @@ const IssueTable = ({ issues, onViewIssue, userRole }) => {
                     {issue.status}
                   </span>
                 </td>
+
                 {userRole === "Registrar" && (
-                  <td>{issue.assignee || "Unassigned"}</td>
+                  <td>
+                    {issue.assigned_lecturer?.user?.full_name ||
+                      issue.register?.user?.full_name ||
+                      "Unassigned"}
+                  </td>
                 )}
+
                 {userRole === "Lecturer" && (
-                  <td>{issue.student || "Unknown"}</td>
+                  <td>
+                    {issue.author?.user?.full_name ||
+                      issue.author?.user?.username ||
+                      "Unknown"}
+                  </td>
                 )}
+
                 <td>
                   <button
                     className="action-button"
