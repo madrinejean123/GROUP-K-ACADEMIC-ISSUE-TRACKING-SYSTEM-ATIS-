@@ -53,7 +53,7 @@ const RegistrarDashboard = () => {
         if (!token) throw new Error("No access token");
 
         const response = await axios.get(
-          "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/api/issues/list/",
+          "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/list/",
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setIssues(response.data);
@@ -114,7 +114,7 @@ const RegistrarDashboard = () => {
     try {
       // Call backend assign endpoint
       await axios.post(
-        `https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/api/issues/assign/${selectedIssue.id}/`,
+        `https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/assign/${selectedIssue.id}/`,
         { lecturer_id: selectedLecturer },
         { headers: { Authorization: `Bearer ${token}` } }
       );
