@@ -1,23 +1,48 @@
-import { useState } from "react";
+// src/components/IssueList.jsx
+import { useState, useEffect } from "react";
+import axios from "axios";            // ← new
 import { FaSearch, FaPlus } from "react-icons/fa";
 import IssueTable from "./IssueTable";
 import "../styles/issue-list.css";
 
 const IssueList = ({
-  issues,
   title = "Issues",
   showCreateButton = true,
   onCreateIssue,
   onViewIssue,
   userRole,
 }) => {
-  const [searchTerm, setSearchTerm] = useState("");
+  // ─── FETCHED ISSUES STATE ──────────────────────────────
+  const [issues, setIssues]       = useState([]);
+  const [loading, setLoading]     = useState(true);
+  const [error, setError]         = useState(null);
+
+  useEffect(() => {
+    axios
+      .get("https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/list/")
+      .then((res) => {
+        setIssues(res.data);
+      })
+      .catch((err) => {
+        console.error("Error fetching issues:", err);
+        setError(err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+
+  // ─── LOCAL FILTER STATE ────────────────────────────────
+  const [searchTerm, setSearchTerm]     = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
 
-  // Filter and sort issues
+  // ─── RENDER LOADING / ERROR ───────────────────────────
+  if (loading) return <div>Loading issues…</div>;
+  if (error)   return <div>Error loading issues: {error.message}</div>;
+
+  // ─── FILTER & SORT ────────────────────────────────────
   const getFilteredAndSortedIssues = () => {
-    // First filter by search term
     let filtered = issues.filter(
       (issue) =>
         issue.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -27,28 +52,27 @@ const IssueList = ({
           issue.category.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
-    // Then filter by status if not "all"
     if (statusFilter !== "all") {
       filtered = filtered.filter(
-        (issue) => issue.status.toLowerCase() === statusFilter.toLowerCase()
+        (issue) => issue.status.toLowerCase() === statusFilter
       );
     }
 
-    // Then filter by category if not "all"
     if (categoryFilter !== "all") {
-      filtered = filtered.filter((issue) => issue.category === categoryFilter);
+      filtered = filtered.filter(
+        (issue) => issue.category === categoryFilter
+      );
     }
 
-    // Sort by newest first (default)
+    // sort by created_at descending
     return filtered.sort((a, b) => {
-      const dateA = new Date(a.date);
-      const dateB = new Date(b.date);
-      return dateB - dateA;
+      return new Date(b.created_at) - new Date(a.created_at);
     });
   };
 
   const filteredIssues = getFilteredAndSortedIssues();
 
+  // ─── JSX ───────────────────────────────────────────────
   return (
     <div className="issues-section">
       <div className="issues-header">
@@ -71,6 +95,7 @@ const IssueList = ({
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
+
         <div className="filter-options">
           <select
             className="filter-select"
@@ -83,6 +108,7 @@ const IssueList = ({
             <option value="resolved">Resolved</option>
             <option value="closed">Closed</option>
           </select>
+
           <select
             className="filter-select"
             value={categoryFilter}

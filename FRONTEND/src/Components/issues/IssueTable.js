@@ -1,38 +1,28 @@
+// src/components/IssueTable.jsx
+import { useState, useEffect } from "react";
+import axios from "axios";
 import "../styles/issue-table.css";
 
-const IssueTable = ({ issues, onViewIssue, userRole }) => {
-  // Get status badge class
-  const getStatusClass = (status) => {
-    switch (status.toLowerCase()) {
-      case "open":
-        return "status-open";
-      case "in progress":
-        return "status-progress";
-      case "resolved":
-        return "status-resolved";
-      case "closed":
-        return "status-closed";
-      default:
-        return "status-default";
-    }
-  };
+const IssueTable = ({ onViewIssue, userRole }) => {
+  const [issues, setIssues]       = useState([]);
+  const [loading, setLoading]     = useState(true);
+  const [error, setError]         = useState(null);
 
-  // Add a function to get category badge class
-  const getCategoryClass = (category) => {
-    if (!category) return "";
-    switch (category.toLowerCase()) {
-      case "missing marks":
-        return "category-missing-marks";
-      case "appeals":
-        return "category-appeals";
-      case "correction":
-        return "category-correction";
-      default:
-        return "";
-    }
-  };
+  useEffect(() => {
+    axios
+      .get("https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/list/")
+      .then((res) => setIssues(res.data))
+      .catch((err) => setError(err))
+      .finally(() => setLoading(false));
+  }, []);
 
-  // Customize columns based on user role
+  if (loading) return <div>Loading issues…</div>;
+  if (error)   return <div>Error loading issues: {error.message}</div>;
+
+  // derive unique statuses
+  const statuses = Array.from(new Set(issues.map((i) => i.status)));
+
+  // define table columns based on userRole
   const getTableColumns = () => {
     const commonColumns = [
       { id: "id", label: "ID" },
@@ -47,7 +37,7 @@ const IssueTable = ({ issues, onViewIssue, userRole }) => {
       return [
         ...commonColumns.slice(0, -1),
         { id: "assignee", label: "Assignee" },
-        { id: "actions", label: "Actions" },
+        commonColumns[commonColumns.length - 1],
       ];
     }
 
@@ -55,7 +45,7 @@ const IssueTable = ({ issues, onViewIssue, userRole }) => {
       return [
         ...commonColumns.slice(0, -1),
         { id: "student", label: "Student" },
-        { id: "actions", label: "Actions" },
+        commonColumns[commonColumns.length - 1],
       ];
     }
 
@@ -64,75 +54,90 @@ const IssueTable = ({ issues, onViewIssue, userRole }) => {
 
   const columns = getTableColumns();
 
+  // status badge classes
+  const getStatusClass = (status) => {
+    switch (status.toLowerCase()) {
+      case "open": return "status-open";
+      case "in progress": return "status-progress";
+      case "resolved": return "status-resolved";
+      case "closed": return "status-closed";
+      default: return "status-default";
+    }
+  };
+
   return (
     <div className="issues-table-container">
-      <table className="issues-table">
-        <thead>
-          <tr>
-            {columns.map((column) => (
-              <th key={column.id}>{column.label}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {issues.length > 0 ? (
-            issues.map((issue) => (
-              <tr key={issue.id}>
-                <td>#{issue.id}</td>
-                <td>{issue.title}</td>
-                <td className="description-cell">{issue.description}</td>
-                <td>
-                  {new Date(issue.created_at).toLocaleString(undefined, {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </td>
-                <td>
-                  <span
-                    className={`status-badge ${getStatusClass(issue.status)}`}
-                  >
-                    {issue.status}
-                  </span>
-                </td>
-
-                {userRole === "Registrar" && (
-                  <td>
-                    {issue.assigned_lecturer?.user?.full_name ||
-                      issue.register?.user?.full_name ||
-                      "Unassigned"}
-                  </td>
-                )}
-
-                {userRole === "Lecturer" && (
-                  <td>
-                    {issue.author?.user?.full_name ||
-                      issue.author?.user?.username ||
-                      "Unknown"}
-                  </td>
-                )}
-
-                <td>
-                  <button
-                    className="action-button"
-                    onClick={() => onViewIssue(issue)}
-                  >
-                    View
-                  </button>
-                </td>
+      {statuses.map((status) => (
+        <section key={status} className="status-group">
+          <h3 className="group-title">
+            {status.charAt(0).toUpperCase() + status.slice(1)}
+          </h3>
+          <table className="issues-table">
+            <thead>
+              <tr>
+                {columns.map((col) => (
+                  <th key={col.id}>{col.label}</th>
+                ))}
               </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan={columns.length} className="no-issues">
-                No issues found matching your search.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+            </thead>
+            <tbody>
+              {issues
+                .filter((i) => i.status === status)
+                .map((issue) => (
+                  <tr key={issue.id}>
+                    {columns.map((col) => {
+                      switch (col.id) {
+                        case "id":
+                          return <td key={col.id}>#{issue.id}</td>;
+                        case "title":
+                          return <td key={col.id}>{issue.title}</td>;
+                        case "description":
+                          return <td key={col.id} className="description-cell">
+                            {issue.description}
+                          </td>;
+                        case "date":
+                          return <td key={col.id}>
+                            {new Date(issue.created_at).toLocaleString(undefined, {
+                              year: "numeric",
+                              month: "2-digit",
+                              day: "2-digit",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </td>;
+                        case "status":
+                          return <td key={col.id}>
+                            <span className={`status-badge ${getStatusClass(issue.status)}`}> 
+                              {issue.status}
+                            </span>
+                          </td>;
+                        case "assignee":
+                          return <td key={col.id}>
+                            {issue.assigned_lecturer?.user?.full_name || issue.register?.user?.full_name || "Unassigned"}
+                          </td>;
+                        case "student":
+                          return <td key={col.id}>
+                            {issue.author?.user?.full_name || "Unknown"}
+                          </td>;
+                        case "actions":
+                          return <td key={col.id}>
+                            <button
+                              className="action-button"
+                              onClick={() => onViewIssue(issue)}
+                            >
+                              View
+                            </button>
+                          </td>;
+                        default:
+                          return <td key={col.id}>—</td>;
+                      }
+                    })}
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </section>
+      ))}
     </div>
   );
 };
