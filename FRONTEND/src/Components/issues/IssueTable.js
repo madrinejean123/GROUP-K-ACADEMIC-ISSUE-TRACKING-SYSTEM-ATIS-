@@ -72,7 +72,7 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
       if (!token) throw new Error("No auth token");
 
       const { data } = await axios.post(
-        `https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/${issueId}`,
+        `https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/assign/${issueId}/`,
         { lecturer_id: lecturerId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
