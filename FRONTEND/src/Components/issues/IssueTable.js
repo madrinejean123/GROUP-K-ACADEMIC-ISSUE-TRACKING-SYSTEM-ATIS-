@@ -7,6 +7,8 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
   const [assignMessages, setAssignMessages] = useState({});
   const [lecturers, setLecturers] = useState([]);
   const [loadingLecturers, setLoadingLecturers] = useState(false);
+  // Track local assignment names until parent updates the issues prop
+  const [assignedLecturers, setAssignedLecturers] = useState({});
 
   const statuses = Array.from(new Set(issues.map((i) => i.status)));
 
@@ -45,14 +47,9 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
       const token = localStorage.getItem("access_token");
       const { data } = await axios.get(
         "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/users/lecturers/",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-      const formatted = data.map((l) => ({
-        id: l.id,
-        name: l.user.full_name,
-      }));
+      const formatted = data.map((l) => ({ id: l.id, name: l.user.full_name }));
       setLecturers(formatted);
     } catch (err) {
       console.error("Failed to fetch lecturers:", err);
@@ -77,7 +74,14 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
+      // Notify parent
       onAssign(issueId, lecturerId);
+      // Persist lecturer name locally until prop updates
+      const selected = lecturers.find((l) => l.id === lecturerId);
+      setAssignedLecturers((prev) => ({
+        ...prev,
+        [issueId]: selected?.name || `ID ${lecturerId}`,
+      }));
 
       setAssignMessages((msgs) => ({
         ...msgs,
@@ -143,9 +147,12 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
                             </td>
                           );
                         case "assignee": {
+                          // Show assigned name if the issue already has an assignee field or local state
+                          const name =
+                            issue.assignee || assignedLecturers[issue.id];
                           const msg = assignMessages[issue.id];
-                          if (issue.assignee) {
-                            return <td key={c.id}>{issue.assignee}</td>;
+                          if (name) {
+                            return <td key={c.id}>{name}</td>;
                           }
                           return (
                             <td key={c.id}>
