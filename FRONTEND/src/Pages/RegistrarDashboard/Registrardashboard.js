@@ -113,10 +113,7 @@ const RegistrarDashboard = () => {
     }));
   };
 
-  // Pass handleAssign to IssueDetail
-  const handleAssignIssue = async (lecturerId) => {
-    // Implementation is now in IssueDetail for direct API call
-  };
+  // No need for handleAssign here; IssueDetail handles assignment directly via API
 
   // Stats & filters
   const stats = {
@@ -209,7 +206,6 @@ const RegistrarDashboard = () => {
           onClose={() => setShowIssueDetailModal(false)}
           onStatusChange={handleStatusChange}
           onAddComment={handleAddComment}
-          onAssign={() => {}}
           userRole="Registrar"
           lecturers={lecturers}
         />
