@@ -50,7 +50,7 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
         }
       );
       const formatted = data.map((l) => ({
-        id: l.user.id,
+        id: l.id,
         name: l.user.full_name,
       }));
       setLecturers(formatted);
@@ -73,7 +73,7 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
 
       const { data } = await axios.post(
         `https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/assign/${issueId}/`,
-        { user_id: lecturerId },
+        { lecturer_id: lecturerId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
