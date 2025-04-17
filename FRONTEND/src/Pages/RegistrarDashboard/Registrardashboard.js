@@ -1,7 +1,5 @@
-// pages/registrar-dashboard.jsx
 "use client";
-
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import DashboardLayout from "../../Components/layout/DashboardLayout";
 import IssueList from "../../Components/issues/IssueList";
 import IssueDetail from "../../Components/issues/IssueDetail";
@@ -62,11 +60,8 @@ const RegistrarDashboard = () => {
           "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/users/lecturers/",
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        const formatted = data.map((lecturer) => ({
-          id: lecturer.user.id,
-          name: lecturer.user.full_name,
-          assignedIssues: lecturer.assignedIssues,
-        }));
+        // Use record ID for assignment consistency
+        const formatted = data.map((l) => ({ id: l.id, name: l.user.full_name }));
         setLecturers(formatted);
       } catch (e) {
         console.error("Lecturers error:", e);
@@ -89,7 +84,9 @@ const RegistrarDashboard = () => {
 
   const handleStatusChange = (newStatus) => {
     setIssues((prev) =>
-      prev.map((i) => (i.id === selectedIssue.id ? { ...i, status: newStatus } : i))
+      prev.map((i) =>
+        i.id === selectedIssue.id ? { ...i, status: newStatus } : i
+      )
     );
     setSelectedIssue((prev) => ({ ...prev, status: newStatus }));
   };
@@ -113,14 +110,34 @@ const RegistrarDashboard = () => {
     }));
   };
 
-  // No need for handleAssign here; IssueDetail handles assignment directly via API
+  // Handle assignment, update local issues state
+  const handleAssign = (issueId, lecturerId, lecturerName) => {
+    setIssues((prev) =>
+      prev.map((i) =>
+        i.id === issueId
+          ? { ...i, assignee: lecturerName, assigneeId: lecturerId }
+          : i
+      )
+    );
+    if (selectedIssue?.id === issueId) {
+      setSelectedIssue((prev) => ({
+        ...prev,
+        assignee: lecturerName,
+        assigneeId: lecturerId,
+      }));
+    }
+  };
 
-  // Stats & filters
+  // Stats & filters (case-insensitive)
   const stats = {
     total: issues.length,
-    open: issues.filter((i) => i.status === "Open").length,
-    inProgress: issues.filter((i) => i.status === "In Progress").length,
-    resolved: issues.filter((i) => ["Resolved", "Closed"].includes(i.status)).length,
+    open: issues.filter((i) => i.status?.toLowerCase() === "open").length,
+    inProgress: issues.filter(
+      (i) => i.status?.toLowerCase() === "in progress"
+    ).length,
+    resolved: issues.filter((i) =>
+      ["resolved", "closed"].includes(i.status?.toLowerCase())
+    ).length,
   };
   const assignedIssues = issues.filter((i) => i.assignee);
 
@@ -133,6 +150,7 @@ const RegistrarDashboard = () => {
             title="All Student Issues"
             showCreateButton={false}
             onViewIssue={handleViewIssue}
+            onAssign={handleAssign}
             userRole="Registrar"
           />
         );
@@ -143,6 +161,7 @@ const RegistrarDashboard = () => {
             title="Assigned Issues"
             showCreateButton={false}
             onViewIssue={handleViewIssue}
+            onAssign={handleAssign}
             userRole="Registrar"
           />
         );
@@ -150,12 +169,17 @@ const RegistrarDashboard = () => {
         return (
           <div className="lecturers-view">
             <h2>Lecturers</h2>
-            {lecturers.map((l) => (
-              <div key={l.id} className="lecturer-card-full">
-                <h3>{l.name}</h3>
-                <p>{l.assignedIssues} assigned issues</p>
-              </div>
-            ))}
+            {lecturers.map((l) => {
+              const count = issues.filter(
+                (i) => i.assigneeId === l.id
+              ).length;
+              return (
+                <div key={l.id} className="lecturer-card-full">
+                  <h3>{l.name}</h3>
+                  <p>{count} assigned issues</p>
+                </div>
+              );
+            })}
           </div>
         );
       case "help":
@@ -206,6 +230,7 @@ const RegistrarDashboard = () => {
           onClose={() => setShowIssueDetailModal(false)}
           onStatusChange={handleStatusChange}
           onAddComment={handleAddComment}
+          onAssign={handleAssign}
           userRole="Registrar"
           lecturers={lecturers}
         />

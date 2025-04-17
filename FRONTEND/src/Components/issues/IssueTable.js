@@ -7,7 +7,7 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
   const [assignMessages, setAssignMessages] = useState({});
   const [lecturers, setLecturers] = useState([]);
   const [loadingLecturers, setLoadingLecturers] = useState(false);
-  // Track local assignment names until parent updates the issues prop
+  // Track assigned state locally
   const [assignedLecturers, setAssignedLecturers] = useState({});
 
   const statuses = Array.from(new Set(issues.map((i) => i.status)));
@@ -27,7 +27,7 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
   ];
 
   const getStatusClass = (s) => {
-    switch (s.toLowerCase()) {
+    switch (s?.toLowerCase()) {
       case "open":
         return "status-open";
       case "in progress":
@@ -42,8 +42,8 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
   };
 
   const fetchLecturers = async () => {
+    setLoadingLecturers(true);
     try {
-      setLoadingLecturers(true);
       const token = localStorage.getItem("access_token");
       const { data } = await axios.get(
         "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/users/lecturers/",
@@ -74,13 +74,14 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // Notify parent
-      onAssign(issueId, lecturerId);
-      // Persist lecturer name locally until prop updates
+      // Inform parent
       const selected = lecturers.find((l) => l.id === lecturerId);
+      const lecturerName = selected ? selected.name : "Assigned";
+      onAssign(issueId, lecturerId, lecturerName);
+      // Mark assigned locally
       setAssignedLecturers((prev) => ({
         ...prev,
-        [issueId]: selected?.name || `ID ${lecturerId}`,
+        [issueId]: lecturerName,
       }));
 
       setAssignMessages((msgs) => ({
@@ -147,13 +148,13 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
                             </td>
                           );
                         case "assignee": {
-                          // Show assigned name if the issue already has an assignee field or local state
-                          const name =
+                          // If already assigned, show plain text
+                          const assignedName =
                             issue.assignee || assignedLecturers[issue.id];
-                          const msg = assignMessages[issue.id];
-                          if (name) {
-                            return <td key={c.id}>{name}</td>;
+                          if (assignedName) {
+                            return <td key={c.id}>{assignedName}</td>;
                           }
+                          // Else show assign button or dropdown
                           return (
                             <td key={c.id}>
                               {assigningIssueId === issue.id ? (
@@ -172,9 +173,9 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
                                         {lec.name}
                                       </button>
                                     ))}
-                                    {msg && (
+                                    {assignMessages[issue.id] && (
                                       <div className="assign-message">
-                                        {msg}
+                                        {assignMessages[issue.id]}
                                       </div>
                                     )}
                                   </div>
