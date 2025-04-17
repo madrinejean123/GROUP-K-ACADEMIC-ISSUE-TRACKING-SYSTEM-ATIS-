@@ -16,7 +16,7 @@ const RegistrarDashboard = () => {
   const [registrarProfile, setRegistrarProfile] = useState({});
   const [activeView, setActiveView] = useState("dashboard");
 
-  // 1️⃣ Fetch registrar profile
+  // Fetch registrar profile
   useEffect(() => {
     async function fetchProfile() {
       const token = localStorage.getItem("access_token");
@@ -34,7 +34,7 @@ const RegistrarDashboard = () => {
     fetchProfile();
   }, []);
 
-  // 2️⃣ Fetch all issues
+  // Fetch all issues
   useEffect(() => {
     async function fetchIssues() {
       const token = localStorage.getItem("access_token");
@@ -52,7 +52,7 @@ const RegistrarDashboard = () => {
     fetchIssues();
   }, []);
 
-  // 3️⃣ Fetch lecturers
+  // Fetch lecturers
   useEffect(() => {
     async function fetchLecturers() {
       const token = localStorage.getItem("access_token");
@@ -89,9 +89,7 @@ const RegistrarDashboard = () => {
 
   const handleStatusChange = (newStatus) => {
     setIssues((prev) =>
-      prev.map((i) =>
-        i.id === selectedIssue.id ? { ...i, status: newStatus } : i
-      )
+      prev.map((i) => (i.id === selectedIssue.id ? { ...i, status: newStatus } : i))
     );
     setSelectedIssue((prev) => ({ ...prev, status: newStatus }));
   };
@@ -115,36 +113,9 @@ const RegistrarDashboard = () => {
     }));
   };
 
-  // 4️⃣ Assign via API
+  // Pass handleAssign to IssueDetail
   const handleAssignIssue = async (lecturerId) => {
-    if (!lecturerId) return;
-    try {
-      const token = localStorage.getItem("access_token");
-      // —— THIS is the POST to assign the issue ——
-      await axios.post(
-        `https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/${selectedIssue.id}/assign/`,
-        { lecturer_id: lecturerId },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      // Then update local state:
-      const lec = lecturers.find((l) => l.id === lecturerId);
-      setIssues((prev) =>
-        prev.map((i) =>
-          i.id === selectedIssue.id
-            ? { ...i, status: "In Progress", assignee: lec.name }
-            : i
-        )
-      );
-      setSelectedIssue((prev) => ({
-        ...prev,
-        status: "In Progress",
-        assignee: lec.name,
-        assignMessage: `Issue has been assigned to ${lec.name}`,
-      }));
-    } catch (e) {
-      console.error("Assign error:", e);
-    }
+    // Implementation is now in IssueDetail for direct API call
   };
 
   // Stats & filters
@@ -152,9 +123,7 @@ const RegistrarDashboard = () => {
     total: issues.length,
     open: issues.filter((i) => i.status === "Open").length,
     inProgress: issues.filter((i) => i.status === "In Progress").length,
-    resolved: issues.filter((i) =>
-      ["Resolved", "Closed"].includes(i.status)
-    ).length,
+    resolved: issues.filter((i) => ["Resolved", "Closed"].includes(i.status)).length,
   };
   const assignedIssues = issues.filter((i) => i.assignee);
 
@@ -240,7 +209,7 @@ const RegistrarDashboard = () => {
           onClose={() => setShowIssueDetailModal(false)}
           onStatusChange={handleStatusChange}
           onAddComment={handleAddComment}
-          onAssign={handleAssignIssue}
+          onAssign={() => {}}
           userRole="Registrar"
           lecturers={lecturers}
         />
