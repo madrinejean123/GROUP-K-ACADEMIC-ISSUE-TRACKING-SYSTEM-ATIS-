@@ -1,4 +1,4 @@
-// ─── pages/registrar-dashboard.jsx ─────────────────────────────────────────
+// pages/registrar-dashboard.jsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -14,6 +14,7 @@ const RegistrarDashboard = () => {
   const [showIssueDetailModal, setShowIssueDetailModal] = useState(false);
   const [lecturers, setLecturers] = useState([]);
   const [registrarProfile, setRegistrarProfile] = useState({});
+  const [activeView, setActiveView] = useState("dashboard");
 
   // 1️⃣ Fetch registrar profile
   useEffect(() => {
@@ -33,7 +34,7 @@ const RegistrarDashboard = () => {
     fetchProfile();
   }, []);
 
-  // 2️⃣ Fetch all issues once (dashboard is authenticated)
+  // 2️⃣ Fetch all issues
   useEffect(() => {
     async function fetchIssues() {
       const token = localStorage.getItem("access_token");
@@ -51,7 +52,7 @@ const RegistrarDashboard = () => {
     fetchIssues();
   }, []);
 
-  // 3️⃣ Fetch lecturers data from backend
+  // 3️⃣ Fetch lecturers
   useEffect(() => {
     async function fetchLecturers() {
       const token = localStorage.getItem("access_token");
@@ -61,14 +62,11 @@ const RegistrarDashboard = () => {
           "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/users/lecturers/",
           { headers: { Authorization: `Bearer ${token}` } }
         );
-
-        // Format lecturers to { id, name, assignedIssues }
-        const formatted = data.map((lect) => ({
-          id: lect.user.id,
-          name: lect.user.full_name,
-          assignedIssues: lect.assignedIssues,
+        const formatted = data.map((lecturer) => ({
+          id: lecturer.user.id,
+          name: lecturer.user.full_name,
+          assignedIssues: lecturer.assignedIssues,
         }));
-
         setLecturers(formatted);
       } catch (e) {
         console.error("Lecturers error:", e);
@@ -122,31 +120,34 @@ const RegistrarDashboard = () => {
     if (!lecturerId) return;
     try {
       const token = localStorage.getItem("access_token");
+      // —— THIS is the POST to assign the issue ——
       await axios.post(
         `https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/${selectedIssue.id}/assign/`,
         { lecturer_id: lecturerId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      const assigned = lecturers.find((l) => l.id.toString() === lecturerId);
+      // Then update local state:
+      const lec = lecturers.find((l) => l.id === lecturerId);
       setIssues((prev) =>
         prev.map((i) =>
           i.id === selectedIssue.id
-            ? { ...i, status: "In Progress", assignee: assigned.name }
+            ? { ...i, status: "In Progress", assignee: lec.name }
             : i
         )
       );
       setSelectedIssue((prev) => ({
         ...prev,
         status: "In Progress",
-        assignee: assigned.name,
+        assignee: lec.name,
+        assignMessage: `Issue has been assigned to ${lec.name}`,
       }));
     } catch (e) {
       console.error("Assign error:", e);
     }
   };
 
-  // Stats for overview
+  // Stats & filters
   const stats = {
     total: issues.length,
     open: issues.filter((i) => i.status === "Open").length,
@@ -156,9 +157,6 @@ const RegistrarDashboard = () => {
     ).length,
   };
   const assignedIssues = issues.filter((i) => i.assignee);
-
-  // Active view state
-  const [activeView, setActiveView] = useState("dashboard");
 
   const renderContent = () => {
     switch (activeView) {
@@ -186,10 +184,10 @@ const RegistrarDashboard = () => {
         return (
           <div className="lecturers-view">
             <h2>Lecturers</h2>
-            {lecturers.map((lec) => (
-              <div key={lec.id} className="lecturer-card-full">
-                <h3>{lec.name}</h3>
-                <p>{lec.assignedIssues} assigned issues</p>
+            {lecturers.map((l) => (
+              <div key={l.id} className="lecturer-card-full">
+                <h3>{l.name}</h3>
+                <p>{l.assignedIssues} assigned issues</p>
               </div>
             ))}
           </div>
@@ -200,8 +198,8 @@ const RegistrarDashboard = () => {
             <h2>Help & Support</h2>
             <ul>
               <li>Email: support@mak.ac.ug</li>
-              <li>Call: +256 414 123456</li>
-              <li>Visit: Room 101, CIT Building</li>
+              <li>Call: +256 414 123456</li>
+              <li>Visit: Room 101, CIT Building</li>
             </ul>
           </div>
         );
@@ -223,7 +221,7 @@ const RegistrarDashboard = () => {
                 <p>{stats.inProgress}</p>
               </div>
               <div className="stat-card">
-                <h3>Resolved / Closed</h3>
+                <h3>Resolved</h3>
                 <p>{stats.resolved}</p>
               </div>
             </div>
