@@ -487,6 +487,17 @@ const Header = ({
                 onChange={handleInputChange}
               />
             </label>
+             {/* Notification Email */}
+            <label>
+              Notification Email:
+              <input
+               type="email"
+               name="notification_email"
+               value={formData.notification_email || ""}
+               onChange={handleInputChange}
+               placeholder="Enter notification email"
+              />
+           </label>
 
             <button type="submit">Save Changes</button>
             <button
