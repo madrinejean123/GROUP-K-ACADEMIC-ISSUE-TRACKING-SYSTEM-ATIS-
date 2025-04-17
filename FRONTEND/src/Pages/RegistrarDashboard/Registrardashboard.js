@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import { useState, useEffect } from "react";
 import DashboardLayout from "../../Components/layout/DashboardLayout";
@@ -11,12 +11,7 @@ const RegistrarDashboard = () => {
   const [issues, setIssues] = useState([]);
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [showIssueDetailModal, setShowIssueDetailModal] = useState(false);
-  const [lecturers] = useState([
-    { id: 1, name: "Dr. Jane Doe", department: "Computer Science", assignedIssues: 3 },
-    { id: 2, name: "Prof. Michael Mutebi", department: "Mathematics", assignedIssues: 5 },
-    { id: 3, name: "Dr. Sarah Williams", department: "Engineering", assignedIssues: 2 },
-    { id: 4, name: "Prof. Robert Kato", department: "Physics", assignedIssues: 0 },
-  ]);
+  const [lecturers, setLecturers] = useState([]);
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [selectedLecturer, setSelectedLecturer] = useState(null);
   const [activeView, setActiveView] = useState("dashboard");
@@ -56,6 +51,32 @@ const RegistrarDashboard = () => {
       }
     }
     fetchIssues();
+  }, []);
+
+  // 3️⃣ Fetch lecturers data from backend
+  useEffect(() => {
+    async function fetchLecturers() {
+      const token = localStorage.getItem("access_token");
+      if (!token) return;
+      try {
+        const { data } = await axios.get(
+          "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/lecturers/", 
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        // Format the lecturers to match the desired structure (id, name, assignedIssues)
+        const formattedLecturers = data.map((lecturer) => ({
+          id: lecturer.id,
+          name: lecturer.name,
+          assignedIssues: lecturer.assignedIssues, // Assuming 'assignedIssues' is a field returned by the API
+        }));
+
+        setLecturers(formattedLecturers);
+      } catch (e) {
+        console.error("Lecturers error:", e);
+      }
+    }
+    fetchLecturers();
   }, []);
 
   // Sidebar navigation
@@ -157,21 +178,10 @@ const RegistrarDashboard = () => {
                 <div key={lecturer.id} className="lecturer-card-full">
                   <div className="lecturer-info-full">
                     <h3>{lecturer.name}</h3>
-                    <p className="lecturer-department">{lecturer.department}</p>
                     <div className="lecturer-stats-full">
                       <div className="stat-item">
                         <span className="stat-value">{lecturer.assignedIssues}</span>
                         <span className="stat-label">Assigned Issues</span>
-                      </div>
-                      <div className="stat-item">
-                        <span className="stat-value">
-                          {issues.filter(
-                            (i) =>
-                              i.assignee === lecturer.name &&
-                              ["Resolved", "Closed"].includes(i.status)
-                          ).length}
-                        </span>
-                        <span className="stat-label">Resolved Issues</span>
                       </div>
                     </div>
                   </div>
@@ -183,7 +193,6 @@ const RegistrarDashboard = () => {
             </div>
           </div>
         );
-
       case "help":
         return (
           <div className="help-view">
@@ -196,8 +205,6 @@ const RegistrarDashboard = () => {
             </ul>
           </div>
         );
-
-        
       default:
         return (
           <div className="dashboard-overview">
@@ -252,7 +259,7 @@ const RegistrarDashboard = () => {
               </option>
               {lecturers.map((l) => (
                 <option key={l.id} value={l.id}>
-                  {l.name} ({l.department})
+                  {l.name}
                 </option>
               ))}
             </select>
