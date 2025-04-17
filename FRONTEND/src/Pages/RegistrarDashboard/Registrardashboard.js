@@ -60,7 +60,7 @@ const RegistrarDashboard = () => {
       if (!token) return;
       try {
         const { data } = await axios.get(
-          "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/lecturers/", 
+          "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/users/lecturers/", 
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
