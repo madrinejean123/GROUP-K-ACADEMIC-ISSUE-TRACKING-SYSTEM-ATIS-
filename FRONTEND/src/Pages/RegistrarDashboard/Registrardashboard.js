@@ -8,11 +8,10 @@ import "./registrar-dashboard.css";
 import axios from "axios";
 
 const RegistrarDashboard = () => {
-  // Local state
   const [issues, setIssues] = useState([]);
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [showIssueDetailModal, setShowIssueDetailModal] = useState(false);
-  const [lecturers, setLecturers] = useState([
+  const [lecturers] = useState([
     { id: 1, name: "Dr. Jane Doe", department: "Computer Science", assignedIssues: 3 },
     { id: 2, name: "Prof. Michael Mutebi", department: "Mathematics", assignedIssues: 5 },
     { id: 3, name: "Dr. Sarah Williams", department: "Engineering", assignedIssues: 2 },
@@ -23,32 +22,47 @@ const RegistrarDashboard = () => {
   const [activeView, setActiveView] = useState("dashboard");
   const [registrarProfile, setRegistrarProfile] = useState({});
 
-  // Fetch registrar profile only
+  // 1️⃣ Fetch registrar profile
   useEffect(() => {
-    const fetchRegistrarProfile = async () => {
+    async function fetchProfile() {
+      const token = localStorage.getItem("access_token");
+      if (!token) return;
       try {
-        const token = localStorage.getItem("access_token");
-        if (!token) return;
-        const response = await axios.get(
+        const { data } = await axios.get(
           "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/profile/",
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        const data = Array.isArray(response.data) ? response.data[0] : response.data;
-        setRegistrarProfile(data);
-      } catch (err) {
-        console.error("Error fetching registrar profile:", err);
+        setRegistrarProfile(Array.isArray(data) ? data[0] : data);
+      } catch (e) {
+        console.error("Profile error:", e);
       }
-    };
-    fetchRegistrarProfile();
+    }
+    fetchProfile();
   }, []);
 
-  // Sidebar navigation listener
+  // 2️⃣ Fetch all issues once (dashboard is authenticated)
   useEffect(() => {
-    const handleSidebarNav = (event) => {
-      if (event.detail?.navItem) setActiveView(event.detail.navItem);
-    };
-    window.addEventListener("sidebarNavigation", handleSidebarNav);
-    return () => window.removeEventListener("sidebarNavigation", handleSidebarNav);
+    async function fetchIssues() {
+      const token = localStorage.getItem("access_token");
+      if (!token) return;
+      try {
+        const { data } = await axios.get(
+          "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/list/",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setIssues(data);
+      } catch (e) {
+        console.error("Issues error:", e);
+      }
+    }
+    fetchIssues();
+  }, []);
+
+  // Sidebar navigation
+  useEffect(() => {
+    const onNav = (e) => e.detail?.navItem && setActiveView(e.detail.navItem);
+    window.addEventListener("sidebarNavigation", onNav);
+    return () => window.removeEventListener("sidebarNavigation", onNav);
   }, []);
 
   const handleViewIssue = (issue) => {
@@ -56,17 +70,12 @@ const RegistrarDashboard = () => {
     setShowIssueDetailModal(true);
   };
 
-  const handleStatusChange = (action) => {
-    if (action === "assign") {
-      setShowAssignModal(true);
-    } else {
-      setIssues((prev) =>
-        prev.map((i) =>
-          i.id === selectedIssue.id ? { ...i, status: action } : i
-        )
-      );
-      setSelectedIssue((prev) => ({ ...prev, status: action }));
-    }
+  const handleStatusChange = (newStatus) => {
+    if (newStatus === "assign") return setShowAssignModal(true);
+    setIssues((prev) =>
+      prev.map((i) => (i.id === selectedIssue.id ? { ...i, status: newStatus } : i))
+    );
+    setSelectedIssue((prev) => ({ ...prev, status: newStatus }));
   };
 
   const handleAddComment = (comment) => {
@@ -88,45 +97,33 @@ const RegistrarDashboard = () => {
     }));
   };
 
-  // Stubbed assign logic (no API call)
+  // Stubbed assign (no API)
   const handleAssignIssue = () => {
     if (!selectedLecturer) return;
-    const lecturer = lecturers.find((l) => l.id === selectedLecturer);
-
-    // Update local state only
+    const lec = lecturers.find((l) => l.id === selectedLecturer);
     setIssues((prev) =>
       prev.map((i) =>
         i.id === selectedIssue.id
-          ? { ...i, status: "In Progress", assignee: lecturer.name }
+          ? { ...i, status: "In Progress", assignee: lec.name }
           : i
-      )
-    );
-    setLecturers((prev) =>
-      prev.map((l) =>
-        l.id === selectedLecturer
-          ? { ...l, assignedIssues: l.assignedIssues + 1 }
-          : l
       )
     );
     setSelectedIssue((prev) => ({
       ...prev,
       status: "In Progress",
-      assignee: lecturer.name,
+      assignee: lec.name,
     }));
     setShowAssignModal(false);
     setSelectedLecturer(null);
   };
 
-  // Dashboard stats
+  // Stats for default dashboard
   const stats = {
-    totalIssues: issues.length,
-    openIssues: issues.filter((i) => i.status === "Open").length,
-    inProgressIssues: issues.filter((i) => i.status === "In Progress").length,
-    resolvedIssues: issues.filter((i) =>
-      ["Resolved", "Closed"].includes(i.status)
-    ).length,
+    total: issues.length,
+    open: issues.filter((i) => i.status === "Open").length,
+    inProgress: issues.filter((i) => i.status === "In Progress").length,
+    resolved: issues.filter((i) => ["Resolved", "Closed"].includes(i.status)).length,
   };
-
   const assignedIssues = issues.filter((i) => i.assignee);
 
   const renderContent = () => {
@@ -141,7 +138,6 @@ const RegistrarDashboard = () => {
             userRole="Registrar"
           />
         );
-
       case "assigned":
         return (
           <IssueList
@@ -152,7 +148,6 @@ const RegistrarDashboard = () => {
             userRole="Registrar"
           />
         );
-
       case "lecturers":
         return (
           <div className="lecturers-view">
@@ -202,6 +197,7 @@ const RegistrarDashboard = () => {
           </div>
         );
 
+        
       default:
         return (
           <div className="dashboard-overview">
@@ -209,19 +205,19 @@ const RegistrarDashboard = () => {
             <div className="stats-cards">
               <div className="stat-card">
                 <h3>Total Issues</h3>
-                <p>{stats.totalIssues}</p>
+                <p>{stats.total}</p>
               </div>
               <div className="stat-card">
-                <h3>Open Issues</h3>
-                <p>{stats.openIssues}</p>
+                <h3>Open</h3>
+                <p>{stats.open}</p>
               </div>
               <div className="stat-card">
                 <h3>In Progress</h3>
-                <p>{stats.inProgressIssues}</p>
+                <p>{stats.inProgress}</p>
               </div>
               <div className="stat-card">
                 <h3>Resolved</h3>
-                <p>{stats.resolvedIssues}</p>
+                <p>{stats.resolved}</p>
               </div>
             </div>
           </div>
@@ -233,7 +229,6 @@ const RegistrarDashboard = () => {
     <DashboardLayout userRole="Registrar" profile={registrarProfile}>
       <div className="registrar-dashboard">{renderContent()}</div>
 
-      {/* Issue Detail Modal */}
       {showIssueDetailModal && selectedIssue && (
         <IssueDetail
           issue={selectedIssue}
@@ -244,17 +239,16 @@ const RegistrarDashboard = () => {
         />
       )}
 
-      {/* Assign Issue Modal */}
       {showAssignModal && (
         <div className="modal-overlay">
           <div className="assign-modal">
-            <h3>Assign Issue to Lecturer</h3>
+            <h3>Assign to Lecturer</h3>
             <select
               value={selectedLecturer || ""}
               onChange={(e) => setSelectedLecturer(Number(e.target.value))}
             >
               <option value="" disabled>
-                -- select a lecturer --
+                — Select lecturer —
               </option>
               {lecturers.map((l) => (
                 <option key={l.id} value={l.id}>
