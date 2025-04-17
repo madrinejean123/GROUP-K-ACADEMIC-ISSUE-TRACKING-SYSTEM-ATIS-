@@ -67,7 +67,7 @@ const RegistrarDashboard = () => {
         // Format the lecturers to match the desired structure (id, name, assignedIssues)
         const formattedLecturers = data.map((lecturer) => ({
           id: lecturer.id,
-          name: lecturer.name,
+          name: lecturer.full_name,
           assignedIssues: lecturer.assignedIssues, // Assuming 'assignedIssues' is a field returned by the API
         }));
 
