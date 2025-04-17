@@ -1,15 +1,15 @@
-// Components/issues/IssueTable.jsx
 import React, { useState } from "react";
 import axios from "axios";
 import "../styles/issue-table.css";
 
-const IssueTable = ({ issues, onViewIssue, userRole, lecturers = [], onAssign }) => {
+const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
   const [assigningIssueId, setAssigningIssueId] = useState(null);
   const [assignMessages, setAssignMessages] = useState({});
+  const [lecturers, setLecturers] = useState([]);
+  const [loadingLecturers, setLoadingLecturers] = useState(false);
 
   const statuses = Array.from(new Set(issues.map((i) => i.status)));
 
-  // Build columns dynamically
   const columns = [
     { id: "id", label: "ID" },
     { id: "title", label: "Title" },
@@ -39,22 +39,46 @@ const IssueTable = ({ issues, onViewIssue, userRole, lecturers = [], onAssign })
     }
   };
 
+  const fetchLecturers = async () => {
+    try {
+      setLoadingLecturers(true);
+      const token = localStorage.getItem("access_token");
+      const { data } = await axios.get(
+        "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/users/lecturers/",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      const formatted = data.map((l) => ({
+        id: l.user.id,
+        name: l.user.full_name,
+      }));
+      setLecturers(formatted);
+    } catch (err) {
+      console.error("Failed to fetch lecturers:", err);
+    } finally {
+      setLoadingLecturers(false);
+    }
+  };
+
+  const handleAssignClick = async (issueId) => {
+    await fetchLecturers();
+    setAssigningIssueId(issueId);
+  };
+
   const handleAssign = async (issueId, lecturerId) => {
     try {
       const token = localStorage.getItem("access_token");
       if (!token) throw new Error("No auth token");
 
-      // Call assign API
       const { data } = await axios.post(
-        `https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/${issueId}/assign/`,
+        `https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/${issueId}`,
         { lecturer_id: lecturerId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // Inform parent to update state
       onAssign(issueId, lecturerId);
 
-      // Show success message
       setAssignMessages((msgs) => ({
         ...msgs,
         [issueId]: data.message || "Assigned successfully",
@@ -66,7 +90,6 @@ const IssueTable = ({ issues, onViewIssue, userRole, lecturers = [], onAssign })
         [issueId]: "Failed to assign. Please try again.",
       }));
     } finally {
-      // Close lecturer list
       setAssigningIssueId(null);
     }
   };
@@ -127,26 +150,32 @@ const IssueTable = ({ issues, onViewIssue, userRole, lecturers = [], onAssign })
                           return (
                             <td key={c.id}>
                               {assigningIssueId === issue.id ? (
-                                <div className="assign-list-inline">
-                                  {lecturers.map((lec) => (
-                                    <button
-                                      key={lec.id}
-                                      className="action-button"
-                                      onClick={() => handleAssign(issue.id, lec.id)}
-                                    >
-                                      {lec.name}
-                                    </button>
-                                  ))}
-                                  {msg && (
-                                    <div className="assign-message">
-                                      {msg}
-                                    </div>
-                                  )}
-                                </div>
+                                loadingLecturers ? (
+                                  <span>Loading...</span>
+                                ) : (
+                                  <div className="assign-list-inline">
+                                    {lecturers.map((lec) => (
+                                      <button
+                                        key={lec.id}
+                                        className="action-button"
+                                        onClick={() =>
+                                          handleAssign(issue.id, lec.id)
+                                        }
+                                      >
+                                        {lec.name}
+                                      </button>
+                                    ))}
+                                    {msg && (
+                                      <div className="assign-message">
+                                        {msg}
+                                      </div>
+                                    )}
+                                  </div>
+                                )
                               ) : (
                                 <button
                                   className="action-button"
-                                  onClick={() => setAssigningIssueId(issue.id)}
+                                  onClick={() => handleAssignClick(issue.id)}
                                 >
                                   Assign
                                 </button>
