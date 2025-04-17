@@ -73,7 +73,7 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
 
       const { data } = await axios.post(
         `https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/assign/${issueId}/`,
-        { lecturer_id: lecturerId },
+        { user_id: lecturerId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
