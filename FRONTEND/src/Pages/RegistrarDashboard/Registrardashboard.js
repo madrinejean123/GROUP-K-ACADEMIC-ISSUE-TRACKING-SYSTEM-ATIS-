@@ -8,6 +8,7 @@ import "./registrar-dashboard.css";
 import axios from "axios";
 
 const RegistrarDashboard = () => {
+  // Local state
   const [issues, setIssues] = useState([]);
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [showIssueDetailModal, setShowIssueDetailModal] = useState(false);
@@ -22,55 +23,29 @@ const RegistrarDashboard = () => {
   const [activeView, setActiveView] = useState("dashboard");
   const [registrarProfile, setRegistrarProfile] = useState({});
 
-  // Fetch the registrar's full profile from the backend
+  // Fetch registrar profile only
   useEffect(() => {
     const fetchRegistrarProfile = async () => {
       try {
         const token = localStorage.getItem("access_token");
-        if (!token) return console.error("No access token found");
-
+        if (!token) return;
         const response = await axios.get(
           "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/profile/",
           { headers: { Authorization: `Bearer ${token}` } }
         );
-
-        const data = response.data;
-        const profileData = Array.isArray(data) ? data[0] : data;
-        setRegistrarProfile(profileData);
-      } catch (error) {
-        console.error("Error fetching registrar profile:", error);
+        const data = Array.isArray(response.data) ? response.data[0] : response.data;
+        setRegistrarProfile(data);
+      } catch (err) {
+        console.error("Error fetching registrar profile:", err);
       }
     };
-
     fetchRegistrarProfile();
   }, []);
 
-  // Fetch issues from backend
-  useEffect(() => {
-    const fetchIssues = async () => {
-      try {
-        const token = localStorage.getItem("access_token");
-        if (!token) throw new Error("No access token");
-
-        const response = await axios.get(
-          "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/list/",
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setIssues(response.data);
-      } catch (error) {
-        console.error("Error fetching issues:", error);
-      }
-    };
-
-    fetchIssues();
-  }, []);
-
-  // Listen for sidebar navigation events
+  // Sidebar navigation listener
   useEffect(() => {
     const handleSidebarNav = (event) => {
-      if (event.detail && event.detail.navItem) {
-        setActiveView(event.detail.navItem);
-      }
+      if (event.detail?.navItem) setActiveView(event.detail.navItem);
     };
     window.addEventListener("sidebarNavigation", handleSidebarNav);
     return () => window.removeEventListener("sidebarNavigation", handleSidebarNav);
@@ -85,11 +60,12 @@ const RegistrarDashboard = () => {
     if (action === "assign") {
       setShowAssignModal(true);
     } else {
-      const updated = issues.map((i) =>
-        i.id === selectedIssue.id ? { ...i, status: action } : i
+      setIssues((prev) =>
+        prev.map((i) =>
+          i.id === selectedIssue.id ? { ...i, status: action } : i
+        )
       );
-      setIssues(updated);
-      setSelectedIssue({ ...selectedIssue, status: action });
+      setSelectedIssue((prev) => ({ ...prev, status: action }));
     }
   };
 
@@ -99,45 +75,44 @@ const RegistrarDashboard = () => {
       date: new Date().toISOString().split("T")[0],
       content: comment,
     };
-    const updatedIssue = {
-      ...selectedIssue,
-      comments: [...(selectedIssue.comments || []), newComment],
-    };
-    setIssues(issues.map((i) => (i.id === updatedIssue.id ? updatedIssue : i)));
-    setSelectedIssue(updatedIssue);
+    setIssues((prev) =>
+      prev.map((i) =>
+        i.id === selectedIssue.id
+          ? { ...i, comments: [...(i.comments || []), newComment] }
+          : i
+      )
+    );
+    setSelectedIssue((prev) => ({
+      ...prev,
+      comments: [...(prev.comments || []), newComment],
+    }));
   };
 
-  const handleAssignIssue = async () => {
+  // Stubbed assign logic (no API call)
+  const handleAssignIssue = () => {
     if (!selectedLecturer) return;
-
-    const token = localStorage.getItem("access_token");
-    try {
-      // Call backend assign endpoint
-      await axios.post(
-        `https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/assign/${selectedIssue.id}/`,
-        { lecturer_id: selectedLecturer },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-    } catch (error) {
-      console.error("Assign API failed:", error);
-      return;
-    }
-
-    // Update local state after successful assignment
     const lecturer = lecturers.find((l) => l.id === selectedLecturer);
-    const updatedIssues = issues.map((i) =>
-      i.id === selectedIssue.id
-        ? { ...i, status: "In Progress", assignee: lecturer.name }
-        : i
+
+    // Update local state only
+    setIssues((prev) =>
+      prev.map((i) =>
+        i.id === selectedIssue.id
+          ? { ...i, status: "In Progress", assignee: lecturer.name }
+          : i
+      )
     );
-    const updatedLecturers = lecturers.map((l) =>
-      l.id === selectedLecturer
-        ? { ...l, assignedIssues: l.assignedIssues + 1 }
-        : l
+    setLecturers((prev) =>
+      prev.map((l) =>
+        l.id === selectedLecturer
+          ? { ...l, assignedIssues: l.assignedIssues + 1 }
+          : l
+      )
     );
-    setIssues(updatedIssues);
-    setLecturers(updatedLecturers);
-    setSelectedIssue({ ...selectedIssue, status: "In Progress", assignee: lecturer.name });
+    setSelectedIssue((prev) => ({
+      ...prev,
+      status: "In Progress",
+      assignee: lecturer.name,
+    }));
     setShowAssignModal(false);
     setSelectedLecturer(null);
   };
@@ -154,7 +129,6 @@ const RegistrarDashboard = () => {
 
   const assignedIssues = issues.filter((i) => i.assignee);
 
-  // Render content based on active view
   const renderContent = () => {
     switch (activeView) {
       case "issues":
@@ -167,6 +141,7 @@ const RegistrarDashboard = () => {
             userRole="Registrar"
           />
         );
+
       case "assigned":
         return (
           <IssueList
@@ -177,6 +152,7 @@ const RegistrarDashboard = () => {
             userRole="Registrar"
           />
         );
+
       case "lecturers":
         return (
           <div className="lecturers-view">
@@ -212,16 +188,43 @@ const RegistrarDashboard = () => {
             </div>
           </div>
         );
+
       case "help":
         return (
           <div className="help-view">
-            <h2>Help & Support</h2>
-            {/* ... help content unchanged ... */}
+            <h2>Help &amp; Support</h2>
+            <p>If you run into any issues, please:</p>
+            <ul>
+              <li>Email: support@mak.ac.ug</li>
+              <li>Call: +256 414 123456</li>
+              <li>Visit: Room 101, CIT Building</li>
+            </ul>
           </div>
         );
+
       default:
         return (
-          <> … (rest of default view unchanged) … </>
+          <div className="dashboard-overview">
+            <h2>Welcome, {registrarProfile.full_name || "Registrar"}</h2>
+            <div className="stats-cards">
+              <div className="stat-card">
+                <h3>Total Issues</h3>
+                <p>{stats.totalIssues}</p>
+              </div>
+              <div className="stat-card">
+                <h3>Open Issues</h3>
+                <p>{stats.openIssues}</p>
+              </div>
+              <div className="stat-card">
+                <h3>In Progress</h3>
+                <p>{stats.inProgressIssues}</p>
+              </div>
+              <div className="stat-card">
+                <h3>Resolved</h3>
+                <p>{stats.resolvedIssues}</p>
+              </div>
+            </div>
+          </div>
         );
     }
   };
@@ -244,7 +247,26 @@ const RegistrarDashboard = () => {
       {/* Assign Issue Modal */}
       {showAssignModal && (
         <div className="modal-overlay">
-          {/* ... assign modal unchanged ... */}
+          <div className="assign-modal">
+            <h3>Assign Issue to Lecturer</h3>
+            <select
+              value={selectedLecturer || ""}
+              onChange={(e) => setSelectedLecturer(Number(e.target.value))}
+            >
+              <option value="" disabled>
+                -- select a lecturer --
+              </option>
+              {lecturers.map((l) => (
+                <option key={l.id} value={l.id}>
+                  {l.name} ({l.department})
+                </option>
+              ))}
+            </select>
+            <div className="modal-actions">
+              <button onClick={handleAssignIssue}>Assign</button>
+              <button onClick={() => setShowAssignModal(false)}>Cancel</button>
+            </div>
+          </div>
         </div>
       )}
     </DashboardLayout>
