@@ -1,5 +1,4 @@
-// ─── Components/issues/IssueDetail.jsx ─────────────────────────────────────
-"use client";
+// Components/issues/IssueDetail.jsx
 import { useState } from "react";
 import { FaTimes, FaFile } from "react-icons/fa";
 import "../styles/issue-detail.css";
@@ -14,21 +13,36 @@ const IssueDetail = ({
   lecturers = [],
 }) => {
   const [newComment, setNewComment] = useState("");
-  const [selectedLecturerId, setSelectedLecturerId] = useState("");
+  const [showAssignList, setShowAssignList] = useState(false);
 
-  // Format status/category badges
-  const getStatusClass = (s) => ({
-    open: "status-open",
-    "in progress": "status-progress",
-    resolved: "status-resolved",
-    closed: "status-closed",
-  }[s.toLowerCase()] || "status-default");
+  const getStatusClass = (s) => {
+    switch (s.toLowerCase()) {
+      case "open":
+        return "status-open";
+      case "in progress":
+        return "status-progress";
+      case "resolved":
+        return "status-resolved";
+      case "closed":
+        return "status-closed";
+      default:
+        return "status-default";
+    }
+  };
 
-  const getCategoryClass = (c) => ({
-    "missing marks": "category-missing-marks",
-    appeals: "category-appeals",
-    correction: "category-correction",
-  }[c?.toLowerCase()] || "");
+  const getCategoryClass = (c) => {
+    if (!c) return "";
+    switch (c.toLowerCase()) {
+      case "missing marks":
+        return "category-missing-marks";
+      case "appeals":
+        return "category-appeals";
+      case "correction":
+        return "category-correction";
+      default:
+        return "";
+    }
+  };
 
   const handleAddComment = () => {
     if (!newComment.trim()) return;
@@ -36,7 +50,7 @@ const IssueDetail = ({
     setNewComment("");
   };
 
-  const availableActions = (() => {
+  const actions = (() => {
     if (userRole === "Student") {
       if (issue.status === "Open")
         return [{ label: "Request Update", action: "In Progress" }];
@@ -47,8 +61,7 @@ const IssueDetail = ({
         ];
     }
     if (userRole === "Registrar" && issue.status === "Open") {
-      // We handle “Assign” inline, not via onStatusChange
-      return [{ label: "Assign", action: "assign" }];
+      return [{ label: "Assign to Lecturer", action: "assign" }];
     }
     if (userRole === "Lecturer") {
       if (issue.status === "In Progress")
@@ -59,14 +72,12 @@ const IssueDetail = ({
     return [];
   })();
 
-  const handleActionClick = (action) => {
-    if (action === "assign") return;
-    onStatusChange(action);
-  };
-
-  const handleAssignClick = () => {
-    if (!selectedLecturerId) return;
-    onAssign(selectedLecturerId);
+  const onActionClick = (act) => {
+    if (act === "assign") {
+      setShowAssignList((v) => !v);
+    } else {
+      onStatusChange(act);
+    }
   };
 
   return (
@@ -78,7 +89,6 @@ const IssueDetail = ({
             <FaTimes />
           </button>
         </div>
-
         <div className="issue-detail-content">
           <div className="issue-detail-header">
             <div className="issue-id-badge">#{issue.id}</div>
@@ -91,16 +101,14 @@ const IssueDetail = ({
 
           <div className="issue-detail-meta">
             <div>
-              <strong>Submitted:</strong>{" "}
-              {new Date(issue.date).toLocaleString()}
-            </div>
-            <div>
-              <strong>Submitted by:</strong> {issue.author || "Unknown"}
+              <strong>Submitted:</strong> {issue.date}
             </div>
             <div>
               <strong>Category:</strong>{" "}
               <span
-                className={`category-badge ${getCategoryClass(issue.category)}`}
+                className={`category-badge ${getCategoryClass(
+                  issue.category
+                )}`}
               >
                 {issue.category || "Not specified"}
               </span>
@@ -119,14 +127,16 @@ const IssueDetail = ({
 
           <div className="issue-detail-section">
             <h4>Description</h4>
-            <p>{issue.description}</p>
+            <p className="issue-detail-description">
+              {issue.description}
+            </p>
 
             {issue.attachments?.length > 0 && (
               <div className="issue-attachments">
                 <h5>Attachments</h5>
-                {issue.attachments.map((file, i) => (
+                {issue.attachments.map((file, idx) => (
                   <a
-                    key={i}
+                    key={idx}
                     href="#"
                     className="attachment-link"
                     onClick={(e) => {
@@ -167,11 +177,11 @@ const IssueDetail = ({
             </div>
             <div className="add-comment">
               <textarea
+                className="comment-input"
                 rows="3"
                 placeholder="Add a comment..."
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
-                className="comment-input"
               />
               <button className="submit-button" onClick={handleAddComment}>
                 Post Comment
@@ -179,48 +189,41 @@ const IssueDetail = ({
             </div>
           </div>
 
-          {/* Inline Assign (Registrar only) */}
-          {availableActions.find((a) => a.action === "assign") && (
-            <div className="issue-detail-section">
-              <h4>Assign to Lecturer</h4>
-              <select
-                value={selectedLecturerId}
-                onChange={(e) => setSelectedLecturerId(e.target.value)}
-              >
-                <option value="">— Select lecturer —</option>
-                {lecturers.map((lec) => (
-                  <option key={lec.id} value={lec.id}>
-                    {lec.name}
-                  </option>
-                ))}
-              </select>
-              <button
-                className="action-button"
-                onClick={handleAssignClick}
-                disabled={!selectedLecturerId}
-              >
-                Assign
-              </button>
-            </div>
-          )}
-
-          {/* Other status actions */}
-          {availableActions.filter((a) => a.action !== "assign").length > 0 && (
+          {/* inline assign toggle */}
+          {actions.length > 0 && (
             <div className="issue-detail-section">
               <h4>Actions</h4>
               <div className="issue-actions">
-                {availableActions
-                  .filter((a) => a.action !== "assign")
-                  .map((a, i) => (
+                {actions.map((a, i) => (
+                  <button
+                    key={i}
+                    className="action-button status-update-button"
+                    onClick={() => onActionClick(a.action)}
+                  >
+                    {a.label}
+                  </button>
+                ))}
+              </div>
+
+              {showAssignList && (
+                <div className="assign-list">
+                  <p>Select a lecturer to assign:</p>
+                  {lecturers.map((lec) => (
                     <button
-                      key={i}
-                      className="action-button status-update-button"
-                      onClick={() => handleActionClick(a.action)}
+                      key={lec.id}
+                      className="action-button"
+                      onClick={() => onAssign(lec.id)}
                     >
-                      {a.label}
+                      {lec.name}
                     </button>
                   ))}
-              </div>
+                  {issue.assignMessage && (
+                    <div className="assign-message">
+                      {issue.assignMessage}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>
