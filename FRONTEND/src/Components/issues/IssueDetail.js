@@ -1,7 +1,6 @@
 // Components/issues/IssueDetail.jsx
 import { useState } from "react";
 import { FaTimes, FaFile } from "react-icons/fa";
-import axios from "axios";
 import "../styles/issue-detail.css";
 
 const IssueDetail = ({
@@ -10,11 +9,8 @@ const IssueDetail = ({
   onStatusChange,
   onAddComment,
   userRole,
-  lecturers = [],
 }) => {
   const [newComment, setNewComment] = useState("");
-  const [showAssignList, setShowAssignList] = useState(false);
-  const [assignMessage, setAssignMessage] = useState("");
 
   const getStatusClass = (s) => {
     switch (s.toLowerCase()) {
@@ -59,9 +55,6 @@ const IssueDetail = ({
         { label: "Reopen Issue", action: "Open" },
       ];
     }
-    if (userRole === "Registrar" && issue.status === "Open") {
-      return [{ label: "Assign to Lecturer", action: "assign" }];
-    }
     if (userRole === "Lecturer") {
       if (issue.status === "In Progress") return [{ label: "Mark as Resolved", action: "Resolved" }];
       if (issue.status === "Open") return [{ label: "Start Working", action: "In Progress" }];
@@ -70,30 +63,7 @@ const IssueDetail = ({
   })();
 
   const onActionClick = (act) => {
-    if (act === "assign") {
-      setShowAssignList((v) => !v);
-    } else {
-      onStatusChange(act);
-    }
-  };
-
-  const handleAssignClick = async (lecturerId) => {
-    if (!lecturerId) return;
-    try {
-      const token = localStorage.getItem("access_token");
-      const { data } = await axios.post(
-        `https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/${issue.id}/assign/`,
-        { lecturer_id: lecturerId },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      const selected = lecturers.find((l) => l.id === lecturerId);
-      setAssignMessage(data.message || `Assigned to ${selected.name}`);
-      onStatusChange("In Progress");
-    } catch (error) {
-      console.error("Assignment failed:", error);
-      setAssignMessage("Failed to assign issue. Please try again.");
-    }
+    onStatusChange(act);
   };
 
   return (
@@ -116,14 +86,13 @@ const IssueDetail = ({
           <h3 className="issue-detail-title">{issue.title}</h3>
 
           <div className="issue-detail-meta">
-            <div><strong>Submitted:</strong> {issue.date}</div>
+            <div><strong>Submitted:</strong> {issue.submitted_at}</div>
             <div>
               <strong>Category:</strong>{" "}
-              <span className={`category-badge ${getCategoryClass(issue.category)}`}>{issue.category || "Not specified"}</span>
+              <span className={`category-badge ${getCategoryClass(issue.category)}`}>
+                {issue.category || "Not specified"}
+              </span>
             </div>
-            {userRole === "Registrar" && (
-              <div><strong>Assignee:</strong> {issue.assignee || "Unassigned"}</div>
-            )}
             {userRole === "Lecturer" && (
               <div><strong>Student:</strong> {issue.student || "Unknown"}</div>
             )}
@@ -141,7 +110,10 @@ const IssueDetail = ({
                     key={idx}
                     href="#"
                     className="attachment-link"
-                    onClick={(e) => { e.preventDefault(); alert(`Downloading file: ${file.name}`); }}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      alert(`Downloading file: ${file.name}`);
+                    }}
                   >
                     <FaFile /> {file.name}
                   </a>
@@ -157,7 +129,7 @@ const IssueDetail = ({
                 issue.comments.map((c, i) => (
                   <div className="comment-item" key={i}>
                     <div className="comment-header">
-                      <img src="/placeholder.svg?height=40&width=40" alt={c.author} className="comment-avatar"/>
+                      <img src="/placeholder.svg?height=40&width=40" alt={c.author} className="comment-avatar" />
                       <div className="comment-meta">
                         <div className="comment-author">{c.author}</div>
                         <div className="comment-date">{c.date}</div>
@@ -196,24 +168,6 @@ const IssueDetail = ({
                   </button>
                 ))}
               </div>
-
-              {showAssignList && (
-                <div className="assign-list">
-                  <p>Select a lecturer to assign:</p>
-                  {lecturers.map((lec) => (
-                    <button
-                      key={lec.id}
-                      className="action-button"
-                      onClick={() => handleAssignClick(lec.id)}
-                    >
-                      {lec.name}
-                    </button>
-                  ))}
-                  {assignMessage && (
-                    <div className="assign-message">{assignMessage}</div>
-                  )}
-                </div>
-              )}
             </div>
           )}
         </div>

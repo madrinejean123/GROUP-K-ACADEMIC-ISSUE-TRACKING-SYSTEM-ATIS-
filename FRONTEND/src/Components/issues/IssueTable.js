@@ -1,3 +1,4 @@
+// Components/issues/IssueTable.jsx
 import React, { useState } from "react";
 import axios from "axios";
 import "../styles/issue-table.css";
@@ -7,8 +8,6 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
   const [assignMessages, setAssignMessages] = useState({});
   const [lecturers, setLecturers] = useState([]);
   const [loadingLecturers, setLoadingLecturers] = useState(false);
-  // Track assigned state locally
-  const [assignedLecturers, setAssignedLecturers] = useState({});
 
   const statuses = Array.from(new Set(issues.map((i) => i.status)));
 
@@ -49,7 +48,10 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
         "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/users/lecturers/",
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      const formatted = data.map((l) => ({ id: l.id, name: l.user.full_name }));
+      const formatted = data.map((l) => ({
+        id: l.id,
+        name: l.user.full_name,
+      }));
       setLecturers(formatted);
     } catch (err) {
       console.error("Failed to fetch lecturers:", err);
@@ -74,15 +76,11 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // Inform parent
       const selected = lecturers.find((l) => l.id === lecturerId);
-      const lecturerName = selected ? selected.name : "Assigned";
+      const lecturerName = selected?.name ?? "Assigned";
+
+      // Propagate up so parent can update issue.assignee in its state
       onAssign(issueId, lecturerId, lecturerName);
-      // Mark assigned locally
-      setAssignedLecturers((prev) => ({
-        ...prev,
-        [issueId]: lecturerName,
-      }));
 
       setAssignMessages((msgs) => ({
         ...msgs,
@@ -121,20 +119,24 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
                       switch (c.id) {
                         case "id":
                           return <td key={c.id}>#{issue.id}</td>;
+
                         case "title":
                           return <td key={c.id}>{issue.title}</td>;
+
                         case "description":
                           return (
                             <td key={c.id} className="description-cell">
                               {issue.description}
                             </td>
                           );
+
                         case "date":
                           return (
                             <td key={c.id}>
                               {new Date(issue.created_at).toLocaleString()}
                             </td>
                           );
+
                         case "status":
                           return (
                             <td key={c.id}>
@@ -147,14 +149,13 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
                               </span>
                             </td>
                           );
+
                         case "assignee": {
-                          // If already assigned, show plain text
-                          const assignedName =
-                            issue.assignee || assignedLecturers[issue.id];
-                          if (assignedName) {
-                            return <td key={c.id}>{assignedName}</td>;
+                          // If already assigned, just show the lecturer's name
+                          if (issue.assignee) {
+                            return <td key={c.id}>{issue.assignee}</td>;
                           }
-                          // Else show assign button or dropdown
+                          // Otherwise, show Assign button / dropdown
                           return (
                             <td key={c.id}>
                               {assigningIssueId === issue.id ? (
@@ -191,12 +192,14 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
                             </td>
                           );
                         }
+
                         case "student":
                           return (
                             <td key={c.id}>
                               {issue.author?.user?.full_name || "Unknown"}
                             </td>
                           );
+
                         case "actions":
                           return (
                             <td key={c.id}>
@@ -208,6 +211,7 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
                               </button>
                             </td>
                           );
+
                         default:
                           return <td key={c.id}>—</td>;
                       }
