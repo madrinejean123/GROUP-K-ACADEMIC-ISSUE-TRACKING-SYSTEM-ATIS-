@@ -4,146 +4,137 @@ import { useState, useEffect } from "react";
 import DashboardLayout from "../../Components/layout/DashboardLayout";
 import IssueList from "../../Components/issues/IssueList";
 import IssueDetail from "../../Components/issues/IssueDetail";
-import { mockIssues } from "../../mock-data";
 import "./lecturer-dashboard.css";
-import axios from "axios";  // 📌 ADDED
+import axios from "axios";
+
+const PROFILE_API_URL = 
+  "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/profile/";
+const ISSUES_API_URL = 
+  "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/list/";
 
 const LecturerDashboard = () => {
+  const [lecturerProfile, setLecturerProfile] = useState({});
   const [issues, setIssues] = useState([]);
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [showIssueDetailModal, setShowIssueDetailModal] = useState(false);
   const [activeTab, setActiveTab] = useState("assigned");
-  // 📌 NEW state to hold the fetched profile
-  const [lecturerProfile, setLecturerProfile] = useState({});
 
-  // 📌 Fetch the lecturer's full profile from the backend
+  // Fetch lecturer profile once on mount
   useEffect(() => {
     const fetchLecturerProfile = async () => {
       try {
         const token = localStorage.getItem("access_token");
-        if (!token) return console.error("No access token found");
+        if (!token) {
+          console.error("No access token found");
+          return;
+        }
 
-        const response = await axios.get(
-          "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/profile/",
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        const { data } = await axios.get(PROFILE_API_URL, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-        const data = response.data;
-        // handle array vs object
-        const profileData = Array.isArray(data) ? data[0] : data;
-        setLecturerProfile(profileData);
-      } catch (error) {
-        console.error("Error fetching lecturer profile:", error);
+        // If your API returns an array, pick the first element
+        setLecturerProfile(Array.isArray(data) ? data[0] : data);
+      } catch (err) {
+        console.error("Error fetching profile:", err);
       }
     };
 
     fetchLecturerProfile();
   }, []);
 
-  // Load issues with student information
+  // Fetch issues after profile is loaded (so we can stamp on assignee if needed)
   useEffect(() => {
-    const assignedIssues = mockIssues
-      .filter(
-        (issue) => issue.status === "In Progress" || issue.status === "Open"
-      )
-      .map((issue) => ({
-        ...issue,
-        student: "John Doe",
-        studentId: "STD" + Math.floor(Math.random() * 10000),
-        assignee: lecturerProfile.full_name
-          ? `Dr. ${lecturerProfile.full_name}`
-          : "Dr. Lecturer",
-      }));
+    const fetchIssueList = async () => {
+      try {
+        const token = localStorage.getItem("access_token");
+        if (!token) return;
 
-    const resolvedIssues = mockIssues
-      .filter(
-        (issue) => issue.status === "Resolved" || issue.status === "Closed"
-      )
-      .map((issue) => ({
-        ...issue,
-        student: "Jane Smith",
-        studentId: "STD" + Math.floor(Math.random() * 10000),
-        assignee: lecturerProfile.full_name
-          ? `Dr. ${lecturerProfile.full_name}`
-          : "Dr. Lecturer",
-      }));
+        const { data } = await axios.get(ISSUES_API_URL, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-    setIssues([...assignedIssues, ...resolvedIssues]);
-  }, [lecturerProfile]);  // 📌 re-run when profile arrives
+        // If you need to add the lecturer’s name as assignee:
+        const enriched = data.map((issue) => ({
+          ...issue,
+          assignee: lecturerProfile.full_name
+            ? `Dr. ${lecturerProfile.full_name}`
+            : "Dr. Lecturer",
+        }));
+
+        setIssues(enriched);
+      } catch (err) {
+        console.error("Error fetching issue list:", err);
+      }
+    };
+
+    // only call once profile is in state
+    if (lecturerProfile.full_name !== undefined) {
+      fetchIssueList();
+    }
+  }, [lecturerProfile]);
 
   const handleViewIssue = (issue) => {
     setSelectedIssue(issue);
     setShowIssueDetailModal(true);
   };
 
-  const handleStatusChange = (action) => {
-    const updatedIssues = issues.map((issue) =>
-      issue.id === selectedIssue.id ? { ...issue, status: action } : issue
+  const handleStatusChange = (newStatus) => {
+    setIssues((all) =>
+      all.map((i) => (i.id === selectedIssue.id ? { ...i, status: newStatus } : i))
     );
-    setIssues(updatedIssues);
-    setSelectedIssue({ ...selectedIssue, status: action });
+    setSelectedIssue((i) => ({ ...i, status: newStatus }));
   };
 
-  const handleAddComment = (comment) => {
+  const handleAddComment = (commentText) => {
     const newComment = {
       author: lecturerProfile.full_name
         ? `Dr. ${lecturerProfile.full_name}`
         : "Dr. Lecturer",
       date: new Date().toISOString().split("T")[0],
-      content: comment,
+      content: commentText,
     };
 
-    const updatedIssue = {
-      ...selectedIssue,
-      comments: [...(selectedIssue.comments || []), newComment],
-    };
-
-    const updatedIssues = issues.map((issue) =>
-      issue.id === selectedIssue.id ? updatedIssue : issue
+    setIssues((all) =>
+      all.map((i) =>
+        i.id === selectedIssue.id
+          ? { ...i, comments: [...(i.comments || []), newComment] }
+          : i
+      )
     );
-
-    setIssues(updatedIssues);
-    setSelectedIssue(updatedIssue);
+    setSelectedIssue((i) => ({
+      ...i,
+      comments: [...(i.comments || []), newComment],
+    }));
   };
 
-  const getFilteredIssues = () => {
-    if (activeTab === "assigned") {
-      return issues.filter(
-        (issue) => issue.status === "Open" || issue.status === "In Progress"
-      );
-    } else {
-      return issues.filter(
-        (issue) => issue.status === "Resolved" || issue.status === "Closed"
-      );
-    }
-  };
-
-  const filteredIssues = getFilteredIssues();
+  // Tabs
+  const assignedIssues = issues.filter(
+    (i) => i.status === "Open" || i.status === "In Progress"
+  );
+  const resolvedIssues = issues.filter(
+    (i) => i.status === "Resolved" || i.status === "Closed"
+  );
+  const filteredIssues = activeTab === "assigned" ? assignedIssues : resolvedIssues;
 
   const stats = {
-    assignedIssues: issues.filter(
-      (issue) => issue.status === "Open" || issue.status === "In Progress"
-    ).length,
-    resolvedIssues: issues.filter(
-      (issue) => issue.status === "Resolved" || issue.status === "Closed"
-    ).length,
-    totalStudents: [...new Set(issues.map((issue) => issue.student))].length,
+    assignedIssues: assignedIssues.length,
+    resolvedIssues: resolvedIssues.length,
+    totalStudents: new Set(issues.map((i) => i.student)).size,
   };
 
   return (
-    <DashboardLayout userRole="Lecturer" profile={lecturerProfile}> {/* 📌 PASS profile down if needed */}
+    <DashboardLayout userRole="Lecturer" profile={lecturerProfile}>
       <div className="lecturer-dashboard">
         <div className="welcome-section">
-          <div className="welcome-text">
-            <h2>
-              Welcome,{" "}
-              {lecturerProfile.full_name
-                ? `Dr. ${lecturerProfile.full_name}`
-                : "Dr. Lecturer"}
-              !
-            </h2>
-            <p>Manage and resolve student academic issues assigned to you.</p>
-          </div>
+          <h2>
+            Welcome,{" "}
+            {lecturerProfile.full_name
+              ? `Dr. ${lecturerProfile.full_name}`
+              : "Dr. Lecturer"}
+            !
+          </h2>
+          <p>Manage and resolve student academic issues.</p>
           <div className="stats-cards">
             <div className="stat-card">
               <div className="stat-value">{stats.assignedIssues}</div>
@@ -161,42 +152,38 @@ const LecturerDashboard = () => {
         </div>
 
         <div className="tabs-container">
-          <div className="tabs">
-            <button
-              className={`tab ${activeTab === "assigned" ? "active" : ""}`}
-              onClick={() => setActiveTab("assigned")}
-            >
-              Assigned Issues
-            </button>
-            <button
-              className={`tab ${activeTab === "resolved" ? "active" : ""}`}
-              onClick={() => setActiveTab("resolved")}
-            >
-              Resolved Issues
-            </button>
-          </div>
+          <button
+            className={activeTab === "assigned" ? "tab active" : "tab"}
+            onClick={() => setActiveTab("assigned")}
+          >
+            Assigned Issues
+          </button>
+          <button
+            className={activeTab === "resolved" ? "tab active" : "tab"}
+            onClick={() => setActiveTab("resolved")}
+          >
+            Resolved Issues
+          </button>
         </div>
 
         <IssueList
           issues={filteredIssues}
-          title={
-            activeTab === "assigned" ? "Assigned Issues" : "Resolved Issues"
-          }
+          title={activeTab === "assigned" ? "Assigned Issues" : "Resolved Issues"}
           showCreateButton={false}
           onViewIssue={handleViewIssue}
           userRole="Lecturer"
         />
-      </div>
 
-      {showIssueDetailModal && selectedIssue && (
-        <IssueDetail
-          issue={selectedIssue}
-          onClose={() => setShowIssueDetailModal(false)}
-          onStatusChange={handleStatusChange}
-          onAddComment={handleAddComment}
-          userRole="Lecturer"
-        />
-      )}
+        {showIssueDetailModal && selectedIssue && (
+          <IssueDetail
+            issue={selectedIssue}
+            onClose={() => setShowIssueDetailModal(false)}
+            onStatusChange={handleStatusChange}
+            onAddComment={handleAddComment}
+            userRole="Lecturer"
+          />
+        )}
+      </div>
     </DashboardLayout>
   );
 };
