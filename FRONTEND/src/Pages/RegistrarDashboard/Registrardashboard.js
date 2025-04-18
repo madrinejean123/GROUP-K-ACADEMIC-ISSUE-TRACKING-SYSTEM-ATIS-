@@ -49,7 +49,6 @@ const RegistrarDashboard = () => {
       } catch (e) {
         console.error("Issues error:", e);
       }
-
     }
     fetchIssues();
   }, []);
@@ -65,7 +64,10 @@ const RegistrarDashboard = () => {
           { headers: { Authorization: `Bearer ${token}` } }
         );
         // Use record ID for assignment consistency
-        const formatted = data.map((l) => ({ id: l.id, name: l.user.full_name }));
+        const formatted = data.map((l) => ({
+          id: l.id,
+          name: l.user.full_name,
+        }));
         setLecturers(formatted);
       } catch (e) {
         console.error("Lecturers error:", e);
@@ -79,7 +81,7 @@ const RegistrarDashboard = () => {
     const onNav = (e) => e.detail?.navItem && setActiveView(e.detail.navItem);
     window.addEventListener("sidebarNavigation", onNav);
     return () => window.removeEventListener("sidebarNavigation", onNav);
-
+  }, []);
 
   const handleViewIssue = (issue) => {
     setSelectedIssue(issue);
@@ -131,16 +133,14 @@ const RegistrarDashboard = () => {
         assigneeId: lecturerId,
       }));
     }
-
   };
 
   // Stats & filters (case-insensitive)
   const stats = {
     total: issues.length,
     open: issues.filter((i) => i.status?.toLowerCase() === "open").length,
-    inProgress: issues.filter(
-      (i) => i.status?.toLowerCase() === "in progress"
-    ).length,
+    inProgress: issues.filter((i) => i.status?.toLowerCase() === "in progress")
+      .length,
     resolved: issues.filter((i) =>
       ["resolved", "closed"].includes(i.status?.toLowerCase())
     ).length,
@@ -176,14 +176,11 @@ const RegistrarDashboard = () => {
           <div className="lecturers-view">
             <h2>Lecturers</h2>
             {lecturers.map((l) => {
-              const count = issues.filter(
-                (i) => i.assigneeId === l.id
-              ).length;
+              const count = issues.filter((i) => i.assigneeId === l.id).length;
               return (
                 <div key={l.id} className="lecturer-card-full">
                   <h3>{l.name}</h3>
                   <p>{count} assigned issues</p>
-
                 </div>
               );
             })}
@@ -202,14 +199,12 @@ const RegistrarDashboard = () => {
         );
       default:
         return (
-<<<<<<< HEAD
           <div className="dashboard-overview">
             <h2>Welcome, {registrarProfile.full_name || "Registrar"}</h2>
             <div className="stats-cards">
               <div className="stat-card">
                 <h3>Total Issues</h3>
                 <p>{stats.total}</p>
-
               </div>
               <div className="stat-card">
                 <h3>Open</h3>
@@ -232,7 +227,6 @@ const RegistrarDashboard = () => {
   return (
     <DashboardLayout userRole="Registrar" profile={registrarProfile}>
       <div className="registrar-dashboard">{renderContent()}</div>
-
 
       {showIssueDetailModal && selectedIssue && (
         <IssueDetail
