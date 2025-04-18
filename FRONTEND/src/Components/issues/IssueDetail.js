@@ -1,5 +1,4 @@
-// Components/issues/IssueDetail.jsx
-import { useState } from "react";
+import React, { useState } from "react";
 import { FaTimes, FaFile } from "react-icons/fa";
 import "../styles/issue-detail.css";
 
@@ -49,15 +48,19 @@ const IssueDetail = ({
 
   const actions = (() => {
     if (userRole === "Student") {
-      if (issue.status === "Open") return [{ label: "Request Update", action: "In Progress" }];
-      if (issue.status === "Resolved") return [
-        { label: "Close Issue", action: "Closed" },
-        { label: "Reopen Issue", action: "Open" },
-      ];
+      if (issue.status === "Open")
+        return [{ label: "Request Update", action: "In Progress" }];
+      if (issue.status === "Resolved")
+        return [
+          { label: "Close Issue", action: "Closed" },
+          { label: "Reopen Issue", action: "Open" },
+        ];
     }
     if (userRole === "Lecturer") {
-      if (issue.status === "In Progress") return [{ label: "Mark as Resolved", action: "Resolved" }];
-      if (issue.status === "Open") return [{ label: "Start Working", action: "In Progress" }];
+      if (issue.status === "In Progress")
+        return [{ label: "Mark as Resolved", action: "Resolved" }];
+      if (issue.status === "Open")
+        return [{ label: "Start Working", action: "In Progress" }];
     }
     return [];
   })();
@@ -75,10 +78,11 @@ const IssueDetail = ({
             <FaTimes />
           </button>
         </div>
+
         <div className="issue-detail-content">
           <div className="issue-detail-header">
             <div className="issue-id-badge">#{issue.id}</div>
-            <span className={`status-badge ${getStatusClass(issue.status)}`}>
+            <span className={`status-badge ${getStatusClass(issue.status)}`}> 
               {issue.status}
             </span>
           </div>
@@ -86,15 +90,29 @@ const IssueDetail = ({
           <h3 className="issue-detail-title">{issue.title}</h3>
 
           <div className="issue-detail-meta">
-            <div><strong>Submitted:</strong> {issue.submitted_at}</div>
+            <div>
+              <strong>Author:</strong>{" "}
+              {issue.author?.user?.full_name || issue.author || "Unknown"}
+            </div>
+            <div>
+              <strong>Submitted:</strong>{" "}
+              {new Date(issue.created_at).toLocaleString()}
+            </div>
             <div>
               <strong>Category:</strong>{" "}
               <span className={`category-badge ${getCategoryClass(issue.category)}`}>
                 {issue.category || "Not specified"}
               </span>
             </div>
+            <div>
+              <strong>Assigned Lecturer:</strong>{" "}
+              {issue.assigned_lecturer || "Unassigned"}
+            </div>
             {userRole === "Lecturer" && (
-              <div><strong>Student:</strong> {issue.student || "Unknown"}</div>
+              <div>
+                <strong>Student:</strong>{" "}
+                {issue.student || "Unknown"}
+              </div>
             )}
           </div>
 
@@ -129,7 +147,11 @@ const IssueDetail = ({
                 issue.comments.map((c, i) => (
                   <div className="comment-item" key={i}>
                     <div className="comment-header">
-                      <img src="/placeholder.svg?height=40&width=40" alt={c.author} className="comment-avatar" />
+                      <img
+                        src="/placeholder.svg?height=40&width=40"
+                        alt={c.author}
+                        className="comment-avatar"
+                      />
                       <div className="comment-meta">
                         <div className="comment-author">{c.author}</div>
                         <div className="comment-date">{c.date}</div>
@@ -150,7 +172,9 @@ const IssueDetail = ({
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
               />
-              <button className="submit-button" onClick={handleAddComment}>Post Comment</button>
+              <button className="submit-button" onClick={handleAddComment}>
+                Post Comment
+              </button>
             </div>
           </div>
 
