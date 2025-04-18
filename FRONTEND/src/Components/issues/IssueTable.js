@@ -11,6 +11,7 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
 
   const statuses = Array.from(new Set(issues.map((i) => i.status)));
 
+  // Define table columns. For Registrar, include Submitted By (author) and Assignee.
   const columns = [
     { id: "id", label: "ID" },
     { id: "title", label: "Title" },
@@ -18,7 +19,10 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
     { id: "date", label: "Submitted At" },
     { id: "status", label: "Status" },
     ...(userRole === "Registrar"
-      ? [{ id: "assignee", label: "Assignee" }]
+      ? [
+          { id: "author", label: "Submitted By" },
+          { id: "assignee", label: "Assignee" },
+        ]
       : userRole === "Lecturer"
       ? [{ id: "student", label: "Student" }]
       : []),
@@ -29,6 +33,7 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
     switch (s?.toLowerCase()) {
       case "open":
         return "status-open";
+      case "in_progress":
       case "in progress":
         return "status-progress";
       case "resolved":
@@ -48,11 +53,8 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
         "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/users/lecturers/",
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      const formatted = data.map((l) => ({
-        id: l.id,
-        name: l.user.full_name,
-      }));
-      setLecturers(formatted);
+      // Each lecturer object has id and nested user.full_name
+      setLecturers(data.map((l) => ({ id: l.id, name: l.user.full_name })));
     } catch (err) {
       console.error("Failed to fetch lecturers:", err);
     } finally {
@@ -77,10 +79,10 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
       );
 
       const selected = lecturers.find((l) => l.id === lecturerId);
-      const lecturerName = selected?.name ?? "Assigned";
+      const fullName = selected?.name || "Assigned";
 
-      // Propagate up so parent can update issue.assignee in its state
-      onAssign(issueId, lecturerId, lecturerName);
+      // Notify parent so it can update issue.assigned_lecturer
+      onAssign(issueId, lecturerId, fullName);
 
       setAssignMessages((msgs) => ({
         ...msgs,
@@ -150,12 +152,25 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
                             </td>
                           );
 
+                        case "author":
+                          // Render who submitted the issue
+                          return (
+                            <td key={c.id}>
+                              {issue.author.user.full_name}
+                            </td>
+                          );
+
                         case "assignee": {
-                          // If already assigned, just show the lecturer's name
-                          if (issue.assignee) {
-                            return <td key={c.id}>{issue.assignee}</td>;
+                          const lecturer = issue.assigned_lecturer;
+                          // assigned_lecturer is an object with id and nested user.full_name
+                          if (lecturer) {
+                            return (
+                              <td key={c.id}>
+                                {lecturer.user.full_name}
+                              </td>
+                            );
                           }
-                          // Otherwise, show Assign button / dropdown
+                          // If not yet assigned, show assign controls
                           return (
                             <td key={c.id}>
                               {assigningIssueId === issue.id ? (
@@ -196,7 +211,7 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
                         case "student":
                           return (
                             <td key={c.id}>
-                              {issue.author?.user?.full_name || "Unknown"}
+                              {issue.author.user.full_name || "Unknown"}
                             </td>
                           );
 
