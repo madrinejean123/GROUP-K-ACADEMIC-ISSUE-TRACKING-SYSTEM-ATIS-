@@ -106,7 +106,7 @@ const IssueDetail = ({
             </div>
             <div>
               <strong>Assigned Lecturer:</strong>{" "}
-              {issue.assigned_lecturer || "Unassigned"}
+              {issue.assigned_lecturer?.user?.full_name || "Unassigned"}
             </div>
             {userRole === "Lecturer" && (
               <div>
