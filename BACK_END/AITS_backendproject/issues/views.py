@@ -13,7 +13,17 @@ from users.models import Lecturer
 from .utils import send_notification_email
 import logging
 
+
 logger = logging.getLogger(__name__)
+
+
+from django.http import FileResponse
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views import View
+
+from .models import CollegeRegister
+from django.core.exceptions import ValidationError
+
 
 
 class CreateIssueView(generics.CreateAPIView):
@@ -28,22 +38,27 @@ class CreateIssueView(generics.CreateAPIView):
         user = self.request.user
         student = getattr(user, 'student', None)
         if not student:
-            return Response({"error": "Only students can create issues."}, status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {"error": "Only students can create issues."}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
 
-        # find registrar for notification
-        college_register = student.user.collegeregister if hasattr(student.user, 'collegeregister') else None
-        serializer.save(
-            author=student,
-            register=college_register,
-            college=student.college,
-            school=student.school,
-            department=student.department,
-        )
-        if college_register:
-            send_notification_email(
-                subject="New Student Issue Submitted",
-                message=f"{student.user.get_full_name()} submitted a new issue.",
-                recipient_email=college_register.user.notification_email
+        # Validate file type (handled by model's FileExtensionValidator)
+        try:
+            college_register = CollegeRegister.objects.get(college=student.college)
+            instance = serializer.save(
+                author=student,
+                register=college_register,
+                college=student.college,
+                school=student.school,
+                department=student.department,
+            )
+            if college_register:
+                send_notification_email(...)
+        except ValidationError as e:
+            return Response(
+                {"error": str(e)}, 
+                status=status.HTTP_400_BAD_REQUEST
             )
 
 
@@ -147,3 +162,37 @@ class RetrieveIssueView(generics.RetrieveAPIView):
     queryset = Issues.objects.all()
     serializer_class = IssueDetailSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+class SecureFileDownloadView(LoginRequiredMixin, View):
+    """
+    Securely serve issue attachments only to authorized users.
+    """
+    def get(self, request, issue_id):
+        try:
+            issue = Issues.objects.get(id=issue_id)
+            # Verify user has permission to access this file
+            user = request.user
+            if not (
+                issue.author.user == user or  # Student who created it
+                issue.assigned_lecturer.user == user or  # Assigned lecturer
+                hasattr(user, 'collegeregister')  # Registrar
+            ):
+                raise PermissionError
+
+            if not issue.attachment:
+                raise Http404("No file attached")
+
+            return FileResponse(
+                issue.attachment.open(),
+                filename=issue.attachment.name.split('/')[-1]
+            )
+        except (Issues.DoesNotExist, PermissionError):
+            return Response(
+                {"error": "Not authorized to access this file."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
