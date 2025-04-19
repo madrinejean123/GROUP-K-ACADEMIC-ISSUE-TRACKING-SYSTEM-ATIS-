@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import CreateIssueView, CollegeRegisterAssignView, LecturerUpdateIssueStatusView, ListIssuesView, RetrieveIssueView
+from .views import CreateIssueView, CollegeRegisterAssignView, LecturerUpdateIssueStatusView, ListIssuesView, RetrieveIssueView,SecureFileDownloadView
 
 urlpatterns = [
     # 1️⃣ API for Students to Create an Issuegit
@@ -16,6 +16,8 @@ urlpatterns = [
 
     # 5️⃣ API to Retrieve a Specific Issue
     path('detail/<int:pk>/', RetrieveIssueView.as_view(), name='retrieve-issue'),
+
+    path('issues/<int:issue_id>/download/', SecureFileDownloadView.as_view(), name='issue-download'),
 
     
 ]
