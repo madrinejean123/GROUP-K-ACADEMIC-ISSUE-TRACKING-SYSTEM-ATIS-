@@ -162,3 +162,37 @@ class RetrieveIssueView(generics.RetrieveAPIView):
     queryset = Issues.objects.all()
     serializer_class = IssueDetailSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+class SecureFileDownloadView(LoginRequiredMixin, View):
+    """
+    Securely serve issue attachments only to authorized users.
+    """
+    def get(self, request, issue_id):
+        try:
+            issue = Issues.objects.get(id=issue_id)
+            # Verify user has permission to access this file
+            user = request.user
+            if not (
+                issue.author.user == user or  # Student who created it
+                issue.assigned_lecturer.user == user or  # Assigned lecturer
+                hasattr(user, 'collegeregister')  # Registrar
+            ):
+                raise PermissionError
+
+            if not issue.attachment:
+                raise Http404("No file attached")
+
+            return FileResponse(
+                issue.attachment.open(),
+                filename=issue.attachment.name.split('/')[-1]
+            )
+        except (Issues.DoesNotExist, PermissionError):
+            return Response(
+                {"error": "Not authorized to access this file."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
