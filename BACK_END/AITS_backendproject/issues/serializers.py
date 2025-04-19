@@ -9,6 +9,12 @@ class IssueCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Issues
         fields = ['title', 'description', 'attachment']
+        extra_kwargs = {
+            'attachment': {
+                'required': False,
+                'help_text': 'Upload image (JPG/PNG) or PDF file'
+            }
+        }
     
     def create(self, validated_data):
         request = self.context['request']
