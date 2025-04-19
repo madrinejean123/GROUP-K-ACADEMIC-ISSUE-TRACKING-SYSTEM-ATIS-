@@ -6,12 +6,13 @@ import "../styles/issue-table.css";
 const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
   const [assigningIssueId, setAssigningIssueId] = useState(null);
   const [assignMessages, setAssignMessages] = useState({});
+  const [resolveMessages, setResolveMessages] = useState({});
   const [lecturers, setLecturers] = useState([]);
   const [loadingLecturers, setLoadingLecturers] = useState(false);
+  const [resolvingIssueId, setResolvingIssueId] = useState(null);
 
   const statuses = Array.from(new Set(issues.map((i) => i.status)));
 
-  // Define table columns. For Registrar, include Submitted By (author) and Assignee.
   const columns = [
     { id: "id", label: "ID" },
     { id: "title", label: "Title" },
@@ -27,6 +28,7 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
       ? [{ id: "student", label: "Student" }]
       : []),
     { id: "actions", label: "Actions" },
+    ...(userRole === "Lecturer" ? [{ id: "resolve", label: "Resolve" }] : []),
   ];
 
   const getStatusClass = (s) => {
@@ -53,7 +55,6 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
         "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/users/lecturers/",
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      // Each lecturer object has id and nested user.full_name
       setLecturers(data.map((l) => ({ id: l.id, name: l.user.full_name })));
     } catch (err) {
       console.error("Failed to fetch lecturers:", err);
@@ -81,7 +82,6 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
       const selected = lecturers.find((l) => l.id === lecturerId);
       const fullName = selected?.name || "Assigned";
 
-      // Notify parent so it can update issue.assigned_lecturer
       onAssign(issueId, lecturerId, fullName);
 
       setAssignMessages((msgs) => ({
@@ -96,6 +96,36 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
       }));
     } finally {
       setAssigningIssueId(null);
+    }
+  };
+
+  const handleResolve = async (issueId) => {
+    setResolvingIssueId(issueId);
+    setResolveMessages((msgs) => ({ ...msgs, [issueId]: null }));
+    try {
+      const token = localStorage.getItem("access_token");
+      if (!token) throw new Error("No auth token");
+
+      const { data } = await axios.put(
+        `https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/update-status/${issueId}/`,
+        { status: "resolved" },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setResolveMessages((msgs) => ({
+        ...msgs,
+        [issueId]: data.message || "Issue has been resolved successfully.",
+      }));
+
+      // Optional: Refresh UI, re-fetch issues or update state in parent component
+    } catch (error) {
+      console.error("Resolve failed", error);
+      setResolveMessages((msgs) => ({
+        ...msgs,
+        [issueId]: "Failed to resolve issue.",
+      }));
+    } finally {
+      setResolvingIssueId(null);
     }
   };
 
@@ -153,7 +183,6 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
                           );
 
                         case "author":
-                          // Render who submitted the issue
                           return (
                             <td key={c.id}>
                               {issue.author.user.full_name}
@@ -162,7 +191,6 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
 
                         case "assignee": {
                           const lecturer = issue.assigned_lecturer;
-                          // assigned_lecturer is an object with id and nested user.full_name
                           if (lecturer) {
                             return (
                               <td key={c.id}>
@@ -170,7 +198,6 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
                               </td>
                             );
                           }
-                          // If not yet assigned, show assign controls
                           return (
                             <td key={c.id}>
                               {assigningIssueId === issue.id ? (
@@ -226,6 +253,30 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
                               </button>
                             </td>
                           );
+
+                        case "resolve":
+                          if (issue.status.toLowerCase() !== "resolved") {
+                            return (
+                              <td key={c.id}>
+                                <button
+                                  className="action-button"
+                                  onClick={() => handleResolve(issue.id)}
+                                  disabled={resolvingIssueId === issue.id}
+                                >
+                                  {resolvingIssueId === issue.id
+                                    ? "Resolving..."
+                                    : "Resolve"}
+                                </button>
+                                {resolveMessages[issue.id] && (
+                                  <div className="assign-message">
+                                    {resolveMessages[issue.id]}
+                                  </div>
+                                )}
+                              </td>
+                            );
+                          } else {
+                            return <td key={c.id}>Resolved</td>;
+                          }
 
                         default:
                           return <td key={c.id}>—</td>;
