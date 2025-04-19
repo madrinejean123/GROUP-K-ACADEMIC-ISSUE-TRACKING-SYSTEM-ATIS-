@@ -64,8 +64,10 @@ const RegistrarDashboard = () => {
           "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/users/lecturers/",
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        // Use record ID for assignment consistency
-        const formatted = data.map((l) => ({ id: l.id, name: l.user.full_name }));
+        const formatted = data.map((l) => ({
+          id: l.id,
+          name: l.user.full_name,
+        }));
         setLecturers(formatted);
       } catch (e) {
         console.error("Lecturers error:", e);
@@ -114,7 +116,6 @@ const RegistrarDashboard = () => {
     }));
   };
 
-  // Handle assignment, update local issues state
   const handleAssign = (issueId, lecturerId, lecturerName) => {
     setIssues((prev) =>
       prev.map((i) =>
@@ -134,7 +135,7 @@ const RegistrarDashboard = () => {
 
   };
 
-  // Stats & filters (case-insensitive)
+  // Stats & filters
   const stats = {
     total: issues.length,
     open: issues.filter((i) => i.status?.toLowerCase() === "open").length,
@@ -160,6 +161,7 @@ const RegistrarDashboard = () => {
             userRole="Registrar"
           />
         );
+
       case "assigned":
         return (
           <IssueList
@@ -171,14 +173,13 @@ const RegistrarDashboard = () => {
             userRole="Registrar"
           />
         );
+
       case "lecturers":
         return (
           <div className="lecturers-view">
             <h2>Lecturers</h2>
             {lecturers.map((l) => {
-              const count = issues.filter(
-                (i) => i.assigneeId === l.id
-              ).length;
+              const count = issues.filter((i) => i.assigneeId === l.id).length;
               return (
                 <div key={l.id} className="lecturer-card-full">
                   <h3>{l.name}</h3>
@@ -189,6 +190,7 @@ const RegistrarDashboard = () => {
             })}
           </div>
         );
+
       case "help":
         return (
           <div className="help-view">
@@ -200,6 +202,7 @@ const RegistrarDashboard = () => {
             </ul>
           </div>
         );
+
       default:
         return (
 <<<<<<< HEAD
@@ -227,7 +230,7 @@ const RegistrarDashboard = () => {
           </div>
         );
     }
-  };
+  }; // end renderContent
 
   return (
     <DashboardLayout userRole="Registrar" profile={registrarProfile}>
