@@ -96,7 +96,7 @@ class LecturerUpdateIssueStatusView(APIView):
 
     def patch(self, request, issue_id):
         user = request.user
-        lecturer = getattr(user, 'lecturer', None)
+        lecturer = getattr(user, 'lecturers', None)
         if not lecturer:
             return Response({"error": "Only lecturers can update issue status."}, status=status.HTTP_403_FORBIDDEN)
 
@@ -133,8 +133,9 @@ class ListIssuesView(generics.ListAPIView):
         if user.user_role == 'registrar':
             return Issues.objects.filter(college=user.college)
         # Lecturer view
-        if user.user_role == 'lecturer' and hasattr(user, 'lecturer'):
-            return Issues.objects.filter(assigned_lecturer=user.lecturer)
+        if hasattr(user, 'lecturers'):
+        # filter by the User so it always matches the correct lecturer row
+           return Issues.objects.filter(assigned_lecturer__user=user)
         # Fallback
         return Issues.objects.none()
 
