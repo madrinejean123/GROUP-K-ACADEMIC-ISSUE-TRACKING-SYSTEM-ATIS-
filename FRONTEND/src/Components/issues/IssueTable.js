@@ -1,8 +1,9 @@
+// Components/issues/IssueTable.jsx
 import React, { useState } from "react";
 import axios from "axios";
 import "../styles/issue-table.css";
 
-const IssueTable = ({ issues, onViewIssue, onAssign, userRole }) => {
+const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
   const [assigningIssueId, setAssigningIssueId] = useState(null);
   const [assignMessages, setAssignMessages] = useState({});
   const [resolveMessages, setResolveMessages] = useState({});
@@ -10,7 +11,6 @@ const IssueTable = ({ issues, onViewIssue, onAssign, userRole }) => {
   const [loadingLecturers, setLoadingLecturers] = useState(false);
   const [resolvingIssueId, setResolvingIssueId] = useState(null);
 
-  // Use the raw status values for filtering, but display humanized headers
   const statuses = Array.from(new Set(issues.map((i) => i.status)));
 
   const columns = [
@@ -116,6 +116,8 @@ const IssueTable = ({ issues, onViewIssue, onAssign, userRole }) => {
         ...msgs,
         [issueId]: data.message || "Issue has been resolved successfully.",
       }));
+
+      // Optional: Refresh UI, re-fetch issues or update state in parent component
     } catch (error) {
       console.error("Resolve failed", error);
       setResolveMessages((msgs) => ({
@@ -131,8 +133,7 @@ const IssueTable = ({ issues, onViewIssue, onAssign, userRole }) => {
     <div className="issues-table-container">
       {statuses.map((status) => (
         <section key={status} className="status-group">
-          {/* Humanize header: replace underscore and capitalize */}
-          <h3>{status.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}</h3>
+          <h3>{status}</h3>
           <table className="issues-table">
             <thead>
               <tr>
@@ -150,20 +151,24 @@ const IssueTable = ({ issues, onViewIssue, onAssign, userRole }) => {
                       switch (c.id) {
                         case "id":
                           return <td key={c.id}>#{issue.id}</td>;
+
                         case "title":
                           return <td key={c.id}>{issue.title}</td>;
+
                         case "description":
                           return (
                             <td key={c.id} className="description-cell">
                               {issue.description}
                             </td>
                           );
+
                         case "date":
                           return (
                             <td key={c.id}>
                               {new Date(issue.created_at).toLocaleString()}
                             </td>
                           );
+
                         case "status":
                           return (
                             <td key={c.id}>
@@ -176,52 +181,67 @@ const IssueTable = ({ issues, onViewIssue, onAssign, userRole }) => {
                               </span>
                             </td>
                           );
+
                         case "author":
                           return (
                             <td key={c.id}>
                               {issue.author.user.full_name}
                             </td>
                           );
+
                         case "assignee": {
-                          const lec = issue.assigned_lecturer;
-                          return lec ? (
-                            <td key={c.id}>{lec.user.full_name}</td>
-                          ) : assigningIssueId === issue.id ? (
-                            loadingLecturers ? (
-                              <span>Loading...</span>
-                            ) : (
-                              <div className="assign-list-inline">
-                                {lecturers.map((l) => (
-                                  <button
-                                    key={l.id}
-                                    className="action-button"
-                                    onClick={() => handleAssign(issue.id, l.id)}
-                                  >
-                                    {l.name}
-                                  </button>
-                                ))}
-                                {assignMessages[issue.id] && (
-                                  <div className="assign-message">
-                                    {assignMessages[issue.id]}
+                          const lecturer = issue.assigned_lecturer;
+                          if (lecturer) {
+                            return (
+                              <td key={c.id}>
+                                {lecturer.user.full_name}
+                              </td>
+                            );
+                          }
+                          return (
+                            <td key={c.id}>
+                              {assigningIssueId === issue.id ? (
+                                loadingLecturers ? (
+                                  <span>Loading...</span>
+                                ) : (
+                                  <div className="assign-list-inline">
+                                    {lecturers.map((lec) => (
+                                      <button
+                                        key={lec.id}
+                                        className="action-button"
+                                        onClick={() =>
+                                          handleAssign(issue.id, lec.id)
+                                        }
+                                      >
+                                        {lec.name}
+                                      </button>
+                                    ))}
+                                    {assignMessages[issue.id] && (
+                                      <div className="assign-message">
+                                        {assignMessages[issue.id]}
+                                      </div>
+                                    )}
                                   </div>
-                                )}
-                              </div>
-                            )
-                          ) : (
-                            <button
-                              className="action-button"
-                              onClick={() => handleAssignClick(issue.id)}
-                            >
-                              Assign
-                            </button>
+                                )
+                              ) : (
+                                <button
+                                  className="action-button"
+                                  onClick={() => handleAssignClick(issue.id)}
+                                >
+                                  Assign
+                                </button>
+                              )}
+                            </td>
                           );
                         }
+
                         case "student":
                           return (
                             <td key={c.id}>
-                              {issue.author.user.full_name}
+                              {issue.author.user.full_name || "Unknown"}
                             </td>
                           );
+
                         case "actions":
                           return (
                             <td key={c.id}>
@@ -233,27 +253,31 @@ const IssueTable = ({ issues, onViewIssue, onAssign, userRole }) => {
                               </button>
                             </td>
                           );
+
                         case "resolve":
-                          return issue.status.toLowerCase() !== "resolved" ? (
-                            <td key={c.id}>
-                              <button
-                                className="action-button"
-                                onClick={() => handleResolve(issue.id)}
-                                disabled={resolvingIssueId === issue.id}
-                              >
-                                {resolvingIssueId === issue.id
-                                  ? "Resolving..."
-                                  : "Resolve"}
-                              </button>
-                              {resolveMessages[issue.id] && (
-                                <div className="assign-message">
-                                  {resolveMessages[issue.id]}
-                                </div>
-                              )}
-                            </td>
-                          ) : (
-                            <td key={c.id}>Resolved</td>
-                          );
+                          if (issue.status.toLowerCase() !== "resolved") {
+                            return (
+                              <td key={c.id}>
+                                <button
+                                  className="action-button"
+                                  onClick={() => handleResolve(issue.id)}
+                                  disabled={resolvingIssueId === issue.id}
+                                >
+                                  {resolvingIssueId === issue.id
+                                    ? "Resolving..."
+                                    : "Resolve"}
+                                </button>
+                                {resolveMessages[issue.id] && (
+                                  <div className="assign-message">
+                                    {resolveMessages[issue.id]}
+                                  </div>
+                                )}
+                              </td>
+                            );
+                          } else {
+                            return <td key={c.id}>Resolved</td>;
+                          }
+
                         default:
                           return <td key={c.id}>—</td>;
                       }
