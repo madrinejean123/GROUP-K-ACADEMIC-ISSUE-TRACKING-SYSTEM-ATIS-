@@ -10,11 +10,8 @@ const RegistrarDashboard = () => {
   const [issues, setIssues] = useState([]);
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [showIssueDetailModal, setShowIssueDetailModal] = useState(false);
-
   const [lecturers, setLecturers] = useState([]);
   const [registrarProfile, setRegistrarProfile] = useState({});
-  const [showAssignModal, setShowAssignModal] = useState(false);
-  const [selectedLecturer, setSelectedLecturer] = useState(null);
   const [activeView, setActiveView] = useState("dashboard");
 
   // Fetch registrar profile
@@ -49,7 +46,6 @@ const RegistrarDashboard = () => {
       } catch (e) {
         console.error("Issues error:", e);
       }
-
     }
     fetchIssues();
   }, []);
@@ -81,7 +77,7 @@ const RegistrarDashboard = () => {
     const onNav = (e) => e.detail?.navItem && setActiveView(e.detail.navItem);
     window.addEventListener("sidebarNavigation", onNav);
     return () => window.removeEventListener("sidebarNavigation", onNav);
-
+  }, []);
 
   const handleViewIssue = (issue) => {
     setSelectedIssue(issue);
@@ -124,7 +120,6 @@ const RegistrarDashboard = () => {
           : i
       )
     );
-
     if (selectedIssue?.id === issueId) {
       setSelectedIssue((prev) => ({
         ...prev,
@@ -132,7 +127,6 @@ const RegistrarDashboard = () => {
         assigneeId: lecturerId,
       }));
     }
-
   };
 
   // Stats & filters
@@ -184,7 +178,6 @@ const RegistrarDashboard = () => {
                 <div key={l.id} className="lecturer-card-full">
                   <h3>{l.name}</h3>
                   <p>{count} assigned issues</p>
-
                 </div>
               );
             })}
@@ -205,14 +198,12 @@ const RegistrarDashboard = () => {
 
       default:
         return (
-<<<<<<< HEAD
           <div className="dashboard-overview">
             <h2>Welcome, {registrarProfile.full_name || "Registrar"}</h2>
             <div className="stats-cards">
               <div className="stat-card">
                 <h3>Total Issues</h3>
                 <p>{stats.total}</p>
-
               </div>
               <div className="stat-card">
                 <h3>Open</h3>
@@ -235,7 +226,6 @@ const RegistrarDashboard = () => {
   return (
     <DashboardLayout userRole="Registrar" profile={registrarProfile}>
       <div className="registrar-dashboard">{renderContent()}</div>
-
 
       {showIssueDetailModal && selectedIssue && (
         <IssueDetail
