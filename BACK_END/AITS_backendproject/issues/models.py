@@ -24,7 +24,7 @@ class Issues(models.Model):
         null=True,
         validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'pdf'])]
     )#i addded this field to do add more files not just images
-    
+
     
     assigned_lecturer = models.ForeignKey(
         Lecturer, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_issues'
@@ -43,3 +43,4 @@ class Issues(models.Model):
         return f'{self.title} - {self.status}, (By {self.author})'
 
 
+"testing git"
