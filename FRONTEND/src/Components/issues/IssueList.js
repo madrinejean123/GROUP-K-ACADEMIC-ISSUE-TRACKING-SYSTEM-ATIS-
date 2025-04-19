@@ -9,13 +9,13 @@ const IssueList = ({
   showCreateButton = true,
   onCreateIssue,
   onViewIssue,
+  onAssign,          // <-- accept onAssign prop
   userRole,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
 
-  // filter & sort locally
   const filtered = issues
     .filter((i) =>
       [i.title, i.description, i.status]
@@ -23,9 +23,19 @@ const IssueList = ({
         .toLowerCase()
         .includes(searchTerm.toLowerCase())
     )
-    .filter((i) => statusFilter === "all" || i.status.toLowerCase() === statusFilter)
-    .filter((i) => categoryFilter === "all" || i.category === categoryFilter)
-    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    .filter(
+      (i) =>
+        statusFilter === "all" ||
+        i.status.toLowerCase() === statusFilter
+    )
+    .filter(
+      (i) =>
+        categoryFilter === "all" ||
+        i.category === categoryFilter
+    )
+    .sort(
+      (a, b) => new Date(b.created_at) - new Date(a.created_at)
+    );
 
   return (
     <div className="issues-section">
@@ -48,6 +58,7 @@ const IssueList = ({
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
+
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
@@ -55,10 +66,11 @@ const IssueList = ({
           <option value="all">All Statuses</option>
           {Array.from(new Set(issues.map((i) => i.status))).map((s) => (
             <option key={s} value={s.toLowerCase()}>
-              {s}
+              {s.replace("_", " ")}
             </option>
           ))}
         </select>
+
         <select
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
@@ -77,10 +89,11 @@ const IssueList = ({
       <IssueTable
         issues={filtered}
         onViewIssue={onViewIssue}
+        onAssign={onAssign}       // <-- pass onAssign down
         userRole={userRole}
       />
     </div>
-);
+  );
 };
 
 export default IssueList;

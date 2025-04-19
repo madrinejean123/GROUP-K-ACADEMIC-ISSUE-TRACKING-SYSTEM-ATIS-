@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import DashboardLayout from "../../Components/layout/DashboardLayout";
 import IssueList from "../../Components/issues/IssueList";
@@ -13,109 +12,66 @@ const ALL_ISSUES_API_URL =
   "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/list/";
 
 const LecturerDashboard = () => {
-  const [lecturerProfile, setLecturerProfile] = useState({});
+  const [lecturerProfile, setLecturerProfile] = useState(null);
   const [issues, setIssues] = useState([]);
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [showIssueDetailModal, setShowIssueDetailModal] = useState(false);
   const [activeTab, setActiveTab] = useState("assigned");
 
-  // 1️⃣ Fetch lecturer’s own profile
+  // 1️⃣ Fetch your profile and keep the nested user object
   useEffect(() => {
-    const fetchLecturerProfile = async () => {
+    (async () => {
       const token = localStorage.getItem("access_token");
       if (!token) return;
-
       try {
         const { data } = await axios.get(PROFILE_API_URL, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setLecturerProfile(Array.isArray(data) ? data[0] : data);
+        // API returns [{ id:7, user:{id:43,...} }], so grab the record then its .user
+        const profileRec = Array.isArray(data) ? data[0] : data;
+        setLecturerProfile(profileRec.user);
       } catch (err) {
         console.error("Error fetching profile:", err);
       }
-    };
-    fetchLecturerProfile();
+    })();
   }, []);
 
-  // 2️⃣ Once we have the lecturer’s ID, fetch **all** issues, then filter to theirs
+  // 2️⃣ Once we have lecturerProfile.user.id, fetch ALL issues and filter
   useEffect(() => {
-    if (!lecturerProfile.id) return;
+    if (!lecturerProfile?.id) return;
 
-    const fetchAssignedIssues = async () => {
+    (async () => {
       const token = localStorage.getItem("access_token");
       if (!token) return;
-
       try {
         const { data } = await axios.get(ALL_ISSUES_API_URL, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        // Keep only those where assigned_lecturer.id === this lecturer’s id
-        const myIssues = data
-          .filter((issue) => issue.assigned_lecturer?.id === lecturerProfile.id)
-          // optional: stamp on a nicer assignee name
-          .map((issue) => ({
-            ...issue,
-            assignee: `Dr. ${lecturerProfile.full_name}`,
-          }));
+        // Match on the nested user.id (43), not the record id (7)
+        const myIssues = data.filter(
+          (issue) =>
+            issue.assigned_lecturer?.user?.id === lecturerProfile.id
+        );
 
         setIssues(myIssues);
       } catch (err) {
-        console.error("Error fetching issue list:", err);
+        console.error("Error fetching issues:", err);
       }
-    };
-
-    fetchAssignedIssues();
+    })();
   }, [lecturerProfile]);
 
-  // ↪️ Handlers for viewing/detailing
-  const handleViewIssue = (issue) => {
-    setSelectedIssue(issue);
-    setShowIssueDetailModal(true);
-  };
-
-  const handleStatusChange = (newStatus) => {
-    setIssues((all) =>
-      all.map((i) =>
-        i.id === selectedIssue.id ? { ...i, status: newStatus } : i
-      )
-    );
-    setSelectedIssue((i) => ({ ...i, status: newStatus }));
-  };
-
-  const handleAddComment = (commentText) => {
-    const newComment = {
-      author: `Dr. ${lecturerProfile.full_name}`,
-      date: new Date().toISOString().split("T")[0],
-      content: commentText,
-    };
-
-    setIssues((all) =>
-      all.map((i) =>
-        i.id === selectedIssue.id
-          ? { ...i, comments: [...(i.comments || []), newComment] }
-          : i
-      )
-    );
-    setSelectedIssue((i) => ({
-      ...i,
-      comments: [...(i.comments || []), newComment],
-    }));
-  };
-
-  // ↪️ Tabs: assigned vs. resolved
+  // 3️⃣ Stats & tab splitting — catch both snake_case & human  
   const assignedIssues = issues.filter(
-    (i) => i.status.toLowerCase() === "open" ||
-           i.status.toLowerCase() === "in progress"
+    (i) =>
+      !["resolved", "closed"].includes(i.status.toLowerCase())
   );
-  const resolvedIssues = issues.filter(
-    (i) => i.status.toLowerCase() === "resolved" ||
-           i.status.toLowerCase() === "closed"
+  const resolvedIssues = issues.filter((i) =>
+    ["resolved", "closed"].includes(i.status.toLowerCase())
   );
   const filteredIssues =
     activeTab === "assigned" ? assignedIssues : resolvedIssues;
 
-  // ↪️ Simple stats
   const stats = {
     assigned: assignedIssues.length,
     resolved: resolvedIssues.length,
@@ -123,11 +79,10 @@ const LecturerDashboard = () => {
   };
 
   return (
-    <DashboardLayout userRole="Lecturer" profile={lecturerProfile}>
+    <DashboardLayout userRole="Lecturer" profile={lecturerProfile || {}}>
       <div className="lecturer-dashboard">
-        {/* Welcome + stats */}
         <div className="welcome-section">
-          <h2>Welcome, Dr. {lecturerProfile.full_name || ""}!</h2>
+          <h2>Welcome, Dr. {lecturerProfile?.full_name || ""}!</h2>
           <div className="stats-cards">
             <div className="stat-card">
               <div className="stat-value">{stats.assigned}</div>
@@ -144,7 +99,6 @@ const LecturerDashboard = () => {
           </div>
         </div>
 
-        {/* Tab buttons */}
         <div className="tabs-container">
           <button
             className={activeTab === "assigned" ? "tab active" : "tab"}
@@ -160,22 +114,47 @@ const LecturerDashboard = () => {
           </button>
         </div>
 
-        {/* 3️⃣ Pass your filtered issues into IssueList */}
         <IssueList
           issues={filteredIssues}
           title={activeTab === "assigned" ? "Assigned Issues" : "Resolved Issues"}
           showCreateButton={false}
-          onViewIssue={handleViewIssue}
+          onViewIssue={(i) => {
+            setSelectedIssue(i);
+            setShowIssueDetailModal(true);
+          }}
           userRole="Lecturer"
         />
 
-        {/* 4️⃣ And when you open one, pass it into IssueDetail */}
         {showIssueDetailModal && selectedIssue && (
           <IssueDetail
             issue={selectedIssue}
             onClose={() => setShowIssueDetailModal(false)}
-            onStatusChange={handleStatusChange}
-            onAddComment={handleAddComment}
+            onStatusChange={(newStatus) => {
+              setIssues((all) =>
+                all.map((i) =>
+                  i.id === selectedIssue.id ? { ...i, status: newStatus } : i
+                )
+              );
+              setSelectedIssue((i) => ({ ...i, status: newStatus }));
+            }}
+            onAddComment={(c) => {
+              const comment = {
+                author: `Dr. ${lecturerProfile.full_name}`,
+                date: new Date().toISOString().split("T")[0],
+                content: c,
+              };
+              setIssues((all) =>
+                all.map((i) =>
+                  i.id === selectedIssue.id
+                    ? { ...i, comments: [...(i.comments || []), comment] }
+                    : i
+                )
+              );
+              setSelectedIssue((i) => ({
+                ...i,
+                comments: [...(i.comments || []), comment],
+              }));
+            }}
             userRole="Lecturer"
           />
         )}
