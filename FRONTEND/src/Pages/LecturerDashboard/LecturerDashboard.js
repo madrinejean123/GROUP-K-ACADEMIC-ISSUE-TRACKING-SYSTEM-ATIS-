@@ -11,7 +11,7 @@ const PROFILE_API_URL =
   "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/profile/";
 const ALL_ISSUES_API_URL =
   "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/list/";
-const RESOLVE_ISSUE_API_URL =
+const UPDATE_STATUS_API_URL =
   "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/update-status/";
 
 const LecturerDashboard = () => {
@@ -40,14 +40,11 @@ const LecturerDashboard = () => {
     fetchLecturerProfile();
   }, []);
 
-  // Fetch issues
+  // Fetch issues once we have a profile
   useEffect(() => {
     const fetchIssues = async () => {
       const token = localStorage.getItem("access_token");
-      if (!token) {
-        console.warn("⚠️  No access_token in localStorage");
-        return;
-      }
+      if (!token) return;
       try {
         const { data } = await axios.get(ALL_ISSUES_API_URL, {
           headers: { Authorization: `Bearer ${token}` },
@@ -59,17 +56,19 @@ const LecturerDashboard = () => {
       }
     };
 
-    if (lecturerProfile.id) fetchIssues();
+    if (lecturerProfile.id) {
+      fetchIssues();
+    }
   }, [lecturerProfile]);
 
-  // Handle resolving an issue
+  // Handle resolving an issue — now using PATCH instead of PUT
   const handleResolve = async (issueId) => {
     setResolvingIssueId(issueId);
     try {
       const token = localStorage.getItem("access_token");
       if (!token) throw new Error("No auth token");
-      await axios.put(
-        `${RESOLVE_ISSUE_API_URL}${issueId}/`,
+      await axios.patch(
+        `${UPDATE_STATUS_API_URL}${issueId}/`,    // ← PATCH method matches Django view
         { status: "resolved" },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -85,13 +84,13 @@ const LecturerDashboard = () => {
     }
   };
 
-  // Handle viewing an issue
+  // View issue details
   const handleViewIssue = (issue) => {
     setSelectedIssue(issue);
     setShowIssueDetailModal(true);
   };
 
-  // Handle status change in IssueDetail
+  // Status change callback from IssueDetail modal
   const handleStatusChange = (newStatus) => {
     setIssues((all) =>
       all.map((i) =>
@@ -101,7 +100,7 @@ const LecturerDashboard = () => {
     setSelectedIssue((i) => ({ ...i, status: newStatus }));
   };
 
-  // Handle adding a comment
+  // Add comment locally
   const handleAddComment = (commentText) => {
     const newComment = {
       author: `Dr. ${lecturerProfile.full_name}`,
@@ -121,24 +120,20 @@ const LecturerDashboard = () => {
     }));
   };
 
-  // Normalize status for filtering
+  // Helpers for filtering
   const normalize = (s) => s.replace(/_/g, " ").toLowerCase();
-
-  // Filter assigned and resolved issues
   const assignedIssues = issues.filter((i) => {
     const st = normalize(i.status);
     return st === "open" || st === "in progress";
   });
-
   const resolvedIssues = issues.filter((i) => {
     const st = normalize(i.status);
     return st === "resolved" || st === "closed";
   });
-
   const filteredIssues =
     activeTab === "assigned" ? assignedIssues : resolvedIssues;
 
-  // Calculate stats
+  // Quick stats
   const stats = {
     assigned: assignedIssues.length,
     resolved: resolvedIssues.length,
@@ -148,7 +143,7 @@ const LecturerDashboard = () => {
   return (
     <DashboardLayout userRole="Lecturer" profile={lecturerProfile}>
       <div className="lecturer-dashboard">
-        {/* Welcome Section */}
+        {/* Welcome / Stats */}
         <div className="welcome-section">
           <h2>Welcome, Dr. {lecturerProfile.full_name || "Lecturer"}!</h2>
           <div className="stats-cards">
@@ -183,7 +178,7 @@ const LecturerDashboard = () => {
           </button>
         </div>
 
-        {/* Issue List */}
+        {/* Issue List & Table */}
         <IssueList
           issues={filteredIssues}
           title={
@@ -193,8 +188,6 @@ const LecturerDashboard = () => {
           onViewIssue={handleViewIssue}
           userRole="Lecturer"
         />
-
-        {/* Issues Table */}
         <div className="issues-table-container">
           <table className="issues-table">
             <thead>
@@ -214,7 +207,9 @@ const LecturerDashboard = () => {
                     <td>#{issue.id}</td>
                     <td>{issue.title}</td>
                     <td>{issue.description}</td>
-                    <td>{new Date(issue.created_at).toLocaleString()}</td>
+                    <td>
+                      {new Date(issue.created_at).toLocaleString()}
+                    </td>
                     <td>{normalize(issue.status)}</td>
                     {activeTab === "assigned" && (
                       <td>
@@ -242,7 +237,7 @@ const LecturerDashboard = () => {
           </table>
         </div>
 
-        {/* Issue Detail Modal */}
+        {/* Detail Modal */}
         {showIssueDetailModal && selectedIssue && (
           <IssueDetail
             issue={selectedIssue}
