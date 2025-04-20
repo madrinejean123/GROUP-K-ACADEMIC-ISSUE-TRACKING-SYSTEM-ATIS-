@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
 import DashboardLayout from "../../Components/layout/DashboardLayout";
 import IssueList from "../../Components/issues/IssueList";
@@ -13,6 +14,10 @@ const RegistrarDashboard = () => {
   const [lecturers, setLecturers] = useState([]);
   const [registrarProfile, setRegistrarProfile] = useState({});
   const [activeView, setActiveView] = useState("dashboard");
+
+  // Normalize snake_case → human‑readable
+  const normalizeStatus = (s = "") =>
+    s.replace(/_/g, " ").trim().toLowerCase();
 
   // Fetch registrar profile
   useEffect(() => {
@@ -42,7 +47,12 @@ const RegistrarDashboard = () => {
           "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/list/",
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        setIssues(data);
+        const withAssignees = data.map((i) => ({
+          ...i,
+          assignee: i.assigned_lecturer?.user.full_name || null,
+          assigneeId: i.assigned_lecturer?.id || null,
+        }));
+        setIssues(withAssignees);
       } catch (e) {
         console.error("Issues error:", e);
       }
@@ -60,11 +70,12 @@ const RegistrarDashboard = () => {
           "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/users/lecturers/",
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        const formatted = data.map((l) => ({
-          id: l.id,
-          name: l.user.full_name,
-        }));
-        setLecturers(formatted);
+        setLecturers(
+          data.map((l) => ({
+            id: l.id,
+            name: l.user.full_name,
+          }))
+        );
       } catch (e) {
         console.error("Lecturers error:", e);
       }
@@ -74,11 +85,16 @@ const RegistrarDashboard = () => {
 
   // Sidebar navigation
   useEffect(() => {
-    const onNav = (e) => e.detail?.navItem && setActiveView(e.detail.navItem);
+    const onNav = (e) => {
+      if (e.detail?.navItem) {
+        setActiveView(e.detail.navItem);
+      }
+    };
     window.addEventListener("sidebarNavigation", onNav);
     return () => window.removeEventListener("sidebarNavigation", onNav);
   }, []);
 
+  // Handlers
   const handleViewIssue = (issue) => {
     setSelectedIssue(issue);
     setShowIssueDetailModal(true);
@@ -132,16 +148,21 @@ const RegistrarDashboard = () => {
   // Stats & filters
   const stats = {
     total: issues.length,
-    open: issues.filter((i) => i.status?.toLowerCase() === "open").length,
+    open: issues.filter((i) => normalizeStatus(i.status) === "open").length,
     inProgress: issues.filter(
-      (i) => i.status?.toLowerCase() === "in progress"
+      (i) => normalizeStatus(i.status) === "in progress"
     ).length,
     resolved: issues.filter((i) =>
-      ["resolved", "closed"].includes(i.status?.toLowerCase())
+      ["resolved", "closed"].includes(normalizeStatus(i.status))
     ).length,
   };
-  const assignedIssues = issues.filter((i) => i.assignee);
+  const assignedIssues = issues.filter((i) => i.assigneeId);
+  const lecturerCounts = lecturers.map((l) => ({
+    ...l,
+    count: issues.filter((i) => i.assigneeId === l.id).length,
+  }));
 
+  // Render based on activeView
   const renderContent = () => {
     switch (activeView) {
       case "issues":
@@ -172,15 +193,12 @@ const RegistrarDashboard = () => {
         return (
           <div className="lecturers-view">
             <h2>Lecturers</h2>
-            {lecturers.map((l) => {
-              const count = issues.filter((i) => i.assigneeId === l.id).length;
-              return (
-                <div key={l.id} className="lecturer-card-full">
-                  <h3>{l.name}</h3>
-                  <p>{count} assigned issues</p>
-                </div>
-              );
-            })}
+            {lecturerCounts.map((l) => (
+              <div key={l.id} className="lecturer-card-full">
+                <h3>{l.name}</h3>
+                <p>{l.count} assigned issues</p>
+              </div>
+            ))}
           </div>
         );
 
@@ -221,12 +239,11 @@ const RegistrarDashboard = () => {
           </div>
         );
     }
-  }; // end renderContent
+  };
 
   return (
     <DashboardLayout userRole="Registrar" profile={registrarProfile}>
       <div className="registrar-dashboard">{renderContent()}</div>
-
       {showIssueDetailModal && selectedIssue && (
         <IssueDetail
           issue={selectedIssue}
