@@ -22,12 +22,11 @@ const LecturerDashboard = () => {
   const [activeTab, setActiveTab] = useState("assigned");
   const [resolvingIssueId, setResolvingIssueId] = useState(null);
 
-  // 1️⃣ Fetch lecturer’s own profile
+  // 1️⃣ Fetch lecturer’s profile (UNCHANGED)
   useEffect(() => {
     const fetchLecturerProfile = async () => {
       const token = localStorage.getItem("access_token");
       if (!token) return;
-
       try {
         const { data } = await axios.get(PROFILE_API_URL, {
           headers: { Authorization: `Bearer ${token}` },
@@ -40,19 +39,16 @@ const LecturerDashboard = () => {
     fetchLecturerProfile();
   }, []);
 
-  // 2️⃣ Fetch all issues assigned to the lecturer
+  // 2️⃣ Fetch all issues (UNCHANGED)
   useEffect(() => {
     if (!lecturerProfile.id) return;
-
     const fetchAssignedIssues = async () => {
       const token = localStorage.getItem("access_token");
       if (!token) return;
-
       try {
         const { data } = await axios.get(ALL_ISSUES_API_URL, {
           headers: { Authorization: `Bearer ${token}` },
         });
-
         const myIssues = data.filter(
           (issue) => issue.assigned_lecturer?.id === lecturerProfile.id
         );
@@ -61,27 +57,23 @@ const LecturerDashboard = () => {
         console.error("Error fetching issue list:", err);
       }
     };
-
     fetchAssignedIssues();
   }, [lecturerProfile]);
 
-  // 3️⃣ Handle resolving an issue
+  // 3️⃣ Resolve
   const handleResolve = async (issueId) => {
     setResolvingIssueId(issueId);
     try {
       const token = localStorage.getItem("access_token");
       if (!token) throw new Error("No auth token");
-
       await axios.put(
         `${RESOLVE_ISSUE_API_URL}${issueId}/`,
         { status: "resolved" },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      // Update the issue's status locally
-      setIssues((prevIssues) =>
-        prevIssues.map((issue) =>
-          issue.id === issueId ? { ...issue, status: "resolved" } : issue
+      setIssues((prev) =>
+        prev.map((i) =>
+          i.id === issueId ? { ...i, status: "resolved" } : i
         )
       );
     } catch (err) {
@@ -91,12 +83,11 @@ const LecturerDashboard = () => {
     }
   };
 
-  // 4️⃣ Handlers for viewing and updating issues
+  // 4️⃣ View & comment handlers (UNCHANGED)
   const handleViewIssue = (issue) => {
     setSelectedIssue(issue);
     setShowIssueDetailModal(true);
   };
-
   const handleStatusChange = (newStatus) => {
     setIssues((all) =>
       all.map((i) =>
@@ -105,14 +96,12 @@ const LecturerDashboard = () => {
     );
     setSelectedIssue((i) => ({ ...i, status: newStatus }));
   };
-
   const handleAddComment = (commentText) => {
     const newComment = {
       author: `Dr. ${lecturerProfile.full_name}`,
       date: new Date().toISOString().split("T")[0],
       content: commentText,
     };
-
     setIssues((all) =>
       all.map((i) =>
         i.id === selectedIssue.id
@@ -126,19 +115,20 @@ const LecturerDashboard = () => {
     }));
   };
 
-  // 5️⃣ Tabs: assigned vs. resolved
-  const assignedIssues = issues.filter(
-    (i) =>
-      i.status.toLowerCase() === "open" || i.status.toLowerCase() === "in progress"
-  );
-  const resolvedIssues = issues.filter(
-    (i) =>
-      i.status.toLowerCase() === "resolved" || i.status.toLowerCase() === "closed"
-  );
+  // ── 5️⃣ Status filters (FIXED) ────────────────────────────
+  const normalizeStatus = (s) => s.replace(/_/g, " ").toLowerCase();
+  const assignedIssues = issues.filter((i) => {
+    const st = normalizeStatus(i.status);
+    return st === "open" || st === "in progress";
+  });
+  const resolvedIssues = issues.filter((i) => {
+    const st = normalizeStatus(i.status);
+    return st === "resolved" || st === "closed";
+  });
   const filteredIssues =
     activeTab === "assigned" ? assignedIssues : resolvedIssues;
 
-  // 6️⃣ Simple stats
+  // ── 6️⃣ Stats (now correct!) ─────────────────────────────
   const stats = {
     assigned: assignedIssues.length,
     resolved: resolvedIssues.length,
@@ -167,7 +157,7 @@ const LecturerDashboard = () => {
           </div>
         </div>
 
-        {/* Tab buttons */}
+        {/* Tabs */}
         <div className="tabs-container">
           <button
             className={activeTab === "assigned" ? "tab active" : "tab"}
@@ -183,50 +173,39 @@ const LecturerDashboard = () => {
           </button>
         </div>
 
-        {/* Issues Table */}
+        {/* IssueList (optional) */}
         <IssueList
           issues={filteredIssues}
-          title={activeTab === "assigned" ? "Assigned Issues" : "Resolved Issues"}
+          title={
+            activeTab === "assigned" ? "Assigned Issues" : "Resolved Issues"
+          }
           showCreateButton={false}
           onViewIssue={handleViewIssue}
           userRole="Lecturer"
         />
 
-        {/* Issue Detail Modal */}
-        {showIssueDetailModal && selectedIssue && (
-          <IssueDetail
-            issue={selectedIssue}
-            onClose={() => setShowIssueDetailModal(false)}
-            onStatusChange={handleStatusChange}
-            onAddComment={handleAddComment}
-            userRole="Lecturer"
-          />
-        )}
-
-        {/* Resolve Button for Assigned Issues */}
-        {activeTab === "assigned" && (
-          <div className="issues-table-container">
-            <table className="issues-table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Title</th>
-                  <th>Description</th>
-                  <th>Submitted At</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {assignedIssues.map((issue) => (
-                  <tr key={issue.id}>
-                    <td>#{issue.id}</td>
-                    <td>{issue.title}</td>
-                    <td>{issue.description}</td>
-                    <td>
-                      {new Date(issue.created_at).toLocaleString()}
-                    </td>
-                    <td>{issue.status}</td>
+        {/* ── Table for both tabs ─────────────────────────────── */}
+        <div className="issues-table-container">
+          <table className="issues-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Submitted At</th>
+                <th>Status</th>
+                {activeTab === "assigned" && <th>Actions</th>}
+              </tr>
+            </thead>
+            <tbody>
+              {filteredIssues.map((issue) => (
+                <tr key={issue.id}>
+                  <td>#{issue.id}</td>
+                  <td>{issue.title}</td>
+                  <td>{issue.description}</td>
+                  <td>{new Date(issue.created_at).toLocaleString()}</td>
+                  <td>{issue.status}</td>
+                  {activeTab === "assigned" && (
                     <td>
                       <button
                         className="action-button"
@@ -238,11 +217,22 @@ const LecturerDashboard = () => {
                           : "Resolve"}
                       </button>
                     </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Detail Modal */}
+        {showIssueDetailModal && selectedIssue && (
+          <IssueDetail
+            issue={selectedIssue}
+            onClose={() => setShowIssueDetailModal(false)}
+            onStatusChange={handleStatusChange}
+            onAddComment={handleAddComment}
+            userRole="Lecturer"
+          />
         )}
       </div>
     </DashboardLayout>
