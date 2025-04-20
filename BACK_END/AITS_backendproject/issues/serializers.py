@@ -9,6 +9,12 @@ class IssueCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Issues
         fields = ['title', 'description', 'attachment']
+        extra_kwargs = {
+            'attachment': {
+                'required': False,
+                'help_text': 'Upload image (JPG/PNG) or PDF file'
+            }
+        }
     
     def create(self, validated_data):
         request = self.context['request']
@@ -104,6 +110,7 @@ class IssueDetailSerializer(serializers.ModelSerializer):
     author = StudentSerializer(read_only=True)
     assigned_lecturer = LecturerSerializer(read_only=True)
     register = CollegeRegisterSerializer(read_only=True)
+    attachment_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Issues
@@ -118,4 +125,10 @@ class IssueDetailSerializer(serializers.ModelSerializer):
         if value in ['resolved', 'rejected'] and not hasattr(request.user, 'lecturer'):
             raise serializers.ValidationError("Only lecturers can resolve/reject issues.")
         return value
+    #this is such that when i user click the url of an attached file it can fetch it from backend to front end so bascially for users to view the attached files
+    def get_attachment_url(self, obj):
+        if obj.attachment:
+            request = self.context.get('request')
+            return request.build_absolute_uri(obj.attachment.url)
+        return None
 
