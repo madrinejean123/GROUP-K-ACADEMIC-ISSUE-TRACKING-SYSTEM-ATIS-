@@ -42,3 +42,4 @@ class Issues(models.Model):
     def __str__(self):
         return f'{self.title} - {self.status}, (By {self.author})'
 
+
