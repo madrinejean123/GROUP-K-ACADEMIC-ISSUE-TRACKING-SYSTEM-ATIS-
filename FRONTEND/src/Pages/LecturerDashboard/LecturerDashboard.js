@@ -22,7 +22,6 @@ const LecturerDashboard = () => {
   const [activeTab, setActiveTab] = useState("assigned");
   const [resolvingIssueId, setResolvingIssueId] = useState(null);
 
-  // ─── 1️⃣ Fetch lecturer’s profile (unchanged) ───────────
   useEffect(() => {
     const fetchLecturerProfile = async () => {
       const token = localStorage.getItem("access_token");
@@ -40,13 +39,8 @@ const LecturerDashboard = () => {
     fetchLecturerProfile();
   }, []);
 
-  // ─── 2️⃣ Fetch issues, filter by assigned_lecturer.id ────────
   useEffect(() => {
-    // only run once we have a profile.id
-    if (!lecturerProfile.id) return;
-
     const fetchIssues = async () => {
-      console.log("➡️  Fetching issues for lecturer ID", lecturerProfile.id);
       const token = localStorage.getItem("access_token");
       if (!token) {
         console.warn("⚠️  No access_token in localStorage");
@@ -56,24 +50,17 @@ const LecturerDashboard = () => {
         const { data } = await axios.get(ALL_ISSUES_API_URL, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        console.log("📥 Received issues payload:", data);
-
-        // match on assigned_lecturer.id === lecturerProfile.id
-        const myIssues = data.filter(
-          (issue) => issue.assigned_lecturer?.id === lecturerProfile.id
-        );
-        console.log("🔍  Filtered myIssues:", myIssues);
-
-        setIssues(myIssues);
+        console.log("📥 Received issues:", data);
+        setIssues(data); // no need to filter
       } catch (err) {
         console.error("❌ Error fetching issue list:", err);
       }
     };
 
-    fetchIssues();
+    // Only fetch if we have the lecturer's profile (you can remove this check if unnecessary)
+    if (lecturerProfile.id) fetchIssues();
   }, [lecturerProfile]);
 
-  // ─── 3️⃣ Resolve an issue ───────────────────────────────
   const handleResolve = async (issueId) => {
     setResolvingIssueId(issueId);
     try {
@@ -96,11 +83,11 @@ const LecturerDashboard = () => {
     }
   };
 
-  // ─── 4️⃣ Handlers for viewing / commenting (unchanged) ─────
   const handleViewIssue = (issue) => {
     setSelectedIssue(issue);
     setShowIssueDetailModal(true);
   };
+
   const handleStatusChange = (newStatus) => {
     setIssues((all) =>
       all.map((i) =>
@@ -109,6 +96,7 @@ const LecturerDashboard = () => {
     );
     setSelectedIssue((i) => ({ ...i, status: newStatus }));
   };
+
   const handleAddComment = (commentText) => {
     const newComment = {
       author: `Dr. ${lecturerProfile.full_name}`,
@@ -128,20 +116,21 @@ const LecturerDashboard = () => {
     }));
   };
 
-  // ─── 5️⃣ Normalize & filter by status ───────────────────
   const normalize = (s) => s.replace(/_/g, " ").toLowerCase();
+
   const assignedIssues = issues.filter((i) => {
     const st = normalize(i.status);
     return st === "open" || st === "in progress";
   });
+
   const resolvedIssues = issues.filter((i) => {
     const st = normalize(i.status);
     return st === "resolved" || st === "closed";
   });
+
   const filteredIssues =
     activeTab === "assigned" ? assignedIssues : resolvedIssues;
 
-  // ─── 6️⃣ Stats ───────────────────────────────────────────
   const stats = {
     assigned: assignedIssues.length,
     resolved: resolvedIssues.length,
@@ -151,7 +140,6 @@ const LecturerDashboard = () => {
   return (
     <DashboardLayout userRole="Lecturer" profile={lecturerProfile}>
       <div className="lecturer-dashboard">
-        {/* Welcome + stats */}
         <div className="welcome-section">
           <h2>Welcome, Dr. {lecturerProfile.full_name || "Lecturer"}!</h2>
           <div className="stats-cards">
@@ -170,7 +158,6 @@ const LecturerDashboard = () => {
           </div>
         </div>
 
-        {/* Tabs */}
         <div className="tabs-container">
           <button
             className={activeTab === "assigned" ? "tab active" : "tab"}
@@ -186,7 +173,6 @@ const LecturerDashboard = () => {
           </button>
         </div>
 
-        {/* IssueList (optional) */}
         <IssueList
           issues={filteredIssues}
           title={
@@ -197,7 +183,6 @@ const LecturerDashboard = () => {
           userRole="Lecturer"
         />
 
-        {/* Table */}
         <div className="issues-table-container">
           <table className="issues-table">
             <thead>
@@ -245,7 +230,6 @@ const LecturerDashboard = () => {
           </table>
         </div>
 
-        {/* Detail Modal */}
         {showIssueDetailModal && selectedIssue && (
           <IssueDetail
             issue={selectedIssue}
