@@ -12,9 +12,7 @@ const PROFILE_API_URL =
 const ALL_ISSUES_API_URL =
   "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/list/";
 const RESOLVE_ISSUE_API_URL =
-  "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/update-status/${issueId}/";
-
-
+  "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/update-status/";
 
 const LecturerDashboard = () => {
   const [lecturerProfile, setLecturerProfile] = useState({});
@@ -24,6 +22,7 @@ const LecturerDashboard = () => {
   const [activeTab, setActiveTab] = useState("assigned");
   const [resolvingIssueId, setResolvingIssueId] = useState(null);
 
+  // Fetch lecturer profile
   useEffect(() => {
     const fetchLecturerProfile = async () => {
       const token = localStorage.getItem("access_token");
@@ -41,6 +40,7 @@ const LecturerDashboard = () => {
     fetchLecturerProfile();
   }, []);
 
+  // Fetch issues
   useEffect(() => {
     const fetchIssues = async () => {
       const token = localStorage.getItem("access_token");
@@ -53,16 +53,16 @@ const LecturerDashboard = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         console.log("📥 Received issues:", data);
-        setIssues(data); // no need to filter
+        setIssues(data);
       } catch (err) {
         console.error("❌ Error fetching issue list:", err);
       }
     };
 
-    // Only fetch if we have the lecturer's profile (you can remove this check if unnecessary)
     if (lecturerProfile.id) fetchIssues();
   }, [lecturerProfile]);
 
+  // Handle resolving an issue
   const handleResolve = async (issueId) => {
     setResolvingIssueId(issueId);
     try {
@@ -85,11 +85,13 @@ const LecturerDashboard = () => {
     }
   };
 
+  // Handle viewing an issue
   const handleViewIssue = (issue) => {
     setSelectedIssue(issue);
     setShowIssueDetailModal(true);
   };
 
+  // Handle status change in IssueDetail
   const handleStatusChange = (newStatus) => {
     setIssues((all) =>
       all.map((i) =>
@@ -99,6 +101,7 @@ const LecturerDashboard = () => {
     setSelectedIssue((i) => ({ ...i, status: newStatus }));
   };
 
+  // Handle adding a comment
   const handleAddComment = (commentText) => {
     const newComment = {
       author: `Dr. ${lecturerProfile.full_name}`,
@@ -118,8 +121,10 @@ const LecturerDashboard = () => {
     }));
   };
 
+  // Normalize status for filtering
   const normalize = (s) => s.replace(/_/g, " ").toLowerCase();
 
+  // Filter assigned and resolved issues
   const assignedIssues = issues.filter((i) => {
     const st = normalize(i.status);
     return st === "open" || st === "in progress";
@@ -133,6 +138,7 @@ const LecturerDashboard = () => {
   const filteredIssues =
     activeTab === "assigned" ? assignedIssues : resolvedIssues;
 
+  // Calculate stats
   const stats = {
     assigned: assignedIssues.length,
     resolved: resolvedIssues.length,
@@ -142,6 +148,7 @@ const LecturerDashboard = () => {
   return (
     <DashboardLayout userRole="Lecturer" profile={lecturerProfile}>
       <div className="lecturer-dashboard">
+        {/* Welcome Section */}
         <div className="welcome-section">
           <h2>Welcome, Dr. {lecturerProfile.full_name || "Lecturer"}!</h2>
           <div className="stats-cards">
@@ -160,6 +167,7 @@ const LecturerDashboard = () => {
           </div>
         </div>
 
+        {/* Tabs */}
         <div className="tabs-container">
           <button
             className={activeTab === "assigned" ? "tab active" : "tab"}
@@ -175,6 +183,7 @@ const LecturerDashboard = () => {
           </button>
         </div>
 
+        {/* Issue List */}
         <IssueList
           issues={filteredIssues}
           title={
@@ -185,6 +194,7 @@ const LecturerDashboard = () => {
           userRole="Lecturer"
         />
 
+        {/* Issues Table */}
         <div className="issues-table-container">
           <table className="issues-table">
             <thead>
@@ -232,6 +242,7 @@ const LecturerDashboard = () => {
           </table>
         </div>
 
+        {/* Issue Detail Modal */}
         {showIssueDetailModal && selectedIssue && (
           <IssueDetail
             issue={selectedIssue}
