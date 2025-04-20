@@ -12,7 +12,8 @@ const PROFILE_API_URL =
 const ALL_ISSUES_API_URL =
   "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/list/";
 const RESOLVE_ISSUE_API_URL =
-  "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/update-status/";
+  "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/update-status/<issue_id>/";
+
 
 const LecturerDashboard = () => {
   const [lecturerProfile, setLecturerProfile] = useState({});
