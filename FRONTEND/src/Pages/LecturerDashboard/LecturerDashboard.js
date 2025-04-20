@@ -32,33 +32,44 @@ const LecturerDashboard = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         setLecturerProfile(Array.isArray(data) ? data[0] : data);
+        console.log("✅ Fetched profile:", data);
       } catch (err) {
-        console.error("Error fetching profile:", err);
+        console.error("❌ Error fetching profile:", err);
       }
     };
     fetchLecturerProfile();
   }, []);
 
-  // ─── 2️⃣ Fetch issues, filter by nested user.id ──────────
+  // ─── 2️⃣ Fetch issues, filter by assigned_lecturer.id ────────
   useEffect(() => {
-    if (!lecturerProfile.user?.id) return;
+    // only run once we have a profile.id
+    if (!lecturerProfile.id) return;
+
     const fetchIssues = async () => {
+      console.log("➡️  Fetching issues for lecturer ID", lecturerProfile.id);
       const token = localStorage.getItem("access_token");
-      if (!token) return;
+      if (!token) {
+        console.warn("⚠️  No access_token in localStorage");
+        return;
+      }
       try {
         const { data } = await axios.get(ALL_ISSUES_API_URL, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        // match on assigned_lecturer.user.id
+        console.log("📥 Received issues payload:", data);
+
+        // match on assigned_lecturer.id === lecturerProfile.id
         const myIssues = data.filter(
-          (issue) =>
-            issue.assigned_lecturer?.user?.id === lecturerProfile.user.id
+          (issue) => issue.assigned_lecturer?.id === lecturerProfile.id
         );
+        console.log("🔍  Filtered myIssues:", myIssues);
+
         setIssues(myIssues);
       } catch (err) {
-        console.error("Error fetching issue list:", err);
+        console.error("❌ Error fetching issue list:", err);
       }
     };
+
     fetchIssues();
   }, [lecturerProfile]);
 
@@ -79,7 +90,7 @@ const LecturerDashboard = () => {
         )
       );
     } catch (err) {
-      console.error("Error resolving issue:", err);
+      console.error("❌ Error resolving issue:", err);
     } finally {
       setResolvingIssueId(null);
     }
@@ -100,7 +111,7 @@ const LecturerDashboard = () => {
   };
   const handleAddComment = (commentText) => {
     const newComment = {
-      author: `Dr. ${lecturerProfile.user?.full_name}`,
+      author: `Dr. ${lecturerProfile.full_name}`,
       date: new Date().toISOString().split("T")[0],
       content: commentText,
     };
@@ -130,7 +141,7 @@ const LecturerDashboard = () => {
   const filteredIssues =
     activeTab === "assigned" ? assignedIssues : resolvedIssues;
 
-  // ─── 6️⃣ Stats (now will be non‑zero!) ───────────────────
+  // ─── 6️⃣ Stats ───────────────────────────────────────────
   const stats = {
     assigned: assignedIssues.length,
     resolved: resolvedIssues.length,
@@ -142,7 +153,7 @@ const LecturerDashboard = () => {
       <div className="lecturer-dashboard">
         {/* Welcome + stats */}
         <div className="welcome-section">
-          <h2>Welcome, Dr. {lecturerProfile.user?.full_name || "Lecturer"}!</h2>
+          <h2>Welcome, Dr. {lecturerProfile.full_name || "Lecturer"}!</h2>
           <div className="stats-cards">
             <div className="stat-card">
               <div className="stat-value">{stats.assigned}</div>
@@ -186,7 +197,7 @@ const LecturerDashboard = () => {
           userRole="Lecturer"
         />
 
-        {/* ── Table ───────────────────────────────────────────── */}
+        {/* Table */}
         <div className="issues-table-container">
           <table className="issues-table">
             <thead>
@@ -206,9 +217,7 @@ const LecturerDashboard = () => {
                     <td>#{issue.id}</td>
                     <td>{issue.title}</td>
                     <td>{issue.description}</td>
-                    <td>
-                      {new Date(issue.created_at).toLocaleString()}
-                    </td>
+                    <td>{new Date(issue.created_at).toLocaleString()}</td>
                     <td>{normalize(issue.status)}</td>
                     {activeTab === "assigned" && (
                       <td>
