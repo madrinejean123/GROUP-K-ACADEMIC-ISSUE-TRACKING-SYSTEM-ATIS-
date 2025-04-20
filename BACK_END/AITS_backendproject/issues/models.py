@@ -43,3 +43,4 @@ class Issues(models.Model):
         return f'{self.title} - {self.status}, (By {self.author})'
 
 
+
