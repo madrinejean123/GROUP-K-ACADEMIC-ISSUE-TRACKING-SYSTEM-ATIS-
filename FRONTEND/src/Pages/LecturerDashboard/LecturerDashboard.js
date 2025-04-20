@@ -11,6 +11,8 @@ const PROFILE_API_URL =
   "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/profile/";
 const ALL_ISSUES_API_URL =
   "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/list/";
+const RESOLVE_ISSUE_API_URL =
+  "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/update-status/";
 
 const LecturerDashboard = () => {
   const [lecturerProfile, setLecturerProfile] = useState({});
@@ -18,6 +20,7 @@ const LecturerDashboard = () => {
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [showIssueDetailModal, setShowIssueDetailModal] = useState(false);
   const [activeTab, setActiveTab] = useState("assigned");
+  const [resolvingIssueId, setResolvingIssueId] = useState(null);
 
   // 1️⃣ Fetch lecturer’s own profile
   useEffect(() => {
@@ -37,7 +40,7 @@ const LecturerDashboard = () => {
     fetchLecturerProfile();
   }, []);
 
-  // 2️⃣ Once we have the lecturer’s ID, fetch **all** issues, then filter to theirs
+  // 2️⃣ Fetch all issues assigned to the lecturer
   useEffect(() => {
     if (!lecturerProfile.id) return;
 
@@ -50,15 +53,9 @@ const LecturerDashboard = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        // Keep only those where assigned_lecturer.id === this lecturer’s id
-        const myIssues = data
-          .filter((issue) => issue.assigned_lecturer?.id === lecturerProfile.id)
-          // optional: stamp on a nicer assignee name
-          .map((issue) => ({
-            ...issue,
-            assignee: `Dr. ${lecturerProfile.full_name}`,
-          }));
-
+        const myIssues = data.filter(
+          (issue) => issue.assigned_lecturer?.id === lecturerProfile.id
+        );
         setIssues(myIssues);
       } catch (err) {
         console.error("Error fetching issue list:", err);
@@ -68,7 +65,33 @@ const LecturerDashboard = () => {
     fetchAssignedIssues();
   }, [lecturerProfile]);
 
-  // ↪️ Handlers for viewing/detailing
+  // 3️⃣ Handle resolving an issue
+  const handleResolve = async (issueId) => {
+    setResolvingIssueId(issueId);
+    try {
+      const token = localStorage.getItem("access_token");
+      if (!token) throw new Error("No auth token");
+
+      await axios.put(
+        `${RESOLVE_ISSUE_API_URL}${issueId}/`,
+        { status: "resolved" },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // Update the issue's status locally
+      setIssues((prevIssues) =>
+        prevIssues.map((issue) =>
+          issue.id === issueId ? { ...issue, status: "resolved" } : issue
+        )
+      );
+    } catch (err) {
+      console.error("Error resolving issue:", err);
+    } finally {
+      setResolvingIssueId(null);
+    }
+  };
+
+  // 4️⃣ Handlers for viewing and updating issues
   const handleViewIssue = (issue) => {
     setSelectedIssue(issue);
     setShowIssueDetailModal(true);
@@ -103,19 +126,19 @@ const LecturerDashboard = () => {
     }));
   };
 
-  // ↪️ Tabs: assigned vs. resolved
+  // 5️⃣ Tabs: assigned vs. resolved
   const assignedIssues = issues.filter(
-    (i) => i.status.toLowerCase() === "open" ||
-           i.status.toLowerCase() === "in progress"
+    (i) =>
+      i.status.toLowerCase() === "open" || i.status.toLowerCase() === "in progress"
   );
   const resolvedIssues = issues.filter(
-    (i) => i.status.toLowerCase() === "resolved" ||
-           i.status.toLowerCase() === "closed"
+    (i) =>
+      i.status.toLowerCase() === "resolved" || i.status.toLowerCase() === "closed"
   );
   const filteredIssues =
     activeTab === "assigned" ? assignedIssues : resolvedIssues;
 
-  // ↪️ Simple stats
+  // 6️⃣ Simple stats
   const stats = {
     assigned: assignedIssues.length,
     resolved: resolvedIssues.length,
@@ -127,7 +150,7 @@ const LecturerDashboard = () => {
       <div className="lecturer-dashboard">
         {/* Welcome + stats */}
         <div className="welcome-section">
-          <h2>Welcome, Dr. {lecturerProfile.full_name || ""}!</h2>
+          <h2>Welcome, Dr. {lecturerProfile.full_name || "Lecturer"}!</h2>
           <div className="stats-cards">
             <div className="stat-card">
               <div className="stat-value">{stats.assigned}</div>
@@ -160,7 +183,7 @@ const LecturerDashboard = () => {
           </button>
         </div>
 
-        {/* 3️⃣ Pass your filtered issues into IssueList */}
+        {/* Issues Table */}
         <IssueList
           issues={filteredIssues}
           title={activeTab === "assigned" ? "Assigned Issues" : "Resolved Issues"}
@@ -169,7 +192,7 @@ const LecturerDashboard = () => {
           userRole="Lecturer"
         />
 
-        {/* 4️⃣ And when you open one, pass it into IssueDetail */}
+        {/* Issue Detail Modal */}
         {showIssueDetailModal && selectedIssue && (
           <IssueDetail
             issue={selectedIssue}
@@ -178,6 +201,48 @@ const LecturerDashboard = () => {
             onAddComment={handleAddComment}
             userRole="Lecturer"
           />
+        )}
+
+        {/* Resolve Button for Assigned Issues */}
+        {activeTab === "assigned" && (
+          <div className="issues-table-container">
+            <table className="issues-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Title</th>
+                  <th>Description</th>
+                  <th>Submitted At</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {assignedIssues.map((issue) => (
+                  <tr key={issue.id}>
+                    <td>#{issue.id}</td>
+                    <td>{issue.title}</td>
+                    <td>{issue.description}</td>
+                    <td>
+                      {new Date(issue.created_at).toLocaleString()}
+                    </td>
+                    <td>{issue.status}</td>
+                    <td>
+                      <button
+                        className="action-button"
+                        onClick={() => handleResolve(issue.id)}
+                        disabled={resolvingIssueId === issue.id}
+                      >
+                        {resolvingIssueId === issue.id
+                          ? "Resolving..."
+                          : "Resolve"}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </DashboardLayout>
