@@ -4,6 +4,8 @@ from django.contrib.auth.models import AbstractUser, Group, Permission, BaseUser
 from cloudinary.models import CloudinaryField
 from department.models import Department, College, School
 import re
+from django.db.models.signals import post_save  # NEW: Import added for signals
+from django.dispatch import receiver  # NEW: Import added for signals
 
 # Custom validator for university email domain
 def validate_email_domain(value, user_role=None): 
@@ -128,9 +130,14 @@ class Student(models.Model):
     def save(self, *args, **kwargs):
         if not self.user.is_superuser:
             validate_email_domain(self.user.mak_email, self.user.user_role)
+        
+        # NEW: Sync college to User model when Student college changes
+        if self.college != self.user.college:
+            self.user.college = self.college
+            self.user.save()
+            
         super().save(*args, **kwargs)
         
-
 
 class Lecturer(models.Model):
     user = models.OneToOneField(
@@ -151,7 +158,7 @@ class Lecturer(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True
-    )  # Changed: now optional
+    )
     is_lecturer = models.BooleanField(default=True)
 
     def __str__(self):
@@ -168,7 +175,23 @@ class CollegeRegister(models.Model):
     college = models.ForeignKey(
         College,
         on_delete=models.CASCADE
-    )  # Still required
+    )
 
     def __str__(self):
         return f"{self.user.username} - {self.college}"
+
+
+# NEW: Signal handlers added for automatic college synchronization
+@receiver(post_save, sender=User)
+def sync_user_college_to_student(sender, instance, **kwargs):
+    """When User.college changes, update Student.college if exists"""
+    if hasattr(instance, 'student') and instance.college != instance.student.college:
+        instance.student.college = instance.college
+        instance.student.save()
+
+@receiver(post_save, sender=Student)
+def sync_student_college_to_user(sender, instance, **kwargs):
+    """When Student.college changes, update User.college"""
+    if instance.college != instance.user.college:
+        instance.user.college = instance.college
+        instance.user.save()
