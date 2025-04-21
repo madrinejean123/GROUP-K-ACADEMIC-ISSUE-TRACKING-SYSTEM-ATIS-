@@ -10,11 +10,10 @@ const CreateIssueForm = ({ onCancel }) => {
     title: "",
     description: "",
     courseCode: "",
-    category:"Missing Marks",
-    status:"Open",
+    category: "Missing Marks",
+    status: "Open",
     attachment: [],
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [userData, setUserData] = useState({
     fullName: "",
     studentNo: "",
@@ -22,6 +21,24 @@ const CreateIssueForm = ({ onCancel }) => {
     school: "",
     department: "",
   });
+
+  // Validation state
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState(null);
+
+  // File size limit in bytes (5MB)
+  const MAX_FILE_SIZE = 5 * 1024 * 1024;
+  // Allowed file types
+  const ALLOWED_FILE_TYPES = [
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ];
 
   // Fetch user data from the backend profile
   useEffect(() => {
@@ -38,13 +55,8 @@ const CreateIssueForm = ({ onCancel }) => {
         //   response.data.college = { id, name, code }
         //   response.data.school = { id, school_name, college }
         //   response.data.department = { id, department_name, school }
-        const {
-          full_name,
-          student_no,
-          college,
-          school,
-          department,
-        } = response.data;
+        const { full_name, student_no, college, school, department } =
+          response.data;
 
         setUserData({
           fullName: full_name,
@@ -62,16 +74,35 @@ const CreateIssueForm = ({ onCancel }) => {
     fetchUserData();
   }, []);
 
+  // Validate form on input change
+  useEffect(() => {
+    validateForm();
+  }, [newIssue]);
+
   // Handle input changes for text fields
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewIssue((prev) => ({ ...prev, [name]: value }));
-  };
+    const handleNewIssueChange = (e) => {
+      const { name, value } = e.target;
+
+      setNewIssue((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+
+      // Mark field as touched
+      setTouched((prev) => ({
+        ...prev,
+        [name]: true,
+      }));
+    };
 
   // Handle file attachment change
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    if (file && !file.type.startsWith("image/") && file.type !== "application/pdf") {
+    if (
+      file &&
+      !file.type.startsWith("image/") &&
+      file.type !== "application/pdf"
+    ) {
       toast.error("Please upload a valid image or PDF file.");
       return;
     }
@@ -128,11 +159,21 @@ const CreateIssueForm = ({ onCancel }) => {
 
           {/* Display User Profile Info */}
           <div className="user-info">
-            <p><strong>Name:</strong> {userData.fullName || "Loading..."}</p>
-            <p><strong>Student No:</strong> {userData.studentNo || "Loading..."}</p>
-            <p><strong>College:</strong> {userData.college || "Loading..."}</p>
-            <p><strong>School:</strong> {userData.school || "Loading..."}</p>
-            <p><strong>Department:</strong> {userData.department || "Loading..."}</p>
+            <p>
+              <strong>Name:</strong> {userData.fullName || "Loading..."}
+            </p>
+            <p>
+              <strong>Student No:</strong> {userData.studentNo || "Loading..."}
+            </p>
+            <p>
+              <strong>College:</strong> {userData.college || "Loading..."}
+            </p>
+            <p>
+              <strong>School:</strong> {userData.school || "Loading..."}
+            </p>
+            <p>
+              <strong>Department:</strong> {userData.department || "Loading..."}
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} noValidate>
