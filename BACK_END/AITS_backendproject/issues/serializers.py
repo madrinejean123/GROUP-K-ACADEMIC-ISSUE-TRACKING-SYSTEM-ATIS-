@@ -149,3 +149,5 @@ class IssueDetailSerializer(serializers.ModelSerializer):
         # Convert status to match frontend display logic
         data['status'] = instance.status.replace('_', ' ').title()  
         return data
+    
+#this updated serializers should work now 
