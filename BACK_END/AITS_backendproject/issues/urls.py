@@ -27,3 +27,5 @@ urlpatterns = [
     # 6️⃣ File Downloads (Matches attachment links in IssueDetail.jsx)
     path('issues/<int:issue_id>/download/', SecureFileDownloadView.as_view(), name='issue-download'),
 ]
+
+
