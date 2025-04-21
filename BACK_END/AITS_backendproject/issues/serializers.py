@@ -150,4 +150,6 @@ class IssueDetailSerializer(serializers.ModelSerializer):
         data['status'] = instance.status.replace('_', ' ').title()  
         return data
     
+
+
     
