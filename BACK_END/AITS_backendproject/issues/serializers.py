@@ -1,21 +1,34 @@
 from rest_framework import serializers
-from .models import Issues
+from .models import Issue
 from users.serializers import StudentSerializer, LecturerSerializer, CollegeRegisterSerializer
-from users.models import Lecturer,CollegeRegister
+from users.models import Lecturer, CollegeRegister
+import logging
 
+logger = logging.getLogger(__name__)
 
-# 1️⃣ Serializer for Creating Issues (Student Submits)
 class IssueCreateSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Issues
-        fields = ['title', 'description', 'attachment']
+        model = Issue
+        fields = ['title', 'description', 'category', 'course_code', 'attachment']
         extra_kwargs = {
             'attachment': {
                 'required': False,
-                'help_text': 'Upload image (JPG/PNG) or PDF file'
+                'help_text': 'Upload file (JPG/PNG/PDF/DOC) up to 5MB'
+            },
+            'course_code': {
+                'help_text': 'Format: 3-4 capital letters + 4 digits (e.g., CSC1200)'
             }
         }
     
+    def validate_category(self, value):
+        """Ensure category matches frontend choices exactly"""
+        valid_categories = ['missing_marks', 'appeals', 'correction']
+        if value not in valid_categories:
+            raise serializers.ValidationError(
+                f"Invalid category. Must be one of: {', '.join(valid_categories)}"
+            )
+        return value
+
     def create(self, validated_data):
         request = self.context['request']
         student = request.user.student
@@ -26,109 +39,113 @@ class IssueCreateSerializer(serializers.ModelSerializer):
                 code='student_required'
             )
 
-        # Debug prints - remove in production
-        print(f"Creating issue for student: {student}")
-        print(f"Student college: {student.college}")
-        
-        try:
-            college_register = CollegeRegister.objects.get(college=student.college)
-        except CollegeRegister.DoesNotExist:
-            raise serializers.ValidationError(
-                {"error": "No registrar available for your college"},
-                code='no_registrar'
-            )
-
-        # Build issue data dict
-        issue_data = {
+        validated_data.update({
             'author': student,
-            'register': college_register,
             'college': student.college,
             'school': student.school,
             'department': student.department,
-            **validated_data
-        }
-        
-        # Debug print issue data
-        print(f"Issue data: {issue_data}")
-        
-        # Create and save issue
+            'status': 'open'  # Frontend expects this default
+        })
+
         try:
-            issue = Issues(**issue_data)
-            issue.full_clean()  # Validate model fields
-            issue.save()
+            college_register = CollegeRegister.objects.get(college=student.college)
+            validated_data['handled_by'] = college_register
+        except CollegeRegister.DoesNotExist:
+            logger.warning(f"No registrar found for college {student.college}")
+
+        try:
+            issue = Issue.objects.create(**validated_data)
             return issue
         except Exception as e:
-            print(f"Error creating issue: {str(e)}")
+            logger.error(f"Issue creation failed: {str(e)}")
             raise serializers.ValidationError(
-                {"error": f"Failed to create issue: {str(e)}"},
+                {"error": "Failed to create issue. Please try again."},
                 code='creation_failed'
             )
 
-# 2️⃣ Serializer for College Register Assigning Lecturer
 class IssueAssignSerializer(serializers.ModelSerializer):
-    assigned_lecturer = serializers.PrimaryKeyRelatedField(queryset=Lecturer.objects.all())
+    assigned_lecturer = LecturerSerializer(read_only=True)
+    lecturer_id = serializers.PrimaryKeyRelatedField(
+        queryset=Lecturer.objects.all(),
+        source='assigned_lecturer',
+        write_only=True,
+        help_text="ID of lecturer to assign"
+    )
 
     class Meta:
-        model = Issues
-        fields = ['assigned_lecturer']
-
+        model = Issue
+        fields = ['assigned_lecturer', 'lecturer_id', 'status']
+        read_only_fields = ['assigned_lecturer', 'status']
+    
     def update(self, instance, validated_data):
-        """
-        Only College Register can assign an issue to a lecturer.
-        """
         request = self.context['request']
         if not hasattr(request.user, 'collegeregister'):
-            raise serializers.ValidationError("Only College Registers can assign lecturers.")
+            raise serializers.ValidationError(
+                {"error": "Only College Registers can assign lecturers."},
+                code='registrar_required'
+            )
 
         instance.assigned_lecturer = validated_data['assigned_lecturer']
+        instance.status = 'in_progress'
         instance.save()
         return instance
 
-# 3️⃣ Serializer for Lecturer Updating Issue Status
 class IssueStatusUpdateSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Issues
-        fields = ['status']
+        model = Issue
+        fields = ['status', 'resolution_notes']
+        extra_kwargs = {
+            'resolution_notes': {
+                'required': False,
+                'allow_blank': True
+            }
+        }
 
-    def validate_status(self, value):
-        """
-        Only lecturers can update the issue status.
-        """
+    def validate(self, data):
+        if data.get('status') == 'resolved' and not data.get('resolution_notes'):
+            raise serializers.ValidationError(
+                {"error": "Resolution notes are required when resolving an issue"},
+                code='resolution_notes_required'
+            )
+        return data
+
+    def update(self, instance, validated_data):
         request = self.context['request']
         if not hasattr(request.user, 'lecturer'):
-            raise serializers.ValidationError("Only lecturers can update issue status.")
+            raise serializers.ValidationError(
+                {"error": "Only lecturers can update issue status."},
+                code='lecturer_required'
+            )
 
-        if value not in ['resolved', 'rejected', 'in_progress']:
-            raise serializers.ValidationError("Invalid status update.")
+        instance.status = validated_data['status']
+        instance.resolution_notes = validated_data.get('resolution_notes', '')
+        instance.save()
+        return instance
 
-        return value
-    from users.models import User
-
-
-# 4️⃣ Serializer for Listing & Viewing Issues
 class IssueDetailSerializer(serializers.ModelSerializer):
     author = StudentSerializer(read_only=True)
     assigned_lecturer = LecturerSerializer(read_only=True)
-    register = CollegeRegisterSerializer(read_only=True)
+    handled_by = CollegeRegisterSerializer(read_only=True)
     attachment_url = serializers.SerializerMethodField()
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
 
     class Meta:
-        model = Issues
+        model = Issue
         fields = '__all__'
-        read_only_fields = ['author', 'college', 'school', 'department', 'register', 'created_at']  # Auto-set fields
+        read_only_fields = [
+            'id', 'author', 'college', 'school', 'department',
+            'handled_by', 'created_at', 'updated_at', 'status_changed_at'
+        ]
 
-    def validate_status(self, value):
-        """
-        Ensure only lecturers can set 'resolved' or 'rejected'.
-        """
-        request = self.context.get('request')
-        if value in ['resolved', 'rejected'] and not hasattr(request.user, 'lecturer'):
-            raise serializers.ValidationError("Only lecturers can resolve/reject issues.")
-        return value
-    #this is such that when i user click the url of an attached file it can fetch it from backend to front end so bascially for users to view the attached files
     def get_attachment_url(self, obj):
         if obj.attachment:
             request = self.context.get('request')
             return request.build_absolute_uri(obj.attachment.url)
         return None
 
+    def to_representation(self, instance):
+        """Frontend-friendly formatting"""
+        data = super().to_representation(instance)
+        # Convert status to match frontend display logic
+        data['status'] = instance.status.replace('_', ' ').title()  
+        return data
