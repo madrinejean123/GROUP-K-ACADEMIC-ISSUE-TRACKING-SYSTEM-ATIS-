@@ -184,12 +184,12 @@ const RegistrarDashboard = () => {
         return (
           <div className="lecturers-view">
             <h2>Lecturers</h2>
-            {lecturers.map((l) => {
+            {lecturerCounts.map((l) => (
               <div key={l.id} className="lecturer-card-full">
                 <h3>{l.name}</h3>
-                <p>{count} assigned issues</p>
-              </div>;
-            })}
+                <p>{l.count} assigned issues</p>
+              </div>
+            ))}
           </div>
         );
 
