@@ -106,8 +106,9 @@ const CreateIssueForm = ({ onCancel }) => {
     // Course code validation
     if (!newIssue.courseCode.trim()) {
       newErrors.courseCode = "Course code is required";
-    } else if (!/^[A-Z]{3,4}\s*\d{3,4}$/i.test(newIssue.courseCode.trim())) {
-      newErrors.courseCode = "Invalid course code format (e.g., CSC 101)";
+    } else if (!/^[A-Z]{3,4}\d{4}$/.test(newIssue.courseCode.trim())) {
+      newErrors.courseCode =
+        "Invalid course code format (e.g., CSC1234 or MATH1234)";
     }
 
     // Category validation
@@ -309,7 +310,7 @@ const CreateIssueForm = ({ onCancel }) => {
                 name="courseCode"
                 value={newIssue.courseCode}
                 onChange={handleInputChange}
-                placeholder="Enter course code (e.g., CSC 101)"
+                placeholder="Enter course code (e.g., CSC1200 or MATH1201)"
                 required
               />
               {errors.courseCode && touched.courseCode && (
@@ -363,7 +364,9 @@ const CreateIssueForm = ({ onCancel }) => {
                 errors.attachment && touched.attachment ? "error" : ""
               }`}
             >
-              <label htmlFor="attachment">Attachment</label>
+              <label htmlFor="attachment">
+                Attach Supporting File (Optional)
+              </label>
               <input
                 type="file"
                 id="attachment"
@@ -372,7 +375,7 @@ const CreateIssueForm = ({ onCancel }) => {
                 className="file-input"
               />
               <div className="file-info">
-                Accepted file types: Images, PDF, Word documents (Max size: 5MB)
+                Optional: Upload images, PDF, or Word documents (Max size: 5MB)
               </div>
               {errors.attachment && touched.attachment && (
                 <div className="error-message">{errors.attachment}</div>
