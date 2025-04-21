@@ -1,9 +1,11 @@
+"use client";
+
 // src/components/CreateIssueForm.jsx
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import '../styles/create-issue.css';
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import "../styles/create-issue.css";
 
 const CreateIssueForm = ({ onCancel }) => {
   const [newIssue, setNewIssue] = useState({
@@ -12,7 +14,7 @@ const CreateIssueForm = ({ onCancel }) => {
     courseCode: "",
     category: "Missing Marks",
     status: "Open",
-    attachment: [],
+    attachment: null,
   });
   const [userData, setUserData] = useState({
     fullName: "",
@@ -76,49 +78,141 @@ const CreateIssueForm = ({ onCancel }) => {
 
   // Validate form on input change
   useEffect(() => {
-    validateForm();
-  }, [newIssue]);
+    if (Object.keys(touched).length > 0) {
+      validateForm();
+    }
+  }, [newIssue, touched]);
+
+  // Form validation function
+  const validateForm = () => {
+    const newErrors = {};
+
+    // Title validation
+    if (!newIssue.title.trim()) {
+      newErrors.title = "Title is required";
+    } else if (newIssue.title.length < 5) {
+      newErrors.title = "Title must be at least 5 characters";
+    } else if (newIssue.title.length > 100) {
+      newErrors.title = "Title must be less than 100 characters";
+    }
+
+    // Description validation
+    if (!newIssue.description.trim()) {
+      newErrors.description = "Description is required";
+    } else if (newIssue.description.length < 10) {
+      newErrors.description = "Description must be at least 10 characters";
+    }
+
+    // Course code validation
+    if (!newIssue.courseCode.trim()) {
+      newErrors.courseCode = "Course code is required";
+    } else if (!/^[A-Z]{3,4}\s*\d{3,4}$/i.test(newIssue.courseCode.trim())) {
+      newErrors.courseCode = "Invalid course code format (e.g., CSC 101)";
+    }
+
+    // Category validation
+    if (!newIssue.category) {
+      newErrors.category = "Please select a category";
+    }
+
+    // File validation (if a file is selected)
+    if (newIssue.attachment) {
+      if (!ALLOWED_FILE_TYPES.includes(newIssue.attachment.type)) {
+        newErrors.attachment = "File type not supported";
+      } else if (newIssue.attachment.size > MAX_FILE_SIZE) {
+        newErrors.attachment = "File size must be less than 5MB";
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   // Handle input changes for text fields
-    const handleNewIssueChange = (e) => {
-      const { name, value } = e.target;
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
 
-      setNewIssue((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
+    setNewIssue((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
 
-      // Mark field as touched
-      setTouched((prev) => ({
-        ...prev,
-        [name]: true,
-      }));
-    };
+    // Mark field as touched
+    setTouched((prev) => ({
+      ...prev,
+      [name]: true,
+    }));
+  };
 
   // Handle file attachment change
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    if (
-      file &&
-      !file.type.startsWith("image/") &&
-      file.type !== "application/pdf"
-    ) {
-      toast.error("Please upload a valid image or PDF file.");
+
+    if (!file) {
       return;
     }
-    setNewIssue((prev) => ({ ...prev, attachment: file }));
+
+    // Check file type
+    if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+      toast.error(
+        "Please upload a valid file type (image, PDF, or Word document)."
+      );
+      e.target.value = null; // Reset the input
+      return;
+    }
+
+    // Check file size
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error("File size must be less than 5MB.");
+      e.target.value = null; // Reset the input
+      return;
+    }
+
+    setNewIssue((prev) => ({
+      ...prev,
+      attachment: file,
+    }));
+
+    setTouched((prev) => ({
+      ...prev,
+      attachment: true,
+    }));
   };
 
   // Handle form submission using FormData for the file attachment
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Mark all fields as touched to trigger validation
+    const allFields = {
+      title: true,
+      description: true,
+      courseCode: true,
+      category: true,
+      attachment: true,
+    };
+    setTouched(allFields);
+
+    // Validate the form
+    const isValid = validateForm();
+
+    if (!isValid) {
+      setFormError("Please fix the errors in the form before submitting.");
+      return;
+    }
+
     setIsSubmitting(true);
+    setFormError(null);
 
     try {
       const token = localStorage.getItem("access_token");
       const formData = new FormData();
       formData.append("title", newIssue.title);
       formData.append("description", newIssue.description);
+      formData.append("courseCode", newIssue.courseCode);
+      formData.append("category", newIssue.category);
+      formData.append("status", newIssue.status);
+
       if (newIssue.attachment) {
         formData.append("attachment", newIssue.attachment);
       }
@@ -139,7 +233,11 @@ const CreateIssueForm = ({ onCancel }) => {
       onCancel(); // Close the modal after submission
     } catch (error) {
       console.error("Error creating issue:", error);
-      toast.error("Failed to create issue. Please try again.");
+      const errorMessage =
+        error.response?.data?.message ||
+        "Failed to create issue. Please try again.";
+      toast.error(errorMessage);
+      setFormError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -176,8 +274,14 @@ const CreateIssueForm = ({ onCancel }) => {
             </p>
           </div>
 
+          {formError && <div className="form-error">{formError}</div>}
+
           <form onSubmit={handleSubmit} noValidate>
-            <div className="form-group">
+            <div
+              className={`form-group ${
+                errors.title && touched.title ? "error" : ""
+              }`}
+            >
               <label htmlFor="title">Title</label>
               <input
                 type="text"
@@ -188,9 +292,58 @@ const CreateIssueForm = ({ onCancel }) => {
                 placeholder="Enter the issue title"
                 required
               />
+              {errors.title && touched.title && (
+                <div className="error-message">{errors.title}</div>
+              )}
             </div>
 
-            <div className="form-group">
+            <div
+              className={`form-group ${
+                errors.courseCode && touched.courseCode ? "error" : ""
+              }`}
+            >
+              <label htmlFor="courseCode">Course Code</label>
+              <input
+                type="text"
+                id="courseCode"
+                name="courseCode"
+                value={newIssue.courseCode}
+                onChange={handleInputChange}
+                placeholder="Enter course code (e.g., CSC 101)"
+                required
+              />
+              {errors.courseCode && touched.courseCode && (
+                <div className="error-message">{errors.courseCode}</div>
+              )}
+            </div>
+
+            <div
+              className={`form-group ${
+                errors.category && touched.category ? "error" : ""
+              }`}
+            >
+              <label htmlFor="category">Category</label>
+              <select
+                id="category"
+                name="category"
+                value={newIssue.category}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="Missing Marks">Missing Marks</option>
+                <option value="Appeals">Appeals</option>
+                <option value="Corrections">Corrections</option>
+              </select>
+              {errors.category && touched.category && (
+                <div className="error-message">{errors.category}</div>
+              )}
+            </div>
+
+            <div
+              className={`form-group ${
+                errors.description && touched.description ? "error" : ""
+              }`}
+            >
               <label htmlFor="description">Description</label>
               <textarea
                 id="description"
@@ -200,23 +353,52 @@ const CreateIssueForm = ({ onCancel }) => {
                 placeholder="Describe the issue"
                 required
               />
+              {errors.description && touched.description && (
+                <div className="error-message">{errors.description}</div>
+              )}
             </div>
 
-            <div className="form-group">
+            <div
+              className={`form-group ${
+                errors.attachment && touched.attachment ? "error" : ""
+              }`}
+            >
               <label htmlFor="attachment">Attachment</label>
               <input
                 type="file"
                 id="attachment"
                 name="attachment"
                 onChange={handleFileChange}
+                className="file-input"
               />
+              <div className="file-info">
+                Accepted file types: Images, PDF, Word documents (Max size: 5MB)
+              </div>
+              {errors.attachment && touched.attachment && (
+                <div className="error-message">{errors.attachment}</div>
+              )}
+              {newIssue.attachment && (
+                <div className="file-preview">
+                  Selected file: {newIssue.attachment.name} (
+                  {(newIssue.attachment.size / 1024 / 1024).toFixed(2)} MB)
+                </div>
+              )}
             </div>
 
             <div className="form-actions">
-              <button type="button" onClick={onCancel} disabled={isSubmitting}>
+              <button
+                type="button"
+                className="cancel-button"
+                onClick={onCancel}
+                disabled={isSubmitting}
+              >
                 Cancel
               </button>
-              <button type="submit" disabled={isSubmitting}>
+              <button
+                type="submit"
+                className="submit-button"
+                disabled={isSubmitting}
+              >
                 {isSubmitting ? "Submitting..." : "Submit Issue"}
               </button>
             </div>
