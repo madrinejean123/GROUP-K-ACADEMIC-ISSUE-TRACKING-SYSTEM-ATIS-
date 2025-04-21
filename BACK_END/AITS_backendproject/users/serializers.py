@@ -240,3 +240,11 @@ class UserSerializer(serializers.ModelSerializer):
             'id', 'username', 'full_name', 'mak_email', 'user_role',
             'gender', 'profile_pic', 'office', 'college', 'notification_email'
         ]
+
+
+class UserLogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField()
+
+    def validate(self, attrs):
+        self.refresh_token = attrs['refresh']
+        return attrs
