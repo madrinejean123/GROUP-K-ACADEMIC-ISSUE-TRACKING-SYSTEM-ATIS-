@@ -9,7 +9,10 @@ const CreateIssueForm = ({ onCancel }) => {
   const [newIssue, setNewIssue] = useState({
     title: "",
     description: "",
-    attachment: null,
+    courseCode: "",
+    category:"Missing Marks",
+    status:"Open",
+    attachment: [],
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [userData, setUserData] = useState({
