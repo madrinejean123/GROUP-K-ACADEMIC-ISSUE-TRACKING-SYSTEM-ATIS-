@@ -6,7 +6,6 @@ import Sidebar from "../../Components/layout/Sidebar"; // Import the Sidebar
 import IssueList from "../../Components/issues/IssueList";
 import CreateIssueForm from "../../Components/issues/CreateIssueForm";
 import IssueDetail from "../../Components/issues/IssueDetail";
-import { mockIssues } from "../../mock-data";
 import "./student-dashboard.css";
 import axios from "axios";
 
@@ -45,8 +44,6 @@ const StudentDashboard = () => {
           setStudentProfile(data); // Store profile directly if not an array
         }
 
-        // Set mock issues for now....replace this
-        setIssues(mockIssues);
       } catch (error) {
         console.error("Error fetching student details:", error);
       }
