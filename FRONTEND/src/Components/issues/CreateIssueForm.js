@@ -42,7 +42,7 @@ const CreateIssueForm = ({ onCancel }) => {
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   ];
 
-  // Fetch user data from the backend profile
+  // Fetch the user data from the backend profile
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -76,7 +76,7 @@ const CreateIssueForm = ({ onCancel }) => {
     fetchUserData();
   }, []);
 
-  // Validate form on input change
+  // Validate the form on input change
   useEffect(() => {
     if (Object.keys(touched).length > 0) {
       validateForm();
@@ -87,7 +87,7 @@ const CreateIssueForm = ({ onCancel }) => {
   const validateForm = () => {
     const newErrors = {};
 
-    // Title validation
+    // Title validations
     if (!newIssue.title.trim()) {
       newErrors.title = "Title is required";
     } else if (newIssue.title.length < 5) {
@@ -96,14 +96,14 @@ const CreateIssueForm = ({ onCancel }) => {
       newErrors.title = "Title must be less than 100 characters";
     }
 
-    // Description validation
+    // Description validations
     if (!newIssue.description.trim()) {
       newErrors.description = "Description is required";
     } else if (newIssue.description.length < 10) {
       newErrors.description = "Description must be at least 10 characters";
     }
 
-    // Course code validation
+    // Course code validations
     if (!newIssue.courseCode.trim()) {
       newErrors.courseCode = "Course code is required";
     } else if (!/^[A-Z]{3,4}\d{4}$/.test(newIssue.courseCode.trim())) {
@@ -111,12 +111,12 @@ const CreateIssueForm = ({ onCancel }) => {
         "Invalid course code format (e.g., CSC1234 or MATH1234)";
     }
 
-    // Category validation
+    // Category validations
     if (!newIssue.category) {
       newErrors.category = "Please select a category";
     }
 
-    // File validation (if a file is selected)
+    // File validations (if a file is selected)
     if (newIssue.attachment) {
       if (!ALLOWED_FILE_TYPES.includes(newIssue.attachment.type)) {
         newErrors.attachment = "File type not supported";
@@ -129,7 +129,7 @@ const CreateIssueForm = ({ onCancel }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle input changes for text fields
+  // Handle the input changes for text fields
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 

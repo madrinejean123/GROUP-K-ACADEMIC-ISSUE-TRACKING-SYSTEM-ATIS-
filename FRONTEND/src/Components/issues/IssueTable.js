@@ -117,7 +117,7 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
         [issueId]: data.message || "Issue has been resolved successfully.",
       }));
 
-      // Optional: Refresh UI, re-fetch issues or update state in parent component
+      // Optional: Refresh UI, re-fetch the issues or update state in parent component
     } catch (error) {
       console.error("Resolve failed", error);
       setResolveMessages((msgs) => ({
@@ -184,18 +184,14 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
 
                         case "author":
                           return (
-                            <td key={c.id}>
-                              {issue.author.user.full_name}
-                            </td>
+                            <td key={c.id}>{issue.author.user.full_name}</td>
                           );
 
                         case "assignee": {
                           const lecturer = issue.assigned_lecturer;
                           if (lecturer) {
                             return (
-                              <td key={c.id}>
-                                {lecturer.user.full_name}
-                              </td>
+                              <td key={c.id}>{lecturer.user.full_name}</td>
                             );
                           }
                           return (

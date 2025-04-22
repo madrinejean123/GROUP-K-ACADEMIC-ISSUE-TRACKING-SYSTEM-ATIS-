@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState, useEffect } from "react";
 import DashboardLayout from "../../Components/layout/DashboardLayout";
 import IssueList from "../../Components/issues/IssueList";
@@ -22,7 +20,7 @@ const LecturerDashboard = () => {
   const [activeTab, setActiveTab] = useState("assigned");
   const [resolvingIssueId, setResolvingIssueId] = useState(null);
 
-  // Fetch lecturer profile
+  // Fetch the lecturer profile
   useEffect(() => {
     const fetchLecturerProfile = async () => {
       const token = localStorage.getItem("access_token");
@@ -40,7 +38,7 @@ const LecturerDashboard = () => {
     fetchLecturerProfile();
   }, []);
 
-  // Fetch issues once we have a profile
+  // Fetch the issues once we have a profile
   useEffect(() => {
     const fetchIssues = async () => {
       const token = localStorage.getItem("access_token");
@@ -68,14 +66,12 @@ const LecturerDashboard = () => {
       const token = localStorage.getItem("access_token");
       if (!token) throw new Error("No auth token");
       await axios.patch(
-        `${UPDATE_STATUS_API_URL}${issueId}/`,    // ← PATCH method matches Django view
+        `${UPDATE_STATUS_API_URL}${issueId}/`, // ← PATCH method matches Django view
         { status: "resolved" },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setIssues((prev) =>
-        prev.map((i) =>
-          i.id === issueId ? { ...i, status: "resolved" } : i
-        )
+        prev.map((i) => (i.id === issueId ? { ...i, status: "resolved" } : i))
       );
     } catch (err) {
       console.error("❌ Error resolving issue:", err);
@@ -84,13 +80,13 @@ const LecturerDashboard = () => {
     }
   };
 
-  // View issue details
+  // View the issue details
   const handleViewIssue = (issue) => {
     setSelectedIssue(issue);
     setShowIssueDetailModal(true);
   };
 
-  // Status change callback from IssueDetail modal
+  // Status change callback from the IssueDetail modal
   const handleStatusChange = (newStatus) => {
     setIssues((all) =>
       all.map((i) =>
@@ -100,7 +96,7 @@ const LecturerDashboard = () => {
     setSelectedIssue((i) => ({ ...i, status: newStatus }));
   };
 
-  // Add comment locally
+  // Add the comment locally
   const handleAddComment = (commentText) => {
     const newComment = {
       author: `Dr. ${lecturerProfile.full_name}`,
@@ -120,7 +116,7 @@ const LecturerDashboard = () => {
     }));
   };
 
-  // Helpers for filtering
+  // Helpers for the filtering
   const normalize = (s) => s.replace(/_/g, " ").toLowerCase();
   const assignedIssues = issues.filter((i) => {
     const st = normalize(i.status);
@@ -133,7 +129,7 @@ const LecturerDashboard = () => {
   const filteredIssues =
     activeTab === "assigned" ? assignedIssues : resolvedIssues;
 
-  // Quick stats
+  // Quick Stats
   const stats = {
     assigned: assignedIssues.length,
     resolved: resolvedIssues.length,
@@ -178,7 +174,7 @@ const LecturerDashboard = () => {
           </button>
         </div>
 
-        {/* Issue List & Table */}
+        {/* Issues List & Table */}
         <IssueList
           issues={filteredIssues}
           title={
@@ -207,9 +203,7 @@ const LecturerDashboard = () => {
                     <td>#{issue.id}</td>
                     <td>{issue.title}</td>
                     <td>{issue.description}</td>
-                    <td>
-                      {new Date(issue.created_at).toLocaleString()}
-                    </td>
+                    <td>{new Date(issue.created_at).toLocaleString()}</td>
                     <td>{normalize(issue.status)}</td>
                     {activeTab === "assigned" && (
                       <td>
@@ -237,7 +231,7 @@ const LecturerDashboard = () => {
           </table>
         </div>
 
-        {/* Detail Modal */}
+        {/* Details Modal */}
         {showIssueDetailModal && selectedIssue && (
           <IssueDetail
             issue={selectedIssue}
