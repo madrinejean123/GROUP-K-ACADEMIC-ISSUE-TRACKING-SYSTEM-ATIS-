@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import "../SignupPage/signup.css";
 import { FaUser, FaLock, FaEnvelope, FaIdBadge } from "react-icons/fa";
 
-// Regular expressions for validation
+// Regular expressions for the validation
 const USER_REGEX = /^[a-zA-Z]+(?:\s[a-zA-Z]+)+$/;
 const PASSWORD_REGEX =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,16}$/;
