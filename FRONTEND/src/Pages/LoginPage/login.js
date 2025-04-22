@@ -44,7 +44,7 @@ const LoginPage = () => {
         console.log("Access Token:", localStorage.getItem("access_token"));
         console.log("Refresh Token:", localStorage.getItem("refresh_token"));
 
-        // Check the user's role and navigate to the appropriate dashboard
+        // Check the user's role and navigate to appropriate dashboard
         const userRole = response.data.user.user_role;
         if (userRole === "student") {
           navigate("/student");
@@ -53,7 +53,7 @@ const LoginPage = () => {
         } else if (userRole === "registrar") {
           navigate("/registrar");
         } else {
-          navigate("/"); // Default to home page if role is not recognized
+          navigate("/"); // Default to home page if the role is not recognized
         }
       } else {
         throw new Error("Invalid credentials");
