@@ -82,13 +82,13 @@ const LecturerDashboard = () => {
     }
   };
 
-  // View issue details
+  // View the issue details
   const handleViewIssue = (issue) => {
     setSelectedIssue(issue);
     setShowIssueDetailModal(true);
   };
 
-  // Status change callback from IssueDetail modal
+  // Status change callback from the IssueDetail modal
   const handleStatusChange = (newStatus) => {
     setIssues((all) =>
       all.map((i) =>
