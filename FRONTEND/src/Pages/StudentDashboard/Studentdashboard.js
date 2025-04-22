@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import Header from "../../Components/layout/Header";
 import Sidebar from "../../Components/layout/Sidebar";
@@ -32,7 +30,7 @@ const StudentDashboard = () => {
           return;
         }
 
-        // Fetch student profile
+        // Fetch the student profile
         const profileResponse = await axios.get(PROFILE_API_URL, {
           headers: { Authorization: `Bearer ${token}` },
         });
