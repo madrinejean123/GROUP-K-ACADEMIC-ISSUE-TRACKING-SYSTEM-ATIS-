@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState, useEffect } from "react";
 import DashboardLayout from "../../Components/layout/DashboardLayout";
 import IssueList from "../../Components/issues/IssueList";
@@ -131,7 +129,7 @@ const LecturerDashboard = () => {
   const filteredIssues =
     activeTab === "assigned" ? assignedIssues : resolvedIssues;
 
-  // Quick stats
+  // Quick Stats
   const stats = {
     assigned: assignedIssues.length,
     resolved: resolvedIssues.length,
