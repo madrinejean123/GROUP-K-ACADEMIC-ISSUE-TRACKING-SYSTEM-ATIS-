@@ -3,13 +3,18 @@ import { Link, useNavigate } from "react-router-dom"; // Import useNavigate for 
 import axios from "axios";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast"; // Correct import for toast
-import "../LoginPage/login.css";  // Add your custom styling
+import "../LoginPage/login.css"; // Add your custom styling
 import { FaEnvelope, FaLock } from "react-icons/fa"; // Import the icons
 
 const LoginPage = () => {
   const [loading, setLoading] = useState(false);
-  const { register, handleSubmit, reset, formState: { errors } } = useForm();
-  const navigate = useNavigate(); // Initialize useNavigate for navigation
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm();
+  const navigate = useNavigate(); // Initialize the useNavigate for navigation
 
   // Handle form submission
   const onSubmit = async (data) => {
@@ -18,7 +23,10 @@ const LoginPage = () => {
 
     try {
       // Assuming the login API is at this URL
-      const response = await axios.post("https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/login/", data);
+      const response = await axios.post(
+        "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/login/",
+        data
+      );
 
       console.log(response);
       if (response.data && response.data.tokens) {
