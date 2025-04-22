@@ -22,7 +22,7 @@ const LoginPage = () => {
     console.log(data);
 
     try {
-      // Assuming login API is at this URL
+      // Assuming the login API is at this URL
       const response = await axios.post(
         "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/login/",
         data
@@ -53,7 +53,7 @@ const LoginPage = () => {
         } else if (userRole === "registrar") {
           navigate("/registrar");
         } else {
-          navigate("/"); // Default to home page if the role is not recognized
+          navigate("/"); // Default to the home page if the role is not recognized
         }
       } else {
         throw new Error("Invalid credentials");
