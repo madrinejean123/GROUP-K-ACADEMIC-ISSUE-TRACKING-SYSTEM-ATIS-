@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState, useEffect } from "react";
 import DashboardLayout from "../../Components/layout/DashboardLayout";
 import IssueList from "../../Components/issues/IssueList";
@@ -82,13 +80,13 @@ const LecturerDashboard = () => {
     }
   };
 
-  // View issue details
+  // View the issue details
   const handleViewIssue = (issue) => {
     setSelectedIssue(issue);
     setShowIssueDetailModal(true);
   };
 
-  // Status change callback from IssueDetail modal
+  // Status change callback from the IssueDetail modal
   const handleStatusChange = (newStatus) => {
     setIssues((all) =>
       all.map((i) =>
@@ -98,7 +96,7 @@ const LecturerDashboard = () => {
     setSelectedIssue((i) => ({ ...i, status: newStatus }));
   };
 
-  // Add a comment locally
+  // Add the comment locally
   const handleAddComment = (commentText) => {
     const newComment = {
       author: `Dr. ${lecturerProfile.full_name}`,
@@ -118,7 +116,7 @@ const LecturerDashboard = () => {
     }));
   };
 
-  // Helpers for filtering
+  // Helpers for the filtering
   const normalize = (s) => s.replace(/_/g, " ").toLowerCase();
   const assignedIssues = issues.filter((i) => {
     const st = normalize(i.status);
@@ -131,7 +129,7 @@ const LecturerDashboard = () => {
   const filteredIssues =
     activeTab === "assigned" ? assignedIssues : resolvedIssues;
 
-  // Quick stats
+  // Quick Stats
   const stats = {
     assigned: assignedIssues.length,
     resolved: resolvedIssues.length,
@@ -176,7 +174,7 @@ const LecturerDashboard = () => {
           </button>
         </div>
 
-        {/* Issue List & Table */}
+        {/* Issues List & Table */}
         <IssueList
           issues={filteredIssues}
           title={
@@ -233,7 +231,7 @@ const LecturerDashboard = () => {
           </table>
         </div>
 
-        {/* Detail Modal */}
+        {/* Details Modal */}
         {showIssueDetailModal && selectedIssue && (
           <IssueDetail
             issue={selectedIssue}
