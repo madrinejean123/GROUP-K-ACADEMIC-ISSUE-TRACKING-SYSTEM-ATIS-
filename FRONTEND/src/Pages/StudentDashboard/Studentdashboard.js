@@ -42,7 +42,7 @@ const StudentDashboard = () => {
             : profileResponse.data
         );
 
-        // Fetch student issues
+        // Fetch the student issues
         const issuesResponse = await axios.get(ALL_ISSUES_API_URL, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -55,7 +55,7 @@ const StudentDashboard = () => {
     fetchStudentData();
   }, []);
 
-  // Normalize status for filtering
+  // Normalize the status for filtering
   const normalize = (status) => status.replace(/_/g, " ").toLowerCase();
 
   // Filter the issues by status
