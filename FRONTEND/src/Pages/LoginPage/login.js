@@ -14,7 +14,7 @@ const LoginPage = () => {
     reset,
     formState: { errors },
   } = useForm();
-  const navigate = useNavigate(); // Initialize the useNavigate for navigation
+  const navigate = useNavigate(); // Initialize useNavigate for navigation
 
   // Handle form submission
   const onSubmit = async (data) => {
@@ -22,7 +22,7 @@ const LoginPage = () => {
     console.log(data);
 
     try {
-      // Assuming the login API is at this URL
+      // Assuming login API is at this URL
       const response = await axios.post(
         "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/login/",
         data
