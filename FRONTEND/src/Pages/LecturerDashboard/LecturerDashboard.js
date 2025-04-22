@@ -176,7 +176,7 @@ const LecturerDashboard = () => {
           </button>
         </div>
 
-        {/* Issue List & Table */}
+        {/* Issues List & Table */}
         <IssueList
           issues={filteredIssues}
           title={
@@ -233,7 +233,7 @@ const LecturerDashboard = () => {
           </table>
         </div>
 
-        {/* Detail Modal */}
+        {/* Details Modal */}
         {showIssueDetailModal && selectedIssue && (
           <IssueDetail
             issue={selectedIssue}
