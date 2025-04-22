@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import "../SignupPage/signup.css";
 import { FaUser, FaLock, FaEnvelope, FaIdBadge } from "react-icons/fa";
 
-// Regular expressions for the validation
+// Regular expressions for validation
 const USER_REGEX = /^[a-zA-Z]+(?:\s[a-zA-Z]+)+$/;
 const PASSWORD_REGEX =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,16}$/;
@@ -20,7 +20,7 @@ const SignUp = () => {
     formState: { errors },
     watch,
   } = useForm({
-    shouldUnregister: true,    // ← ADD THIS
+    shouldUnregister: true, // ← ADD THIS
   });
   const [loading, setLoading] = useState(false);
   const [role, setRole] = useState("student"); // Default role as student
@@ -33,7 +33,9 @@ const SignUp = () => {
   useEffect(() => {
     const fetchColleges = async () => {
       try {
-        const response = await axios.get("https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/department/colleges/");
+        const response = await axios.get(
+          "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/department/colleges/"
+        );
         setColleges(response.data);
       } catch (error) {
         console.error("Error fetching colleges:", error);
@@ -52,7 +54,7 @@ const SignUp = () => {
     setLoading(true);
     console.log("payload before request:", data);
 
-    // Include the role in the data being sent to the backend
+    // Include role in the data being sent to the backend
     const requestData = {
       ...data,
       user_role: role,
@@ -108,11 +110,16 @@ const SignUp = () => {
             placeholder="Enter your full name"
             {...register("full_name", {
               required: "Full name is required",
-              pattern: { value: USER_REGEX, message: "Enter a valid full name" },
+              pattern: {
+                value: USER_REGEX,
+                message: "Enter a valid full name",
+              },
             })}
           />
         </div>
-        {errors.full_name && <p style={{ color: "red" }}>{errors.full_name.message}</p>}
+        {errors.full_name && (
+          <p style={{ color: "red" }}>{errors.full_name.message}</p>
+        )}
 
         {/* Student No (only when role=student) */}
         {role === "student" && (
@@ -126,11 +133,16 @@ const SignUp = () => {
                 placeholder="Student No."
                 {...register("student_no", {
                   required: "Student No is required",
-                  pattern: { value: USERID_REGEX, message: "Enter a valid Student No" },
+                  pattern: {
+                    value: USERID_REGEX,
+                    message: "Enter a valid Student No",
+                  },
                 })}
               />
             </div>
-            {errors.student_no && <p style={{ color: "red" }}>{errors.student_no.message}</p>}
+            {errors.student_no && (
+              <p style={{ color: "red" }}>{errors.student_no.message}</p>
+            )}
           </>
         )}
 
@@ -145,7 +157,9 @@ const SignUp = () => {
             {...register("mak_email", { required: "MAK Email is required" })}
           />
         </div>
-        {errors.mak_email && <p style={{ color: "red" }}>{errors.mak_email.message}</p>}
+        {errors.mak_email && (
+          <p style={{ color: "red" }}>{errors.mak_email.message}</p>
+        )}
 
         {/* College (only for registrar) */}
         {role === "registrar" && (
@@ -153,7 +167,9 @@ const SignUp = () => {
             <label htmlFor="college">College:</label>
             <select
               id="college"
-              {...register("college", { required: "College selection is required" })}
+              {...register("college", {
+                required: "College selection is required",
+              })}
             >
               <option value="">Select College</option>
               {colleges.map((college) => (
@@ -162,7 +178,9 @@ const SignUp = () => {
                 </option>
               ))}
             </select>
-            {errors.college && <p style={{ color: "red" }}>{errors.college.message}</p>}
+            {errors.college && (
+              <p style={{ color: "red" }}>{errors.college.message}</p>
+            )}
           </div>
         )}
 
@@ -184,7 +202,9 @@ const SignUp = () => {
             })}
           />
         </div>
-        {errors.password && <p style={{ color: "red" }}>{errors.password.message}</p>}
+        {errors.password && (
+          <p style={{ color: "red" }}>{errors.password.message}</p>
+        )}
 
         {/* Confirm Password */}
         <label htmlFor="confirm_password">Confirm Password:</label>
@@ -196,7 +216,8 @@ const SignUp = () => {
             placeholder="Enter password again"
             {...register("confirm_password", {
               required: "Please confirm your password",
-              validate: (value) => value === password || "Passwords do not match",
+              validate: (value) =>
+                value === password || "Passwords do not match",
             })}
           />
         </div>
