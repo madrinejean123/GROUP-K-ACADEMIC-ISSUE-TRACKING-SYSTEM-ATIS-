@@ -42,7 +42,7 @@ const CreateIssueForm = ({ onCancel }) => {
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   ];
 
-  // Fetch user data from the backend profile
+  // Fetch the user data from the backend profile
   useEffect(() => {
     const fetchUserData = async () => {
       try {
