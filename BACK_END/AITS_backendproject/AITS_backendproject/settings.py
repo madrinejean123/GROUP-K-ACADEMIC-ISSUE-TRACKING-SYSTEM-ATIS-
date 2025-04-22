@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # your apps
+    # working apps
     'users',
     'issues',
     'department',
@@ -49,9 +49,11 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
+    
 ]
 AUTHENTICATION_BACKENDS = [
-    'users.authentication.EmailBackend',  # 👈 Add your custom backend here
+    'users.authentication.EmailBackend',  #  custom backend 
     'django.contrib.auth.backends.ModelBackend',  # default, as fallback
 ]
 

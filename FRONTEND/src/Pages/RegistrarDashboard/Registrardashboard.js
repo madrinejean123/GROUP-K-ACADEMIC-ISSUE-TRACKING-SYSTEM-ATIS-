@@ -16,8 +16,7 @@ const RegistrarDashboard = () => {
   const [activeView, setActiveView] = useState("dashboard");
 
   // Normalize snake_case → human‑readable
-  const normalizeStatus = (s = "") =>
-    s.replace(/_/g, " ").trim().toLowerCase();
+  const normalizeStatus = (s = "") => s.replace(/_/g, " ").trim().toLowerCase();
 
   // Fetch registrar profile
   useEffect(() => {
@@ -70,12 +69,6 @@ const RegistrarDashboard = () => {
           "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/users/lecturers/",
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        setLecturers(
-          data.map((l) => ({
-            id: l.id,
-            name: l.user.full_name,
-          }))
-        );
       } catch (e) {
         console.error("Lecturers error:", e);
       }
@@ -94,7 +87,6 @@ const RegistrarDashboard = () => {
     return () => window.removeEventListener("sidebarNavigation", onNav);
   }, []);
 
-  // Handlers
   const handleViewIssue = (issue) => {
     setSelectedIssue(issue);
     setShowIssueDetailModal(true);
@@ -148,10 +140,9 @@ const RegistrarDashboard = () => {
   // Stats & filters
   const stats = {
     total: issues.length,
-    open: issues.filter((i) => normalizeStatus(i.status) === "open").length,
-    inProgress: issues.filter(
-      (i) => normalizeStatus(i.status) === "in progress"
-    ).length,
+    open: issues.filter((i) => i.status?.toLowerCase() === "open").length,
+    inProgress: issues.filter((i) => i.status?.toLowerCase() === "in progress")
+      .length,
     resolved: issues.filter((i) =>
       ["resolved", "closed"].includes(normalizeStatus(i.status))
     ).length,
@@ -244,6 +235,7 @@ const RegistrarDashboard = () => {
   return (
     <DashboardLayout userRole="Registrar" profile={registrarProfile}>
       <div className="registrar-dashboard">{renderContent()}</div>
+
       {showIssueDetailModal && selectedIssue && (
         <IssueDetail
           issue={selectedIssue}
