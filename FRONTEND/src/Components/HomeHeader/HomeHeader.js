@@ -3,7 +3,6 @@ import "./HomeHeader.css";
 import { FaUser } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import MakLogo from "../assets/logo.png";
-// import Services from "../../Pages/ServicePage/Services";
 // Resuable component
 const HomeHeader = () => {
   return (
