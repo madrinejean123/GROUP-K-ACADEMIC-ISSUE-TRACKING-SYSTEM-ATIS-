@@ -22,7 +22,7 @@ const LecturerDashboard = () => {
   const [activeTab, setActiveTab] = useState("assigned");
   const [resolvingIssueId, setResolvingIssueId] = useState(null);
 
-  // Fetch lecturer profile
+  // Fetch the lecturer profile
   useEffect(() => {
     const fetchLecturerProfile = async () => {
       const token = localStorage.getItem("access_token");
@@ -40,7 +40,7 @@ const LecturerDashboard = () => {
     fetchLecturerProfile();
   }, []);
 
-  // Fetch issues once we have a profile
+  // Fetch the issues once we have a profile
   useEffect(() => {
     const fetchIssues = async () => {
       const token = localStorage.getItem("access_token");
@@ -68,14 +68,12 @@ const LecturerDashboard = () => {
       const token = localStorage.getItem("access_token");
       if (!token) throw new Error("No auth token");
       await axios.patch(
-        `${UPDATE_STATUS_API_URL}${issueId}/`,    // ← PATCH method matches Django view
+        `${UPDATE_STATUS_API_URL}${issueId}/`, // ← PATCH method matches Django view
         { status: "resolved" },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setIssues((prev) =>
-        prev.map((i) =>
-          i.id === issueId ? { ...i, status: "resolved" } : i
-        )
+        prev.map((i) => (i.id === issueId ? { ...i, status: "resolved" } : i))
       );
     } catch (err) {
       console.error("❌ Error resolving issue:", err);
@@ -100,7 +98,7 @@ const LecturerDashboard = () => {
     setSelectedIssue((i) => ({ ...i, status: newStatus }));
   };
 
-  // Add comment locally
+  // Add a comment locally
   const handleAddComment = (commentText) => {
     const newComment = {
       author: `Dr. ${lecturerProfile.full_name}`,
@@ -207,9 +205,7 @@ const LecturerDashboard = () => {
                     <td>#{issue.id}</td>
                     <td>{issue.title}</td>
                     <td>{issue.description}</td>
-                    <td>
-                      {new Date(issue.created_at).toLocaleString()}
-                    </td>
+                    <td>{new Date(issue.created_at).toLocaleString()}</td>
                     <td>{normalize(issue.status)}</td>
                     {activeTab === "assigned" && (
                       <td>

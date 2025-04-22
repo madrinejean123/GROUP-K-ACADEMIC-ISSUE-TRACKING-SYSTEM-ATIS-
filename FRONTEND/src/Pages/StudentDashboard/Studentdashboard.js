@@ -42,7 +42,7 @@ const StudentDashboard = () => {
             : profileResponse.data
         );
 
-        // Fetch issues
+        // Fetch student issues
         const issuesResponse = await axios.get(ALL_ISSUES_API_URL, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -58,7 +58,7 @@ const StudentDashboard = () => {
   // Normalize status for filtering
   const normalize = (status) => status.replace(/_/g, " ").toLowerCase();
 
-  // Filter issues by status
+  // Filter the issues by status
   const openIssues = issues.filter(
     (issue) => normalize(issue.status) === "open"
   );
@@ -189,9 +189,7 @@ const StudentDashboard = () => {
                           <td>#{issue.id}</td>
                           <td>{issue.title}</td>
                           <td>{issue.description}</td>
-                          <td>
-                            {new Date(issue.created_at).toLocaleString()}
-                          </td>
+                          <td>{new Date(issue.created_at).toLocaleString()}</td>
                           <td>{normalize(issue.status)}</td>
                         </tr>
                       ))
