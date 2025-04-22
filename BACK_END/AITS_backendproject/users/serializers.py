@@ -248,3 +248,4 @@ class UserLogoutSerializer(serializers.Serializer):
     def validate(self, attrs):
         self.refresh_token = attrs['refresh']
         return attrs
+    
