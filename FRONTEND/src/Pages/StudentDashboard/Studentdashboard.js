@@ -2,66 +2,86 @@
 
 import { useState, useEffect } from "react";
 import Header from "../../Components/layout/Header";
-import Sidebar from "../../Components/layout/Sidebar"; // Import the Sidebar
+import Sidebar from "../../Components/layout/Sidebar";
 import IssueList from "../../Components/issues/IssueList";
 import CreateIssueForm from "../../Components/issues/CreateIssueForm";
 import IssueDetail from "../../Components/issues/IssueDetail";
 import "./student-dashboard.css";
 import axios from "axios";
 
+const PROFILE_API_URL =
+  "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/profile/";
+const ALL_ISSUES_API_URL =
+  "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/list/";
+
 const StudentDashboard = () => {
   const [issues, setIssues] = useState([]);
-  const [studentProfile, setStudentProfile] = useState({}); // Store complete profile data
+  const [studentProfile, setStudentProfile] = useState({});
   const [showCreateIssueModal, setShowCreateIssueModal] = useState(false);
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [showIssueDetailModal, setShowIssueDetailModal] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
 
-  // Fetch student details (student name and complete profile) from the backend
+  // Fetch student profile and issues
   useEffect(() => {
-    const fetchStudentDetails = async () => {
+    const fetchStudentData = async () => {
       try {
         const token = localStorage.getItem("access_token");
         if (!token) {
           console.error("No access token found");
           return;
         }
-        console.log("Access Token:", token);
 
-        const response = await axios.get("https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/profile/", {
+        // Fetch student profile
+        const profileResponse = await axios.get(PROFILE_API_URL, {
           headers: { Authorization: `Bearer ${token}` },
         });
+        setStudentProfile(
+          Array.isArray(profileResponse.data)
+            ? profileResponse.data[0]
+            : profileResponse.data
+        );
 
-        const data = response.data;
-        console.log("API Response:", data);
-
-        // If the response is an array, take the first element.
-        if (Array.isArray(data) && data.length > 0) {
-          const profileData = data[0];
-          console.log("Username from API:", profileData.username);
-          setStudentProfile(profileData); // Store complete profile
-        } else {
-          setStudentProfile(data); // Store profile directly if not an array
-        }
-
+        // Fetch issues
+        const issuesResponse = await axios.get(ALL_ISSUES_API_URL, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setIssues(issuesResponse.data);
       } catch (error) {
-        console.error("Error fetching student details:", error);
+        console.error("Error fetching student data:", error);
       }
     };
 
-    fetchStudentDetails();
+    fetchStudentData();
   }, []);
 
-  // Function to get the first two names from the username
-  const getFirstTwoNames = (name) => {
-    if (!name || name.trim() === "") return "Loading..."; // Fallback if name is undefined or empty
-    const names = name.trim().split(" ");
-    return names.slice(0, 2).join(" "); // Take only the first two words
+  // Normalize status for filtering
+  const normalize = (status) => status.replace(/_/g, " ").toLowerCase();
+
+  // Filter issues by status
+  const openIssues = issues.filter(
+    (issue) => normalize(issue.status) === "open"
+  );
+  const inProgressIssues = issues.filter(
+    (issue) => normalize(issue.status) === "in progress"
+  );
+  const resolvedIssues = issues.filter(
+    (issue) =>
+      normalize(issue.status) === "resolved" ||
+      normalize(issue.status) === "closed"
+  );
+
+  // Stats
+  const stats = {
+    total: issues.length,
+    open: openIssues.length,
+    inProgress: inProgressIssues.length,
+    resolved: resolvedIssues.length,
   };
 
   return (
     <div className="student-dashboard">
-      {/* Render the Header */}
+      {/* Header */}
       <Header
         toggleSidebar={() => {}}
         isMobile={false}
@@ -70,11 +90,11 @@ const StudentDashboard = () => {
         profile={studentProfile}
       />
 
-      {/* Dashboard Layout */}
+      {/* Layout */}
       <div className="dashboard-layout">
-        {/* Render the Sidebar */}
+        {/* Sidebar */}
         <Sidebar
-          sidebarOpen={true} // Sidebar is always open for now
+          sidebarOpen={true}
           userRole="Student"
           profile={studentProfile}
         />
@@ -84,84 +104,109 @@ const StudentDashboard = () => {
           {/* Welcome Section */}
           <div className="welcome-section">
             <div className="welcome-text">
-              <h2>
-                Welcome, {getFirstTwoNames(studentProfile.full_name)}!
-              </h2>
-              <p>Log, track and manage your academic-related issues here.</p>
+              <h2>Welcome, {studentProfile.full_name || "Student"}!</h2>
+              <p>Log, track, and manage your academic-related issues here.</p>
               <div className="student-details">
                 <p>
-                  <strong>Student No:</strong> {studentProfile.student_no || "N/A"}
+                  <strong>Student No:</strong>{" "}
+                  {studentProfile.student_no || "N/A"}
                 </p>
               </div>
             </div>
             <div className="stats-cards">
               <div className="stat-card">
-                <div className="stat-value">{issues.length}</div>
+                <div className="stat-value">{stats.total}</div>
                 <div className="stat-label">Total Issues</div>
               </div>
               <div className="stat-card">
-                <div className="stat-value">{issues.filter((issue) => issue.status === "Open").length}</div>
+                <div className="stat-value">{stats.open}</div>
                 <div className="stat-label">Open Issues</div>
               </div>
               <div className="stat-card">
-                <div className="stat-value">{issues.filter((issue) => issue.status === "In Progress").length}</div>
+                <div className="stat-value">{stats.inProgress}</div>
                 <div className="stat-label">In Progress</div>
               </div>
               <div className="stat-card">
-                <div className="stat-value">{issues.filter((issue) => issue.status === "Resolved" || issue.status === "Closed").length}</div>
+                <div className="stat-value">{stats.resolved}</div>
                 <div className="stat-label">Resolved</div>
               </div>
             </div>
           </div>
 
-          {/* Tabs Section */}
+          {/* Tabs */}
           <div className="tabs-container">
-            <div className="tabs">
-              <button
-                className={`tab ${activeTab === "dashboard" ? "active" : ""}`}
-                onClick={() => setActiveTab("dashboard")}
-              >
-                Dashboard
-              </button>
-              <button
-                className={`tab ${activeTab === "issues" ? "active" : ""}`}
-                onClick={() => setActiveTab("issues")}
-              >
-                My Issues
-              </button>
-              <button
-                className={`tab ${activeTab === "history" ? "active" : ""}`}
-                onClick={() => setActiveTab("history")}
-              >
-                History
-              </button>
-            </div>
+            <button
+              className={activeTab === "dashboard" ? "tab active" : "tab"}
+              onClick={() => setActiveTab("dashboard")}
+            >
+              Dashboard
+            </button>
+            <button
+              className={activeTab === "issues" ? "tab active" : "tab"}
+              onClick={() => setActiveTab("issues")}
+            >
+              My Issues
+            </button>
+            <button
+              className={activeTab === "history" ? "tab active" : "tab"}
+              onClick={() => setActiveTab("history")}
+            >
+              History
+            </button>
           </div>
 
+          {/* Dashboard Tab */}
           {activeTab === "dashboard" && (
             <div className="dashboard-content">
+              {/* Steps for Logging Issues */}
               <div className="tips-card">
-                <h3>Tips for logging issues</h3>
+                <h3>Tips for Logging Issues</h3>
                 <ul>
-                  <li>Be specific about the problem you're facing</li>
-                  <li>Include relevant course codes or references</li>
-                  <li>Attach supporting documents (PDFs, images, etc.)</li>
-                  <li>Provide screenshots when applicable</li>
-                  <li>Check existing issues before creating a new one</li>
+                  <li>Be specific about the problem you're facing.</li>
+                  <li>Include relevant course codes or references.</li>
+                  <li>Attach supporting documents (PDFs, images, etc.).</li>
+                  <li>Provide screenshots when applicable.</li>
+                  <li>Check existing issues before creating a new one.</li>
                 </ul>
               </div>
 
-              <IssueList
-                issues={issues.filter(
-                  (issue) => issue.status === "Open" || issue.status === "In Progress"
-                )}
-                title="Active Issues"
-                onCreateIssue={() => setShowCreateIssueModal(true)}
-                onViewIssue={(issue) => setSelectedIssue(issue)}
-              />
+              {/* Issues Table */}
+              <div className="issues-table-container">
+                <table className="issues-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Title</th>
+                      <th>Description</th>
+                      <th>Submitted At</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {issues.length > 0 ? (
+                      issues.map((issue) => (
+                        <tr key={issue.id}>
+                          <td>#{issue.id}</td>
+                          <td>{issue.title}</td>
+                          <td>{issue.description}</td>
+                          <td>
+                            {new Date(issue.created_at).toLocaleString()}
+                          </td>
+                          <td>{normalize(issue.status)}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="5">No issues to display.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
 
+          {/* Issues Tab */}
           {activeTab === "issues" && (
             <IssueList
               issues={issues}
@@ -171,42 +216,29 @@ const StudentDashboard = () => {
             />
           )}
 
+          {/* History Tab */}
           {activeTab === "history" && (
             <div className="history-content">
-              <div className="history-timeline">
-                <h3>Issue Timeline</h3>
-                {issues
-                  .sort((a, b) => new Date(b.date) - new Date(a.date))
-                  .map((issue) => (
-                    <div key={issue.id} className="timeline-item">
-                      <div className="timeline-date">{issue.date}</div>
-                      <div className="timeline-content">
-                        <div className="timeline-header">
-                          <h4>
-                            #{issue.id}: {issue.title}
-                          </h4>
-                          <span
-                            className={`status-badge status-${issue.status
-                              .toLowerCase()
-                              .replace(" ", "-")}`}
-                          >
-                            {issue.status}
-                          </span>
-                        </div>
-                        <p className="timeline-description">{issue.description}</p>
-                        <button
-                          className="action-button"
-                          onClick={() => setSelectedIssue(issue)}
-                        >
-                          View Details
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-              </div>
+              <h3>Issue History</h3>
+              {issues.length > 0 ? (
+                issues.map((issue) => (
+                  <div key={issue.id} className="history-item">
+                    <p>
+                      <strong>Title:</strong> {issue.title}
+                    </p>
+                    <p>
+                      <strong>Submitted On:</strong>{" "}
+                      {new Date(issue.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <p>No history to display.</p>
+              )}
             </div>
           )}
 
+          {/* Create Issue Modal */}
           {showCreateIssueModal && (
             <CreateIssueForm
               onSubmit={(newIssue) => {
@@ -223,6 +255,7 @@ const StudentDashboard = () => {
             />
           )}
 
+          {/* Issue Detail Modal */}
           {showIssueDetailModal && selectedIssue && (
             <IssueDetail
               issue={selectedIssue}
