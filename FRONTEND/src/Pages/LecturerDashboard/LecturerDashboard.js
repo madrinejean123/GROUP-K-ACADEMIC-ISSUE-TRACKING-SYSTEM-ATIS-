@@ -98,7 +98,7 @@ const LecturerDashboard = () => {
     setSelectedIssue((i) => ({ ...i, status: newStatus }));
   };
 
-  // Add a comment locally
+  // Add the comment locally
   const handleAddComment = (commentText) => {
     const newComment = {
       author: `Dr. ${lecturerProfile.full_name}`,
@@ -118,7 +118,7 @@ const LecturerDashboard = () => {
     }));
   };
 
-  // Helpers for filtering
+  // Helpers for the filtering
   const normalize = (s) => s.replace(/_/g, " ").toLowerCase();
   const assignedIssues = issues.filter((i) => {
     const st = normalize(i.status);
