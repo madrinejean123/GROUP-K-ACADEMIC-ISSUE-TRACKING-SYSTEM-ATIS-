@@ -202,7 +202,7 @@ const StudentDashboard = () => {
             </div>
           )}
 
-          {/* Issues Tab */}
+          {/* Issues tab */}
           {activeTab === "issues" && (
             <IssueList
               issues={issues}
@@ -234,7 +234,7 @@ const StudentDashboard = () => {
             </div>
           )}
 
-          {/* Create Issue Modal */}
+          {/* Create the Issue Modal */}
           {showCreateIssueModal && (
             <CreateIssueForm
               onSubmit={(newIssue) => {
