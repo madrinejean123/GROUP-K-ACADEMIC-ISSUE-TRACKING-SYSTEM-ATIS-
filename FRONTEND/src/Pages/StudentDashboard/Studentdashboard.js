@@ -42,7 +42,7 @@ const StudentDashboard = () => {
             : profileResponse.data
         );
 
-        // Fetch issues
+        // Fetch student issues
         const issuesResponse = await axios.get(ALL_ISSUES_API_URL, {
           headers: { Authorization: `Bearer ${token}` },
         });
