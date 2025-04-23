@@ -1,3 +1,4 @@
+/* SPECIFIC STYLES */
 .registrar-dashboard {
   display: flex;
   flex-direction: column;
@@ -360,4 +361,3 @@
     width: 100%;
   }
 }
-

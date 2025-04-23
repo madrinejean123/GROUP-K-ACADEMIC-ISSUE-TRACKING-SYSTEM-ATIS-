@@ -18,7 +18,7 @@ const RegistrarDashboard = () => {
   // Normalize snake_case → human‑readable
   const normalizeStatus = (s = "") => s.replace(/_/g, " ").trim().toLowerCase();
 
-  // Fetch the registrar profile
+  // Fetch registrar profile
   useEffect(() => {
     async function fetchProfile() {
       const token = localStorage.getItem("access_token");
@@ -36,7 +36,7 @@ const RegistrarDashboard = () => {
     fetchProfile();
   }, []);
 
-  // Fetch all the issues
+  // Fetch all issues
   useEffect(() => {
     async function fetchIssues() {
       const token = localStorage.getItem("access_token");
