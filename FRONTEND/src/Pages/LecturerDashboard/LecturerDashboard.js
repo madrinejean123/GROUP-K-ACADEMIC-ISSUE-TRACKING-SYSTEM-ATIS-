@@ -20,7 +20,7 @@ const LecturerDashboard = () => {
   const [activeTab, setActiveTab] = useState("assigned");
   const [resolvingIssueId, setResolvingIssueId] = useState(null);
 
-  // Fetch the lecturer profile
+  // Fetch lecturer profile
   useEffect(() => {
     const fetchLecturerProfile = async () => {
       const token = localStorage.getItem("access_token");
@@ -38,7 +38,7 @@ const LecturerDashboard = () => {
     fetchLecturerProfile();
   }, []);
 
-  // Fetch the issues once we have a profile
+  // Fetch issues once we have a profile
   useEffect(() => {
     const fetchIssues = async () => {
       const token = localStorage.getItem("access_token");
