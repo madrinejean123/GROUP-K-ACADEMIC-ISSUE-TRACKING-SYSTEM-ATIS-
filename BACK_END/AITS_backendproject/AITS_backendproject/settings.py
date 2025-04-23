@@ -1,3 +1,4 @@
+from pathlib import Path
 import os
 from pathlib import Path
 from datetime import timedelta
@@ -67,7 +68,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # Ensure CORS middleware is listed
 ]
 
 ROOT_URLCONF = 'AITS_backendproject.urls'
@@ -169,6 +170,11 @@ SIMPLE_JWT = {
 # CORS settings
 # ----------------------------------------------------------------------------
 
+CORS_ALLOWED_ORIGINS = [
+    "https://group-k-academic-issue-tracking-system-atis-i1751nod2.vercel.app",  # Allow Vercel frontend URL
+]
+
+# ------------------------------------------------------------------------------
 CORS_ALLOW_ALL_ORIGINS = True
 
 # ----------------------------------------------------------------------------

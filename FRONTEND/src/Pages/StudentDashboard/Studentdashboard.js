@@ -20,7 +20,7 @@ const StudentDashboard = () => {
   const [showIssueDetailModal, setShowIssueDetailModal] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
 
-  // Fetch student profile and issues
+  // Fetch the student profile and issues
   useEffect(() => {
     const fetchStudentData = async () => {
       try {
@@ -56,7 +56,7 @@ const StudentDashboard = () => {
   // Normalize the status for filtering
   const normalize = (status) => status.replace(/_/g, " ").toLowerCase();
 
-  // Filter the issues by status
+  // Filter issues by status
   const openIssues = issues.filter(
     (issue) => normalize(issue.status) === "open"
   );
