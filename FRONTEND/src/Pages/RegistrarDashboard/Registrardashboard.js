@@ -15,10 +15,10 @@ const RegistrarDashboard = () => {
   const [registrarProfile, setRegistrarProfile] = useState({});
   const [activeView, setActiveView] = useState("dashboard");
 
-  // Normalize snake-case → human‑readable
+  // Normalize snake_case → human‑readable
   const normalizeStatus = (s = "") => s.replace(/_/g, " ").trim().toLowerCase();
 
-  // Fetch registrar profile
+  // Fetch the registrar profile
   useEffect(() => {
     async function fetchProfile() {
       const token = localStorage.getItem("access_token");
