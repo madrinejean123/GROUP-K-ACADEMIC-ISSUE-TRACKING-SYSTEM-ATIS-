@@ -59,7 +59,7 @@ const LecturerDashboard = () => {
     }
   }, [lecturerProfile]);
 
-  // Handle resolving an issue — now using PATCH instead of PUT
+  // Handle resolving the issue — now using PATCH instead of PUT
   const handleResolve = async (issueId) => {
     setResolvingIssueId(issueId);
     try {
