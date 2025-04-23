@@ -6,15 +6,19 @@ from .views import (
     UserLoginViewSet,
     UserProfileViewSet,
     UserViewSet,
+    UserLogoutViewSet
 )
 
 router = DefaultRouter()
+
+
+
 router.register(r'register', UserRegistrationViewSet, basename='register')
 router.register(r'login', UserLoginViewSet, basename='login')
+router.register(r'logout', UserLogoutViewSet, basename='user-logout')
 router.register(r'profile', UserProfileViewSet, basename='user-profile')
 router.register(r'users', UserViewSet, basename='users')
 
 urlpatterns = [
     path('', include(router.urls)),
 ]
-

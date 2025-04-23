@@ -3,7 +3,7 @@ import Header from "./Header";
 import Sidebar from "./Sidebar";
 import "../styles/dashboard-layout.css";
 
-const DashboardLayout = ({ children, userRole }) => {
+const DashboardLayout = ({ children, userRole, profile }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -39,9 +39,14 @@ const DashboardLayout = ({ children, userRole }) => {
         isMobile={isMobile}
         sidebarOpen={sidebarOpen}
         userRole={userRole}
+        profile={profile}              
       />
       <div className="dashboard-container">
-        <Sidebar sidebarOpen={sidebarOpen} userRole={userRole} />
+        <Sidebar
+          sidebarOpen={sidebarOpen}
+          userRole={userRole}
+          profile={profile}          
+        />
         <main className={`main-content ${sidebarOpen ? "" : "expanded"}`}>
           {children}
         </main>

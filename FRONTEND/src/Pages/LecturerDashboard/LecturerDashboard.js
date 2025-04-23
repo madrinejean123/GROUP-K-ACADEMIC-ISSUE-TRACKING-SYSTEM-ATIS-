@@ -1,169 +1,180 @@
-"use client";
-
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import DashboardLayout from "../../Components/layout/DashboardLayout";
 import IssueList from "../../Components/issues/IssueList";
 import IssueDetail from "../../Components/issues/IssueDetail";
-import { mockIssues } from "../../mock-data";
 import "./lecturer-dashboard.css";
+import axios from "axios";
+
+const PROFILE_API_URL =
+  "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/profile/";
+const ALL_ISSUES_API_URL =
+  "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/list/";
+const UPDATE_STATUS_API_URL =
+  "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/update-status/";
 
 const LecturerDashboard = () => {
+  const [lecturerProfile, setLecturerProfile] = useState({});
   const [issues, setIssues] = useState([]);
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [showIssueDetailModal, setShowIssueDetailModal] = useState(false);
   const [activeTab, setActiveTab] = useState("assigned");
-  const [lecturerName, setLecturerName] = useState(""); // State for lecturer's name
+  const [resolvingIssueId, setResolvingIssueId] = useState(null);
 
-  // Fetch lecturer's name from the backend
+  // Fetch the lecturer's profile
   useEffect(() => {
-    const fetchLecturerName = async () => {
+    const fetchLecturerProfile = async () => {
+      const token = localStorage.getItem("access_token");
+      if (!token) return;
       try {
-        const token = localStorage.getItem("access_token"); // Retrieve the JWT token
-        const response = await fetch("http://127.0.0.1:8000/users/profile/", {
-          headers: {
-            Authorization: `Bearer ${token}`, // Include the token in the request headers
-          },
+        const { data } = await axios.get(PROFILE_API_URL, {
+          headers: { Authorization: `Bearer ${token}` },
         });
+        setLecturerProfile(Array.isArray(data) ? data[0] : data);
+        console.log("✅ Fetched profile:", data);
+      } catch (err) {
+        console.error("❌ Error fetching profile:", err);
+      }
+    };
+    fetchLecturerProfile();
+  }, []);
 
-        if (response.ok) {
-          const data = await response.json();
-          setLecturerName(`Dr. ${data.username}`); // Prepend "Dr." to the name
-        } else {
-          console.error("Failed to fetch lecturer name:", response.statusText);
-        }
-      } catch (error) {
-        console.error("Error fetching lecturer name:", error);
+  // Fetch thee issues once we have a profile
+  useEffect(() => {
+    const fetchIssues = async () => {
+      const token = localStorage.getItem("access_token");
+      if (!token) return;
+      try {
+        const { data } = await axios.get(ALL_ISSUES_API_URL, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        console.log("📥 Received issues:", data);
+        setIssues(data);
+      } catch (err) {
+        console.error("❌ Error fetching issue list:", err);
       }
     };
 
-    fetchLecturerName();
-  }, []);
+    if (lecturerProfile.id) {
+      fetchIssues();
+    }
+  }, [lecturerProfile]);
 
-  // Load issues with student information
-  useEffect(() => {
-    const assignedIssues = mockIssues
-      .filter(
-        (issue) => issue.status === "In Progress" || issue.status === "Open"
-      )
-      .map((issue) => ({
-        ...issue,
-        student: "John Doe", // Mock student name
-        studentId: "STD" + Math.floor(Math.random() * 10000),
-        assignee: "Dr. Lecturer", // Current lecturer
-      }));
+  // Handle resolving an issue — now using PATCH instead of PUT
+  const handleResolve = async (issueId) => {
+    setResolvingIssueId(issueId);
+    try {
+      const token = localStorage.getItem("access_token");
+      if (!token) throw new Error("No auth token");
+      await axios.patch(
+        `${UPDATE_STATUS_API_URL}${issueId}/`, // ← PATCH method matches Django view
+        { status: "resolved" },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setIssues((prev) =>
+        prev.map((i) => (i.id === issueId ? { ...i, status: "resolved" } : i))
+      );
+    } catch (err) {
+      console.error("❌ Error resolving issue:", err);
+    } finally {
+      setResolvingIssueId(null);
+    }
+  };
 
-    const resolvedIssues = mockIssues
-      .filter(
-        (issue) => issue.status === "Resolved" || issue.status === "Closed"
-      )
-      .map((issue) => ({
-        ...issue,
-        student: "Jane Smith", // Mock student name
-        studentId: "STD" + Math.floor(Math.random() * 10000),
-        assignee: "Dr. Lecturer", // Current lecturer
-      }));
-
-    setIssues([...assignedIssues, ...resolvedIssues]);
-  }, []);
-
+  // View the issue details
   const handleViewIssue = (issue) => {
     setSelectedIssue(issue);
     setShowIssueDetailModal(true);
   };
 
-  const handleStatusChange = (action) => {
-    const updatedIssues = issues.map((issue) =>
-      issue.id === selectedIssue.id ? { ...issue, status: action } : issue
+  // Status change callback from the IssueDetail modal
+  const handleStatusChange = (newStatus) => {
+    setIssues((all) =>
+      all.map((i) =>
+        i.id === selectedIssue.id ? { ...i, status: newStatus } : i
+      )
     );
-    setIssues(updatedIssues);
-    setSelectedIssue({ ...selectedIssue, status: action });
+    setSelectedIssue((i) => ({ ...i, status: newStatus }));
   };
 
-  const handleAddComment = (comment) => {
+  // Add the comment locally
+  const handleAddComment = (commentText) => {
     const newComment = {
-      author: "Dr. Lecturer",
+      author: `Dr. ${lecturerProfile.full_name}`,
       date: new Date().toISOString().split("T")[0],
-      content: comment,
+      content: commentText,
     };
-
-    const updatedIssue = {
-      ...selectedIssue,
-      comments: [...(selectedIssue.comments || []), newComment],
-    };
-
-    const updatedIssues = issues.map((issue) =>
-      issue.id === selectedIssue.id ? updatedIssue : issue
+    setIssues((all) =>
+      all.map((i) =>
+        i.id === selectedIssue.id
+          ? { ...i, comments: [...(i.comments || []), newComment] }
+          : i
+      )
     );
-
-    setIssues(updatedIssues);
-    setSelectedIssue(updatedIssue);
+    setSelectedIssue((i) => ({
+      ...i,
+      comments: [...(i.comments || []), newComment],
+    }));
   };
 
-  const getFilteredIssues = () => {
-    if (activeTab === "assigned") {
-      return issues.filter(
-        (issue) => issue.status === "Open" || issue.status === "In Progress"
-      );
-    } else {
-      return issues.filter(
-        (issue) => issue.status === "Resolved" || issue.status === "Closed"
-      );
-    }
-  };
+  // Helpers for the filtering
+  const normalize = (s) => s.replace(/_/g, " ").toLowerCase();
+  const assignedIssues = issues.filter((i) => {
+    const st = normalize(i.status);
+    return st === "open" || st === "in progress";
+  });
+  const resolvedIssues = issues.filter((i) => {
+    const st = normalize(i.status);
+    return st === "resolved" || st === "closed";
+  });
+  const filteredIssues =
+    activeTab === "assigned" ? assignedIssues : resolvedIssues;
 
-  const filteredIssues = getFilteredIssues();
-
+  // Quick Stats
   const stats = {
-    assignedIssues: issues.filter(
-      (issue) => issue.status === "Open" || issue.status === "In Progress"
-    ).length,
-    resolvedIssues: issues.filter(
-      (issue) => issue.status === "Resolved" || issue.status === "Closed"
-    ).length,
-    totalStudents: [...new Set(issues.map((issue) => issue.student))].length,
+    assigned: assignedIssues.length,
+    resolved: resolvedIssues.length,
+    students: new Set(issues.map((i) => i.author.user.id)).size,
   };
 
   return (
-    <DashboardLayout userRole="Lecturer">
+    <DashboardLayout userRole="Lecturer" profile={lecturerProfile}>
       <div className="lecturer-dashboard">
+        {/* Welcome / Stats */}
         <div className="welcome-section">
-          <div className="welcome-text">
-            <h2>Welcome, {lecturerName || "Dr. Lecturer"}!</h2>
-            <p>Manage and resolve student academic issues assigned to you.</p>
-          </div>
+          <h2>Welcome, Dr. {lecturerProfile.full_name || "Lecturer"}!</h2>
           <div className="stats-cards">
             <div className="stat-card">
-              <div className="stat-value">{stats.assignedIssues}</div>
-              <div className="stat-label">Assigned Issues</div>
+              <div className="stat-value">{stats.assigned}</div>
+              <div className="stat-label">Assigned</div>
             </div>
             <div className="stat-card">
-              <div className="stat-value">{stats.resolvedIssues}</div>
-              <div className="stat-label">Resolved Issues</div>
+              <div className="stat-value">{stats.resolved}</div>
+              <div className="stat-label">Resolved</div>
             </div>
             <div className="stat-card">
-              <div className="stat-value">{stats.totalStudents}</div>
+              <div className="stat-value">{stats.students}</div>
               <div className="stat-label">Students</div>
             </div>
           </div>
         </div>
 
+        {/* Tabs */}
         <div className="tabs-container">
-          <div className="tabs">
-            <button
-              className={`tab ${activeTab === "assigned" ? "active" : ""}`}
-              onClick={() => setActiveTab("assigned")}
-            >
-              Assigned Issues
-            </button>
-            <button
-              className={`tab ${activeTab === "resolved" ? "active" : ""}`}
-              onClick={() => setActiveTab("resolved")}
-            >
-              Resolved Issues
-            </button>
-          </div>
+          <button
+            className={activeTab === "assigned" ? "tab active" : "tab"}
+            onClick={() => setActiveTab("assigned")}
+          >
+            Assigned
+          </button>
+          <button
+            className={activeTab === "resolved" ? "tab active" : "tab"}
+            onClick={() => setActiveTab("resolved")}
+          >
+            Resolved
+          </button>
         </div>
 
+        {/* Issues List & Table */}
         <IssueList
           issues={filteredIssues}
           title={
@@ -173,17 +184,64 @@ const LecturerDashboard = () => {
           onViewIssue={handleViewIssue}
           userRole="Lecturer"
         />
-      </div>
+        <div className="issues-table-container">
+          <table className="issues-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Submitted At</th>
+                <th>Status</th>
+                {activeTab === "assigned" && <th>Actions</th>}
+              </tr>
+            </thead>
+            <tbody>
+              {filteredIssues.length > 0 ? (
+                filteredIssues.map((issue) => (
+                  <tr key={issue.id}>
+                    <td>#{issue.id}</td>
+                    <td>{issue.title}</td>
+                    <td>{issue.description}</td>
+                    <td>{new Date(issue.created_at).toLocaleString()}</td>
+                    <td>{normalize(issue.status)}</td>
+                    {activeTab === "assigned" && (
+                      <td>
+                        <button
+                          className="action-button"
+                          onClick={() => handleResolve(issue.id)}
+                          disabled={resolvingIssueId === issue.id}
+                        >
+                          {resolvingIssueId === issue.id
+                            ? "Resolving..."
+                            : "Resolve"}
+                        </button>
+                      </td>
+                    )}
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={activeTab === "assigned" ? 6 : 5}>
+                    No issues to display.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
 
-      {showIssueDetailModal && selectedIssue && (
-        <IssueDetail
-          issue={selectedIssue}
-          onClose={() => setShowIssueDetailModal(false)}
-          onStatusChange={handleStatusChange}
-          onAddComment={handleAddComment}
-          userRole="Lecturer"
-        />
-      )}
+        {/* Details Modal */}
+        {showIssueDetailModal && selectedIssue && (
+          <IssueDetail
+            issue={selectedIssue}
+            onClose={() => setShowIssueDetailModal(false)}
+            onStatusChange={handleStatusChange}
+            onAddComment={handleAddComment}
+            userRole="Lecturer"
+          />
+        )}
+      </div>
     </DashboardLayout>
   );
 };

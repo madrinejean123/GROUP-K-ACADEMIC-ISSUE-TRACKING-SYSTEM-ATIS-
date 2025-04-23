@@ -23,7 +23,7 @@
 }
 
 .issues-table tr:hover td {
-  background-color: var(--table-row-hover);
+  background-color: var(--table-row-hover); /*change bg */
 }
 
 .description-cell {
@@ -110,4 +110,3 @@
     min-width: 800px;
   }
 }
-
