@@ -22,4 +22,3 @@ def send_notification_email(subject, message, recipient_email):
         logger.error(f'Error sending email to {recipient_email}:{e}')
         return False
         
-    

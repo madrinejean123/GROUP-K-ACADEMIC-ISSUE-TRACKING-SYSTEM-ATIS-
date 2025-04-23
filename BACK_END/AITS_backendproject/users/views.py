@@ -4,6 +4,7 @@ from rest_framework.decorators import action
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate, get_user_model
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework_simplejwt.exceptions import TokenError
 from .models import Student, Lecturer, CollegeRegister
 from .serializers import (
     UserRegistrationSerializer,
@@ -12,6 +13,7 @@ from .serializers import (
     StudentSerializer,
     LecturerSerializer,
     CollegeRegisterSerializer,
+    UserLogoutSerializer,
 )
 
 User = get_user_model()
@@ -130,3 +132,26 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     def registrars(self, request):
         qs = CollegeRegister.objects.select_related('user').all()
         return Response(CollegeRegisterSerializer(qs, many=True).data)
+
+
+
+class UserLogoutViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
+    """
+    POST /users/logout/ → create() handles logout
+    """
+    serializer_class = UserLogoutSerializer
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        try:
+            refresh_token = RefreshToken(serializer.validated_data['refresh'])
+            refresh_token.blacklist()
+            return Response(status=status.HTTP_205_RESET_CONTENT)
+        except TokenError:
+            return Response(
+                {'detail': 'Invalid or expired token.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )

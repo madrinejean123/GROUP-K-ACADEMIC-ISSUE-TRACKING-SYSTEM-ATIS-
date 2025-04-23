@@ -1,8 +1,9 @@
+/* SPECIFIC UI STYLES*/
 .lecturer-dashboard {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  width: 100%; /* Ensure full width */
+  width: 100%;
 }
 
 .welcome-section {
@@ -117,4 +118,3 @@
     gap: 5px;
   }
 }
-

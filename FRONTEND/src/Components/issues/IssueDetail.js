@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { FaTimes, FaFile } from "react-icons/fa";
 import "../styles/issue-detail.css";
 
@@ -11,9 +11,8 @@ const IssueDetail = ({
 }) => {
   const [newComment, setNewComment] = useState("");
 
-  // Get status badge class
-  const getStatusClass = (status) => {
-    switch (status.toLowerCase()) {
+  const getStatusClass = (s) => {
+    switch (s.toLowerCase()) {
       case "open":
         return "status-open";
       case "in progress":
@@ -27,11 +26,9 @@ const IssueDetail = ({
     }
   };
 
-  // Add a function to get category badge class
-  const getCategoryClass = (category) => {
-    if (!category) return "";
-
-    switch (category.toLowerCase()) {
+  const getCategoryClass = (c) => {
+    if (!c) return "";
+    switch (c.toLowerCase()) {
       case "missing marks":
         return "category-missing-marks";
       case "appeals":
@@ -49,33 +46,28 @@ const IssueDetail = ({
     setNewComment("");
   };
 
-  // Get available actions based on user role and issue status
-  const getAvailableActions = () => {
+  const actions = (() => {
     if (userRole === "Student") {
-      if (issue.status === "Open") {
+      if (issue.status === "Open")
         return [{ label: "Request Update", action: "In Progress" }];
-      } else if (issue.status === "Resolved") {
+      if (issue.status === "Resolved")
         return [
           { label: "Close Issue", action: "Closed" },
           { label: "Reopen Issue", action: "Open" },
         ];
-      }
-    } else if (userRole === "Registrar") {
-      if (issue.status === "Open") {
-        return [{ label: "Assign to Lecturer", action: "assign" }];
-      }
-    } else if (userRole === "Lecturer") {
-      if (issue.status === "In Progress") {
-        return [{ label: "Mark as Resolved", action: "Resolved" }];
-      } else if (issue.status === "Open") {
-        return [{ label: "Start Working", action: "In Progress" }];
-      }
     }
-
+    if (userRole === "Lecturer") {
+      if (issue.status === "In Progress")
+        return [{ label: "Mark as Resolved", action: "Resolved" }];
+      if (issue.status === "Open")
+        return [{ label: "Start Working", action: "In Progress" }];
+    }
     return [];
-  };
+  })();
 
-  const actions = getAvailableActions();
+  const onActionClick = (act) => {
+    onStatusChange(act);
+  };
 
   return (
     <div className="modal-overlay">
@@ -86,10 +78,11 @@ const IssueDetail = ({
             <FaTimes />
           </button>
         </div>
+
         <div className="issue-detail-content">
           <div className="issue-detail-header">
             <div className="issue-id-badge">#{issue.id}</div>
-            <span className={`status-badge ${getStatusClass(issue.status)}`}>
+            <span className={`status-badge ${getStatusClass(issue.status)}`}> 
               {issue.status}
             </span>
           </div>
@@ -97,25 +90,28 @@ const IssueDetail = ({
           <h3 className="issue-detail-title">{issue.title}</h3>
 
           <div className="issue-detail-meta">
-            <div className="issue-detail-date">
-              <strong>Submitted:</strong> {issue.date}
+            <div>
+              <strong>Author:</strong>{" "}
+              {issue.author?.user?.full_name || issue.author || "Unknown"}
             </div>
-            <div className="issue-detail-category">
+            <div>
+              <strong>Submitted:</strong>{" "}
+              {new Date(issue.created_at).toLocaleString()}
+            </div>
+            <div>
               <strong>Category:</strong>{" "}
-              <span
-                className={`category-badge ${getCategoryClass(issue.category)}`}
-              >
+              <span className={`category-badge ${getCategoryClass(issue.category)}`}>
                 {issue.category || "Not specified"}
               </span>
             </div>
-            {userRole === "Registrar" && (
-              <div className="issue-detail-assignee">
-                <strong>Assignee:</strong> {issue.assignee || "Unassigned"}
-              </div>
-            )}
+            <div>
+              <strong>Assigned Lecturer:</strong>{" "}
+              {issue.assigned_lecturer?.user?.full_name || "Unassigned"}
+            </div>
             {userRole === "Lecturer" && (
-              <div className="issue-detail-student">
-                <strong>Student:</strong> {issue.student || "Unknown"}
+              <div>
+                <strong>Student:</strong>{" "}
+                {issue.student || "Unknown"}
               </div>
             )}
           </div>
@@ -124,25 +120,22 @@ const IssueDetail = ({
             <h4>Description</h4>
             <p className="issue-detail-description">{issue.description}</p>
 
-            {issue.attachments && issue.attachments.length > 0 && (
+            {issue.attachments?.length > 0 && (
               <div className="issue-attachments">
                 <h5>Attachments</h5>
-                <div>
-                  {issue.attachments.map((file, index) => (
-                    <a
-                      key={index}
-                      href="#"
-                      className="attachment-link"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        // In a real app, this would download or open the file
-                        alert(`Downloading file: ${file.name}`);
-                      }}
-                    >
-                      <FaFile /> {file.name}
-                    </a>
-                  ))}
-                </div>
+                {issue.attachments.map((file, idx) => (
+                  <a
+                    key={idx}
+                    href="#"
+                    className="attachment-link"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      alert(`Downloading file: ${file.name}`);
+                    }}
+                  >
+                    <FaFile /> {file.name}
+                  </a>
+                ))}
               </div>
             )}
           </div>
@@ -150,54 +143,52 @@ const IssueDetail = ({
           <div className="issue-detail-section">
             <h4>Comments</h4>
             <div className="comments-list">
-              {issue.comments && issue.comments.length > 0 ? (
-                issue.comments.map((comment, index) => (
-                  <div className="comment-item" key={index}>
+              {issue.comments?.length ? (
+                issue.comments.map((c, i) => (
+                  <div className="comment-item" key={i}>
                     <div className="comment-header">
                       <img
                         src="/placeholder.svg?height=40&width=40"
-                        alt={comment.author}
+                        alt={c.author}
                         className="comment-avatar"
                       />
                       <div className="comment-meta">
-                        <div className="comment-author">{comment.author}</div>
-                        <div className="comment-date">{comment.date}</div>
+                        <div className="comment-author">{c.author}</div>
+                        <div className="comment-date">{c.date}</div>
                       </div>
                     </div>
-                    <div className="comment-content">{comment.content}</div>
+                    <div className="comment-content">{c.content}</div>
                   </div>
                 ))
               ) : (
                 <div className="no-comments">No comments yet.</div>
               )}
             </div>
-
             <div className="add-comment">
               <textarea
-                placeholder="Add a comment..."
                 className="comment-input"
                 rows="3"
+                placeholder="Add a comment..."
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
-              ></textarea>
+              />
               <button className="submit-button" onClick={handleAddComment}>
                 Post Comment
               </button>
             </div>
           </div>
 
-          {/* Status update section */}
           {actions.length > 0 && (
             <div className="issue-detail-section">
               <h4>Actions</h4>
               <div className="issue-actions">
-                {actions.map((action, index) => (
+                {actions.map((a, i) => (
                   <button
-                    key={index}
+                    key={i}
                     className="action-button status-update-button"
-                    onClick={() => onStatusChange(action.action)}
+                    onClick={() => onActionClick(a.action)}
                   >
-                    {action.label}
+                    {a.label}
                   </button>
                 ))}
               </div>

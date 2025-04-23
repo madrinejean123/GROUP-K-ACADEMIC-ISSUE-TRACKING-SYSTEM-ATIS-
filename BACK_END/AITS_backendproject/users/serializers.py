@@ -19,11 +19,10 @@ class CustomPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
     }
 
     def to_internal_value(self, data):
-        # allow {"id": 3} or "Engineering" lookups
         if isinstance(data, dict):
             data = data.get('id')
         if isinstance(data, str) and not data.isdigit():
-            qs = self.get_queryset()
+            qs    = self.get_queryset()
             model = qs.model
             for field in ('name', 'school_name', 'department_name'):
                 if hasattr(model, field):
@@ -36,17 +35,16 @@ class CustomPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
+    password         = serializers.CharField(write_only=True)
     confirm_password = serializers.CharField(write_only=True)
-    student_no = serializers.CharField(write_only=True, required=False)
-    college = CustomPrimaryKeyRelatedField(
-        queryset=College.objects.all(),
-        write_only=True,
-        required=False
-    )
+    student_no       = serializers.CharField(write_only=True, required=False)
+    college          = CustomPrimaryKeyRelatedField(
+                         queryset=College.objects.all(),
+                         write_only=True, required=False
+                       )
 
     class Meta:
-        model = User
+        model  = User
         fields = [
             'id', 'full_name', 'mak_email',
             'password', 'confirm_password',
@@ -64,44 +62,42 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        pwd = validated_data.pop('password')
+        pwd         = validated_data.pop('password')
         validated_data.pop('confirm_password')
-        student_no = validated_data.pop('student_no', None)
-        college = validated_data.pop('college', None)
-        role = validated_data.get('user_role')
+        student_no  = validated_data.pop('student_no', None)
+        college_obj = validated_data.pop('college', None)
+        role        = validated_data.get('user_role')
 
         user = User.objects.create(
-            username=validated_data['mak_email'],
-            full_name=validated_data.get('full_name', ''),
-            mak_email=validated_data['mak_email'],
-            password=make_password(pwd),
-            user_role=role,
-            college=college if role == 'registrar' else None
+            username   = validated_data['mak_email'],
+            full_name  = validated_data.get('full_name', ''),
+            mak_email  = validated_data['mak_email'],
+            password   = make_password(pwd),
+            user_role  = role,
+            college    = college_obj if role == 'registrar' else None,
         )
 
         if role == 'student':
-            Student.objects.create(user=user, student_no=student_no)
+            Student.objects.create(
+                user       = user,
+                student_no = student_no
+            )
         elif role == 'lecturer':
             Lecturer.objects.create(user=user)
-        else:
-            CollegeRegister.objects.create(user=user, college=college)
+        else:  # registrar
+            CollegeRegister.objects.create(user=user, college=college_obj)
+
         return user
 
 
 class UserLoginSerializer(serializers.Serializer):
     mak_email = serializers.EmailField()
-    password = serializers.CharField(write_only=True)
+    password  = serializers.CharField(write_only=True)
     user_role = serializers.CharField(write_only=True, required=False)
-    student_no = serializers.CharField(write_only=True, required=False)
-    college = CustomPrimaryKeyRelatedField(
-        queryset=College.objects.all(),
-        write_only=True,
-        required=False
-    )
 
     def validate(self, data):
         email = data.get('mak_email', '').lower()
-        role = data.get('user_role', '').lower()
+        role  = data.get('user_role', '').lower()
         if role == 'student' and not re.match(r'^[\w\.]+@students\.mak\.ac\.ug$', email):
             raise serializers.ValidationError({'mak_email': 'Invalid student email.'})
         user = authenticate(username=email, password=data.get('password'))
@@ -112,123 +108,110 @@ class UserLoginSerializer(serializers.Serializer):
 
 class UserProfileSerializer(serializers.ModelSerializer):
     """
-    profile GET and update_me PUT/PATCH
+    GET /users/profile/        → nested college/school/department
+    PUT/PATCH /users/profile/update_me/  → accepts college, school, department as IDs or names
     """
     student_no = serializers.CharField(source='student.student_no', read_only=True)
 
-    # —— READ: nested serializers for full detail —— #
-    college = CollegeSerializer(source='student.college', read_only=True)
-    school = SchoolSerializer(source='student.school', read_only=True)
-    department = DepartmentSerializer(source='student.department', read_only=True)
-
-    # —— WRITE: still accept PK/dict/name via CustomPK —— #
-    college_id = CustomPrimaryKeyRelatedField(
-        source='student.college',
-        queryset=College.objects.all(),
-        write_only=True,
-        required=False,
-        allow_null=True
-    )
-    school_id = CustomPrimaryKeyRelatedField(
-        source='student.school',
-        queryset=School.objects.all(),
-        write_only=True,
-        required=False,
-        allow_null=True
-    )
-    department_id = CustomPrimaryKeyRelatedField(
-        source='student.department',
-        queryset=Department.objects.all(),
-        write_only=True,
-        required=False,
-        allow_null=True
-    )
+    # ─── Single fields that do BOTH read (nested) and write (PK/name) ───
+    college    = CustomPrimaryKeyRelatedField(
+                     queryset=College.objects.all(),
+                     required=False, allow_null=True
+                 )
+    school     = CustomPrimaryKeyRelatedField(
+                     queryset=School.objects.all(),
+                     required=False, allow_null=True
+                 )
+    department = CustomPrimaryKeyRelatedField(
+                     queryset=Department.objects.all(),
+                     required=False, allow_null=True
+                 )
 
     class Meta:
-        model = User
+        model  = User
         fields = [
             'id', 'username', 'full_name', 'mak_email', 'user_role',
-            'gender', 'profile_pic', 'office', 'college',
-            'student_no', 'school', 'department', 'notification_email',
+            'gender', 'profile_pic', 'office',
+            'college',       # read/write via the same field
+            'student_no',
+            'school',        # read/write via the same field
+            'department',    # read/write via the same field
+            'notification_email',
         ]
 
-    def get_student_no(self, obj):
-        if obj.user_role == 'student' and hasattr(obj, 'student'):
-            return obj.student.student_no
-        return None
+    def to_representation(self, instance):
+        """
+        On GET: return nested serializers instead of raw PK.
+        """
+        data = super().to_representation(instance)
 
-    def get_department(self, obj):
-        if obj.user_role == 'student' and hasattr(obj, 'student'):
-            return obj.student.department.department_name if obj.student.department else None
-        if obj.user_role == 'lecturer' and hasattr(obj, 'lecturers'):
-            return obj.lecturers.department.department_name if obj.lecturers.department else None
-        return None
+        # choose where to read from
+        if instance.user_role == 'student' and hasattr(instance, 'student'):
+            col = instance.student.college
+            sch = instance.student.school
+            dep = instance.student.department
+        else:
+            col = instance.college
+            sch = None
+            dep = None
 
-    def validate(self, attrs):
-        if attrs.get('user_role') == 'registrar' and not attrs.get('college'):
-            raise serializers.ValidationError({'college': 'College is required for a registrar.'})
-        return attrs
+        data['college']    = CollegeSerializer(col).data if col else None
+        data['school']     = SchoolSerializer(sch).data if sch else None
+        data['department'] = DepartmentSerializer(dep).data if dep else None
+        return data
+
+    def update(self, instance, validated_data):
+        """
+        On PATCH/PUT: assign incoming college/school/department to Student (if student),
+        or to User.college (if registrar/lecturer).
+        """
+        col = validated_data.pop('college', serializers.empty)
+        sch = validated_data.pop('school', serializers.empty)
+        dep = validated_data.pop('department', serializers.empty)
+
+        # 1) Update any other User fields
+        for attr, val in validated_data.items():
+            setattr(instance, attr, val)
+        instance.save()
+
+        # 2) Assign to student or user
+        if instance.user_role == 'student':
+            student, _ = Student.objects.get_or_create(user=instance)
+            if col is not serializers.empty:
+                student.college = col
+            if sch is not serializers.empty:
+                student.school = sch
+            if dep is not serializers.empty:
+                student.department = dep
+            student.save()
+        else:
+            # registrar or lecturer → update User.college
+            if col is not serializers.empty:
+                instance.college = col
+                instance.save()
+
+        return instance
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# User Update Serializer
 class UserUpdateSerializers(serializers.ModelSerializer):
-    gender = serializers.ChoiceField(choices=User.GENDER_CHOICES, required=False)
-    college = CustomPrimaryKeyRelatedField(queryset=College.objects.all(), required=False)
-    school = CustomPrimaryKeyRelatedField(queryset=School.objects.all(), required=False)
+    """
+    (unused by update_me, but available elsewhere)
+    """
+    gender     = serializers.ChoiceField(choices=User.GENDER_CHOICES, required=False)
+    college    = CustomPrimaryKeyRelatedField(queryset=College.objects.all(), required=False)
+    school     = CustomPrimaryKeyRelatedField(queryset=School.objects.all(), required=False)
     department = CustomPrimaryKeyRelatedField(queryset=Department.objects.all(), required=False)
 
     class Meta:
-        model = User
+        model  = User
         fields = ['username', 'gender', 'profile_pic', 'office', 'college', 'school', 'department']
-        extra_kwargs = {
-            'profile_pic': {'required': False},
-            'username': {'required': False},
-            'college': {'required': False},
-            'school': {'required': False},
-            'department': {'required': False},
-        }
-
-    def validate_username(self, value):
-        if value == self.instance.username:
-            return value
-        if not re.match(r'^[\w.@+-]+$', value):
-            raise serializers.ValidationError(
-                "Username may only contain letters, numbers and @/./+/-/_ characters."
-            )
-        return value
-
-    def validate_gender(self, value):
-        if not value:
-            return None
-        conversion_map = {'m': 'male', 'male': 'male', 'f': 'female', 'female': 'female'}
-        normalized = conversion_map.get(value.lower())
-        if not normalized:
-            raise serializers.ValidationError(
-                f"Invalid gender. Must be one of: {[v for _, v in User.GENDER_CHOICES]}"
-            )
-        return normalized
-
-    def update(self, instance, validated_data):
-        student_data = validated_data.pop('student', {})
-        # Update User fields
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        instance.save()
-        # Ensure Student exists
-        student, _ = Student.objects.get_or_create(user=instance)
-        # Update nested Student fields
-        for attr, value in student_data.items():
-            setattr(student, attr, value)
-        student.save()
-        return instance
 
 
 class StudentSerializer(serializers.ModelSerializer):
     user = UserProfileSerializer(read_only=True)
 
     class Meta:
-        model = Student
+        model  = Student
         fields = ['id', 'user', 'student_no', 'college', 'school', 'department']
 
 
@@ -236,7 +219,7 @@ class LecturerSerializer(serializers.ModelSerializer):
     user = UserProfileSerializer(read_only=True)
 
     class Meta:
-        model = Lecturer
+        model  = Lecturer
         fields = ['id', 'user', 'college', 'is_lecturer']
 
 
@@ -244,7 +227,7 @@ class CollegeRegisterSerializer(serializers.ModelSerializer):
     user = UserProfileSerializer(read_only=True)
 
     class Meta:
-        model = CollegeRegister
+        model  = CollegeRegister
         fields = ['id', 'user', 'college']
 
 
@@ -252,5 +235,17 @@ class UserSerializer(serializers.ModelSerializer):
     college = CollegeSerializer(read_only=True)
 
     class Meta:
-        model = User
-        fields = ['id', 'username', 'full_name', 'mak_email', 'user_role', 'gender', 'profile_pic', 'office', 'college', 'notification_email']
+        model  = User
+        fields = [
+            'id', 'username', 'full_name', 'mak_email', 'user_role',
+            'gender', 'profile_pic', 'office', 'college', 'notification_email'
+        ]
+
+
+class UserLogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField()
+
+    def validate(self, attrs):
+        self.refresh_token = attrs['refresh']
+        return attrs
+    

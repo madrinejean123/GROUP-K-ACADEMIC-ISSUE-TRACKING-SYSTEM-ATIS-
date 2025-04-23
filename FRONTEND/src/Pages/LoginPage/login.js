@@ -3,12 +3,17 @@ import { Link, useNavigate } from "react-router-dom"; // Import useNavigate for 
 import axios from "axios";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast"; // Correct import for toast
-import "../LoginPage/login.css";  // Add your custom styling
+import "../LoginPage/login.css"; // Add your custom styling
 import { FaEnvelope, FaLock } from "react-icons/fa"; // Import the icons
 
 const LoginPage = () => {
   const [loading, setLoading] = useState(false);
-  const { register, handleSubmit, reset, formState: { errors } } = useForm();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm();
   const navigate = useNavigate(); // Initialize useNavigate for navigation
 
   // Handle form submission
@@ -18,7 +23,10 @@ const LoginPage = () => {
 
     try {
       // Assuming the login API is at this URL
-      const response = await axios.post("https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/login/", data);
+      const response = await axios.post(
+        "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/login/",
+        data
+      );
 
       console.log(response);
       if (response.data && response.data.tokens) {
@@ -36,7 +44,7 @@ const LoginPage = () => {
         console.log("Access Token:", localStorage.getItem("access_token"));
         console.log("Refresh Token:", localStorage.getItem("refresh_token"));
 
-        // Check the user's role and navigate to the appropriate dashboard
+        // Check the user's role and navigate to appropriate dashboard
         const userRole = response.data.user.user_role;
         if (userRole === "student") {
           navigate("/student");
@@ -45,7 +53,7 @@ const LoginPage = () => {
         } else if (userRole === "registrar") {
           navigate("/registrar");
         } else {
-          navigate("/"); // Default to home page if role is not recognized
+          navigate("/"); // Default to the home page if the role is not recognized
         }
       } else {
         throw new Error("Invalid credentials");

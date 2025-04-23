@@ -1,3 +1,4 @@
+from pathlib import Path
 import os
 from pathlib import Path
 from datetime import timedelta
@@ -40,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # your apps
+    # working apps
     'users',
     'issues',
     'department',
@@ -49,9 +50,11 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
+    
 ]
 AUTHENTICATION_BACKENDS = [
-    'users.authentication.EmailBackend',  # 👈 Add your custom backend here
+    'users.authentication.EmailBackend',  #  custom backend 
     'django.contrib.auth.backends.ModelBackend',  # default, as fallback
 ]
 
@@ -65,7 +68,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # Ensure CORS middleware is listed
 ]
 
 ROOT_URLCONF = 'AITS_backendproject.urls'
@@ -167,6 +170,11 @@ SIMPLE_JWT = {
 # CORS settings
 # ----------------------------------------------------------------------------
 
+CORS_ALLOWED_ORIGINS = [
+    "https://group-k-academic-issue-tracking-system-atis-i1751nod2.vercel.app",  # Allow Vercel frontend URL
+]
+
+# ------------------------------------------------------------------------------
 CORS_ALLOW_ALL_ORIGINS = True
 
 # ----------------------------------------------------------------------------
