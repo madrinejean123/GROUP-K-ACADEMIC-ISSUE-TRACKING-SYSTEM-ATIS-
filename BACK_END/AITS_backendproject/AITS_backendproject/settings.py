@@ -1,7 +1,4 @@
-<<<<<<< HEAD
 from pathlib import Path
-=======
->>>>>>> a04c8dd614a1f84269db18bd1915320b50e01534
 import os
 from pathlib import Path
 from datetime import timedelta
@@ -173,17 +170,14 @@ SIMPLE_JWT = {
 # CORS settings
 # ----------------------------------------------------------------------------
 
-<<<<<<< HEAD
 CORS_ALLOWED_ORIGINS = [
     "https://group-k-academic-issue-tracking-system-atis-i1751nod2.vercel.app",  # Allow Vercel frontend URL
 ]
 
 # ------------------------------------------------------------------------------
-=======
 CORS_ALLOW_ALL_ORIGINS = True
 
 # ----------------------------------------------------------------------------
->>>>>>> a04c8dd614a1f84269db18bd1915320b50e01534
 # Activate Django-Heroku (must be at the bottom!)
 # ----------------------------------------------------------------------------
 
