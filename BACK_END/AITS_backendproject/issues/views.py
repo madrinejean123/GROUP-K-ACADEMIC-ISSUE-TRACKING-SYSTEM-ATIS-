@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Issues
 from .serializers import IssueCreateSerializer, IssueAssignSerializer, IssueStatusUpdateSerializer, IssueDetailSerializer
-from users.models import CollegeRegister, Lecturer
+from users.models import CollegeRegister, Lecturer, Student
 from .utils import send_notification_email
 import logging
 
@@ -41,7 +41,7 @@ class CreateIssueView(generics.CreateAPIView):
             subject="New Student Issue Submitted",
             message=f"{student.user.student_no} submitted a new issue.",
             recipient_email=college_register.user.notification_email
-    )
+        )
 
 #  API for College Register to View & Assign Issues
 class CollegeRegisterAssignView(APIView):
@@ -73,14 +73,14 @@ class CollegeRegisterAssignView(APIView):
         # send email notification to lecturer
         success = send_notification_email(
             subject='Issue Assigned to You',
-            message=f'A new issue has been assigned to you by {register.user.get_full_name()}.',
+            message=f'A new issue has been assigned to you by {register.user.full_name}.',
             recipient_email=lecturer.user.notification_email
         )
         if success:
-            logger.info(f'Issue successfully assigned to {lecturer.user.get_full_name()} ({lecturer.user.notification_email})')
+            logger.info(f'Issue successfully assigned to {lecturer.user.adeletefull_name} ({lecturer.user.notification_email})')
         else:
-            logger.warning(f'Failed to notify {lecturer.user.get_full_name()} about the issue')
-            return Response({"message": f"Issue assigned to {lecturer.user.get_full_name()} successfully."}, status=status.HTTP_200_OK)
+            logger.warning(f'Failed to notify {lecturer.user.full_name} about the issue')
+        return Response({"message": f"Issue assigned to {lecturer.user.full_name} successfully."}, status=status.HTTP_200_OK)
 
 #  API for Lecturers to Update Issue Status
 class LecturerUpdateIssueStatusView(APIView):
