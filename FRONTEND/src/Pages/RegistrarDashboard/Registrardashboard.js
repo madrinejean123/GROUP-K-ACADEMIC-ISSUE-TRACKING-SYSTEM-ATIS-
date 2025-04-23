@@ -15,7 +15,7 @@ const RegistrarDashboard = () => {
   const [registrarProfile, setRegistrarProfile] = useState({});
   const [activeView, setActiveView] = useState("dashboard");
 
-  // Normalize snake_case → human‑readable
+  // Normalize snake-case → human‑readable
   const normalizeStatus = (s = "") => s.replace(/_/g, " ").trim().toLowerCase();
 
   // Fetch registrar profile
