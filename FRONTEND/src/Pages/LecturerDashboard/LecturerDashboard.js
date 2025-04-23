@@ -38,7 +38,7 @@ const LecturerDashboard = () => {
     fetchLecturerProfile();
   }, []);
 
-  // Fetch issues once we have a profile
+  // Fetch the issues once we have a profile
   useEffect(() => {
     const fetchIssues = async () => {
       const token = localStorage.getItem("access_token");
@@ -59,7 +59,7 @@ const LecturerDashboard = () => {
     }
   }, [lecturerProfile]);
 
-  // Handle resolving the issue — now using PATCH instead of PUT
+  // Handle resolving an issue — now using PATCH instead of PUT
   const handleResolve = async (issueId) => {
     setResolvingIssueId(issueId);
     try {
