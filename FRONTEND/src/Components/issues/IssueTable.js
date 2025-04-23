@@ -117,7 +117,7 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
         [issueId]: data.message || "Issue has been resolved successfully.",
       }));
 
-      // Optional: Refresh UI, re-fetch issues or update state in parent component
+      // Optional: Refresh UI, re-fetch the issues or update state in parent component
     } catch (error) {
       console.error("Resolve failed", error);
       setResolveMessages((msgs) => ({
