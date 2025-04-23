@@ -36,7 +36,7 @@ const RegistrarDashboard = () => {
     fetchProfile();
   }, []);
 
-  // Fetch all issues
+  // Fetch all the issues
   useEffect(() => {
     async function fetchIssues() {
       const token = localStorage.getItem("access_token");
