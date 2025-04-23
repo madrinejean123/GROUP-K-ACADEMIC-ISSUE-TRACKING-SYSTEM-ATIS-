@@ -1,14 +1,14 @@
-/* Modal Container */
+/* Modals Container */
 .issue-modal {
-  background-color: #ffffff; /* White background for the modal */
+  background-color: #ffffff; /* White bgc for modal */
   border-radius: 10px;
   padding: 30px;
   width: 90%;
   max-width: 600px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   max-height: 90vh;
   overflow-y: auto;
-  border: 1px solid #e0e0e0; /* Light border for structure */
+  border: 1px solid #e0e0e0; /* Light border for structur */
   margin: 0 auto;
 }
 
@@ -196,4 +196,3 @@
   color: #999999;
   cursor: not-allowed;
 }
-
