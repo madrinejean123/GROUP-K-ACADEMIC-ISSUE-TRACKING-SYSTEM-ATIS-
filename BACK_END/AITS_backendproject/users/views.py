@@ -159,3 +159,5 @@ class UserLogoutViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                 {'detail': 'Invalid or expired token.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
+        
+
