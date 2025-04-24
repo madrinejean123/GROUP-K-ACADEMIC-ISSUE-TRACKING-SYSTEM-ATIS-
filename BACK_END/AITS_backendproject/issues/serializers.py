@@ -21,7 +21,6 @@ class IssueCreateSerializer(serializers.ModelSerializer):
         }
     
     def validate_category(self, value):
-        """Ensure category matches frontend choices exactly"""
         valid_categories = ['missing_marks', 'appeals', 'correction']
         if value not in valid_categories:
             raise serializers.ValidationError(
@@ -31,7 +30,7 @@ class IssueCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         request = self.context['request']
-        student = request.user.student
+        student = getattr(request.user, 'student', None)
         
         if not student:
             raise serializers.ValidationError(
@@ -44,7 +43,7 @@ class IssueCreateSerializer(serializers.ModelSerializer):
             'college': student.college,
             'school': student.school,
             'department': student.department,
-            'status': 'open'  # Frontend expects this default
+            'status': 'open'
         })
 
         try:
@@ -76,16 +75,23 @@ class IssueAssignSerializer(serializers.ModelSerializer):
         model = Issue
         fields = ['assigned_lecturer', 'lecturer_id', 'status']
         read_only_fields = ['assigned_lecturer', 'status']
-    
+
     def update(self, instance, validated_data):
         request = self.context['request']
-        if not hasattr(request.user, 'collegeregister'):
+        # Only allow users with registrar role
+        if request.user.user_role != 'registrar':
             raise serializers.ValidationError(
-                {"error": "Only College Registers can assign lecturers."},
+                {"error": "Only registrars can assign issues."},
                 code='registrar_required'
             )
 
-        instance.assigned_lecturer = validated_data['assigned_lecturer']
+        lecturer = validated_data.get('assigned_lecturer')
+        if not lecturer:
+            raise serializers.ValidationError({
+                "lecturer_id": "This field is required."
+            })
+
+        instance.assigned_lecturer = lecturer
         instance.status = 'in_progress'
         instance.save()
         return instance
@@ -111,7 +117,7 @@ class IssueStatusUpdateSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         request = self.context['request']
-        if not hasattr(request.user, 'lecturer'):
+        if request.user.user_role != 'lecturer':
             raise serializers.ValidationError(
                 {"error": "Only lecturers can update issue status."},
                 code='lecturer_required'
@@ -144,9 +150,6 @@ class IssueDetailSerializer(serializers.ModelSerializer):
         return None
 
     def to_representation(self, instance):
-        """Frontend-friendly formatting"""
         data = super().to_representation(instance)
-        # Convert status to match frontend display logic
-        data['status'] = instance.status.replace('_', ' ').title()  
+        data['status'] = instance.status.replace('_', ' ').title()
         return data
-    

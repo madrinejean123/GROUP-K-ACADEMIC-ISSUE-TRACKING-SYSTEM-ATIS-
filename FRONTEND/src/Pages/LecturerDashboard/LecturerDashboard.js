@@ -38,7 +38,7 @@ const LecturerDashboard = () => {
     fetchLecturerProfile();
   }, []);
 
-  // Fetch thee issues once we have a profile
+  // Fetch the issues once we have a profile
   useEffect(() => {
     const fetchIssues = async () => {
       const token = localStorage.getItem("access_token");
@@ -59,19 +59,36 @@ const LecturerDashboard = () => {
     }
   }, [lecturerProfile]);
 
-  // Handle resolving an issue — now using PATCH instead of PUT
+  // Handle resolving an issue — gather resolution notes and send in payload
   const handleResolve = async (issueId) => {
+    // Prompt lecturer for resolution notes
+    const notes = window.prompt(
+      "Enter resolution notes (required) before resolving this issue:"
+    );
+    if (notes === null) {
+      // Cancelled prompt
+      return;
+    }
+    if (notes.trim() === "") {
+      alert("Resolution notes cannot be empty.");
+      return;
+    }
+
     setResolvingIssueId(issueId);
     try {
       const token = localStorage.getItem("access_token");
       if (!token) throw new Error("No auth token");
+      const payload = { status: "resolved", resolution_notes: notes };
       await axios.patch(
-        `${UPDATE_STATUS_API_URL}${issueId}/`, // ← PATCH method matches Django view
-        { status: "resolved" },
+        `${UPDATE_STATUS_API_URL}${issueId}/`,
+        payload,
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      // Update local state with new status and notes
       setIssues((prev) =>
-        prev.map((i) => (i.id === issueId ? { ...i, status: "resolved" } : i))
+        prev.map((i) =>
+          i.id === issueId ? { ...i, status: "resolved", resolution_notes: notes } : i
+        )
       );
     } catch (err) {
       console.error("❌ Error resolving issue:", err);
@@ -87,13 +104,15 @@ const LecturerDashboard = () => {
   };
 
   // Status change callback from the IssueDetail modal
-  const handleStatusChange = (newStatus) => {
+  const handleStatusChange = (newStatus, notes = null) => {
     setIssues((all) =>
       all.map((i) =>
-        i.id === selectedIssue.id ? { ...i, status: newStatus } : i
+        i.id === selectedIssue.id
+          ? { ...i, status: newStatus, resolution_notes: notes || i.resolution_notes }
+          : i
       )
     );
-    setSelectedIssue((i) => ({ ...i, status: newStatus }));
+    setSelectedIssue((i) => ({ ...i, status: newStatus, resolution_notes: notes || i.resolution_notes }));
   };
 
   // Add the comment locally
@@ -116,7 +135,7 @@ const LecturerDashboard = () => {
     }));
   };
 
-  // Helpers for the filtering
+  // Helpers for filtering
   const normalize = (s) => s.replace(/_/g, " ").toLowerCase();
   const assignedIssues = issues.filter((i) => {
     const st = normalize(i.status);
@@ -126,8 +145,7 @@ const LecturerDashboard = () => {
     const st = normalize(i.status);
     return st === "resolved" || st === "closed";
   });
-  const filteredIssues =
-    activeTab === "assigned" ? assignedIssues : resolvedIssues;
+  const filteredIssues = activeTab === "assigned" ? assignedIssues : resolvedIssues;
 
   // Quick Stats
   const stats = {
@@ -163,23 +181,17 @@ const LecturerDashboard = () => {
           <button
             className={activeTab === "assigned" ? "tab active" : "tab"}
             onClick={() => setActiveTab("assigned")}
-          >
-            Assigned
-          </button>
+          >Assigned</button>
           <button
             className={activeTab === "resolved" ? "tab active" : "tab"}
             onClick={() => setActiveTab("resolved")}
-          >
-            Resolved
-          </button>
+          >Resolved</button>
         </div>
 
-        {/* Issues List & Table */}
+        {/* Issue List & Table */}
         <IssueList
           issues={filteredIssues}
-          title={
-            activeTab === "assigned" ? "Assigned Issues" : "Resolved Issues"
-          }
+          title={activeTab === "assigned" ? "Assigned Issues" : "Resolved Issues"}
           showCreateButton={false}
           onViewIssue={handleViewIssue}
           userRole="Lecturer"
@@ -212,9 +224,7 @@ const LecturerDashboard = () => {
                           onClick={() => handleResolve(issue.id)}
                           disabled={resolvingIssueId === issue.id}
                         >
-                          {resolvingIssueId === issue.id
-                            ? "Resolving..."
-                            : "Resolve"}
+                          {resolvingIssueId === issue.id ? "Resolving..." : "Resolve"}
                         </button>
                       </td>
                     )}
@@ -222,9 +232,7 @@ const LecturerDashboard = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={activeTab === "assigned" ? 6 : 5}>
-                    No issues to display.
-                  </td>
+                  <td colSpan={activeTab === "assigned" ? 6 : 5}>No issues to display.</td>
                 </tr>
               )}
             </tbody>

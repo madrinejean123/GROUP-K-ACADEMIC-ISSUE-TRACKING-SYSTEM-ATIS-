@@ -1,14 +1,14 @@
 from pathlib import Path
 import os
-from pathlib import Path
 from datetime import timedelta
 
 import dj_database_url
 import django_heroku
 
-AUTH_USER_MODEL = 'users.User' 
+# Custom user model
+AUTH_USER_MODEL = 'users.User'
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# Build paths inside the project like this: BASE_DIR / 'subdir'
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ----------------------------------------------------------------------------
@@ -16,14 +16,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ----------------------------------------------------------------------------
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# (Override via Heroku config var DJANGO_SECRET_KEY)
+# Override via Heroku config var DJANGO_SECRET_KEY
 SECRET_KEY = os.environ.get(
     'DJANGO_SECRET_KEY',
-    'django-insecure-x&9+)hjc6k(tq_ob(m%dnc0r!g0ta@ow-emdqbc9k-2!&g3ni_'
+    'django-insecure-x&9+)hjc6k(tq_ob(m%dnc0r!g0ta@ow-emdqbc9k-2!&g3ni_'  # fallback for local dev
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# (Override via Heroku config var DJANGO_DEBUG=False)
+# Override via Heroku config var DJANGO_DEBUG=False
 DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
 
 # Allow hosts (Override via DJANGO_ALLOWED_HOSTS)
@@ -41,23 +41,22 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # working apps
+    # Local apps
     'users',
     'issues',
     'department',
 
-    # third-party
+    # Third-party
     'rest_framework',
     'corsheaders',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
-    
-]
-AUTHENTICATION_BACKENDS = [
-    'users.authentication.EmailBackend',  #  custom backend 
-    'django.contrib.auth.backends.ModelBackend',  # default, as fallback
 ]
 
+AUTHENTICATION_BACKENDS = [
+    'users.authentication.EmailBackend',  # custom backend
+    'django.contrib.auth.backends.ModelBackend',  # default
+]
 
 MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -68,7 +67,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',  # Ensure CORS middleware is listed
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'AITS_backendproject.urls'
@@ -103,6 +102,7 @@ DATABASES = {
     )
 }
 
+# If no DATABASE_URL is provided, use local SQLite
 if not os.environ.get('DATABASE_URL'):
     DATABASES = {
         'default': {
@@ -171,19 +171,9 @@ SIMPLE_JWT = {
 # ----------------------------------------------------------------------------
 
 CORS_ALLOWED_ORIGINS = [
-    "https://group-k-academic-issue-tracking-system-atis-i1751nod2.vercel.app",  # Allow Vercel frontend URL
+    "https://group-k-academic-issue-tracking-system-atis-i1751nod2.vercel.app",
 ]
-
-# ------------------------------------------------------------------------------
 CORS_ALLOW_ALL_ORIGINS = True
-
-# ----------------------------------------------------------------------------
-# Activate Django-Heroku (must be at the bottom!)
-# ----------------------------------------------------------------------------
-
-django_heroku.settings(locals())
-
-
 
 # ----------------------------------------------------------------------------
 # Email (Gmail SMTP Configuration)
@@ -194,13 +184,10 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'aitswebsite576@gmail.com')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'yzhgibfihrddajcz')  
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+# ----------------------------------------------------------------------------
+# Activate Django-Heroku (must be at the bottom!)
+# ----------------------------------------------------------------------------
+django_heroku.settings(locals())
