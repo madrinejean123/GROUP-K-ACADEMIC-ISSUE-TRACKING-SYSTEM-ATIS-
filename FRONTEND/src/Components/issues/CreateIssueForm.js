@@ -331,9 +331,9 @@ const CreateIssueForm = ({ onCancel }) => {
                 onChange={handleInputChange}
                 required
               >
-                <option value="Missing Marks">Missing Marks</option>
-                <option value="Appeals">Appeals</option>
-                <option value="Corrections">Corrections</option>
+                <option value="missing_marks">Missing Marks</option>
+                <option value="appeals">Appeals</option>
+                <option value="correction">Corrections</option>
               </select>
               {errors.category && touched.category && (
                 <div className="error-message">{errors.category}</div>
