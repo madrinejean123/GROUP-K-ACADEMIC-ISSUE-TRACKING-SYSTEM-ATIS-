@@ -249,3 +249,15 @@ class UserLogoutSerializer(serializers.Serializer):
         self.refresh_token = attrs['refresh']
         return attrs
     
+class PasswordResetRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        value = value.lower()
+        try:
+            user = User.objects.get(notification_email=value)
+            if not user.notification_email:
+                raise serializers.ValidationError("No verified Gmail found for this account.")
+            return value
+        except User.DoesNotExist:
+            raise serializers.ValidationError("No user found with this Gmail.")

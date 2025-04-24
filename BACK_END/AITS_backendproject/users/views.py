@@ -16,6 +16,10 @@ from .serializers import (
     UserLogoutSerializer,
 )
 
+from django.core.mail import send_mail
+from django.urls import reverse
+from django.conf import settings
+
 User = get_user_model()
 
 
