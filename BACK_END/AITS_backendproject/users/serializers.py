@@ -6,7 +6,14 @@ import re
 from .models import User, Student, Lecturer, CollegeRegister
 from department.models import College, School, Department
 from department.serializers import CollegeSerializer, SchoolSerializer, DepartmentSerializer
+from rest_framework import serializers
+from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
+from django.contrib.auth.password_validation import validate_password
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
+
+User = get_user_model()
 
 class CustomPrimaryKeyRelatedField(serializers.PrimaryKeyRelatedField):
     """
@@ -249,6 +256,7 @@ class UserLogoutSerializer(serializers.Serializer):
         self.refresh_token = attrs['refresh']
         return attrs
     
+
 class PasswordResetRequestSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
@@ -257,17 +265,39 @@ class PasswordResetRequestSerializer(serializers.Serializer):
         try:
             user = User.objects.get(notification_email=value)
             if not user.notification_email:
-                raise serializers.ValidationError("No verified Gmail found for this account.")
+                raise serializers.ValidationError(
+                    "Please set your notification email in profile settings first."
+                )
             return value
         except User.DoesNotExist:
-            raise serializers.ValidationError("No user found with this Gmail.")
-        
+            raise serializers.ValidationError(
+                "No account found with this notification email."
+            )
+
 class PasswordResetConfirmSerializer(serializers.Serializer):
     token = serializers.CharField()
-    new_password = serializers.CharField(write_only=True)
-    confirm_password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(
+        write_only=True,
+        required=True,
+        style={'input_type': 'password'}
+    )
+    confirm_password = serializers.CharField(
+        write_only=True,
+        required=True,
+        style={'input_type': 'password'}
+    )
 
     def validate(self, data):
         if data['new_password'] != data['confirm_password']:
-            raise serializers.ValidationError({"confirm_password": "Passwords must match."})
+            raise serializers.ValidationError({
+                "confirm_password": "Passwords must match."
+            })
+        
+        try:
+            validate_password(data['new_password'])
+        except ValidationError as e:
+            raise serializers.ValidationError({
+                "new_password": list(e.messages)
+            })
+            
         return data
