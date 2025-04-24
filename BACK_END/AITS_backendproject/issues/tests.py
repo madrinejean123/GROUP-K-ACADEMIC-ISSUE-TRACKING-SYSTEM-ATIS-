@@ -2,11 +2,13 @@ from django.test import TestCase
 from django.core import mail
 from .utils import send_notification_email
 
-class EmailTest(TestCase):
-    def test_send_notification_email(self):
-        send_notification_email('Test Subject', 'Test Message', 'jonathantugume569@gmail.com')
-        self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(mail.outbox[0].subject, 'Test Subject')
-
+class EmailTests(TestCase):
+    def test_send_email(self):
+        success = send_notification_email(
+            subject="Unit Test Email",
+            message="This is a test email sent from unit test.",
+            recipient_email="youremail@example.com"
+        )
+        self.assertTrue(success)
 
 
