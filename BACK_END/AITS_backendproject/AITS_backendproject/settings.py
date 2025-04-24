@@ -163,6 +163,7 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
+    'PASSWORD_RESET_TOKEN_LIFETIME': timedelta(hours=1),
 }
 
 # ----------------------------------------------------------------------------
@@ -179,6 +180,8 @@ django_heroku.settings(locals())
 
 
 
+
+
 # ----------------------------------------------------------------------------
 # Email (Gmail SMTP Configuration)
 # ----------------------------------------------------------------------------
@@ -190,3 +193,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'aitswebsite576@gmail.com')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'yzhgibfihrddajcz')  
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+
+
+

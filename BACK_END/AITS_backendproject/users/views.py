@@ -15,6 +15,7 @@ from .serializers import (
     CollegeRegisterSerializer,
     UserLogoutSerializer,
     PasswordResetRequestSerializer,
+    PasswordResetConfirmSerializer,
 )
 
 from django.core.mail import send_mail
@@ -192,4 +193,20 @@ class PasswordResetViewSet(viewsets.GenericViewSet):
 
     @action(detail=False, methods=['post'], url_path='reset-password')
     def reset_password(self, request):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
         
+        try:
+            token = serializer.validated_data['token']
+            user = User.objects.get(id=AccessToken(token)['user_id'])
+            user.set_password(serializer.validated_data['new_password'])
+            user.save()
+            return Response(
+                {"detail": "Password updated successfully."},
+                status=status.HTTP_200_OK
+            )
+        except Exception as e:
+            return Response(
+                {"detail": "Invalid or expired token."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
