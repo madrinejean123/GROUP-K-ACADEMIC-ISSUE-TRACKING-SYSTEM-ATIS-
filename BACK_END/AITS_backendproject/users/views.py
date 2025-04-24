@@ -161,3 +161,34 @@ class UserLogoutViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             )
         
 
+class PasswordResetViewSet(viewsets.GenericViewSet):
+    permission_classes = [AllowAny]
+
+    @action(detail=False, methods=['post'], url_path='forgot-password')
+    def forgot_password(self, request):
+        serializer = PasswordResetRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        user = User.objects.get(notification_email=serializer.validated_data['email'])
+        token = RefreshToken.for_user(user).access_token
+        
+        reset_link = f"{settings.FRONTEND_URL}/reset-password?token={str(token)}"
+        
+        # Send to notification_email (Gmail)
+        send_mail(
+            "Password Reset Request",
+            f"Click to reset your password: {reset_link}\n\n"
+            f"If you didn't request this, please ignore this email.",
+            settings.DEFAULT_FROM_EMAIL,
+            [user.notification_email],  # Send to Gmail, not mak_email
+            fail_silently=False,
+        )
+        
+        return Response(
+            {"detail": "Password reset link sent to your registered Gmail."},
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, methods=['post'], url_path='reset-password')
+    def reset_password(self, request):
+        
