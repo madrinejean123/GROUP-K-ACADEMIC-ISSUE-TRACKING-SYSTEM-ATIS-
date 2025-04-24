@@ -1,4 +1,3 @@
-from pathlib import Path
 import os
 from pathlib import Path
 from datetime import timedelta
@@ -6,31 +5,33 @@ from datetime import timedelta
 import dj_database_url
 import django_heroku
 
-AUTH_USER_MODEL = 'users.User' 
+# ----------------------------------------------------------------------------
+# Custom User Model
+# ----------------------------------------------------------------------------
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+AUTH_USER_MODEL = 'users.User'
+
+# ----------------------------------------------------------------------------
+# Base Directory
+# ----------------------------------------------------------------------------
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ----------------------------------------------------------------------------
-# Quick-start development settings - unsuitable for production
+# Security Settings
 # ----------------------------------------------------------------------------
 
-# SECURITY WARNING: keep the secret key used in production secret!
-# (Override via Heroku config var DJANGO_SECRET_KEY)
 SECRET_KEY = os.environ.get(
     'DJANGO_SECRET_KEY',
     'django-insecure-x&9+)hjc6k(tq_ob(m%dnc0r!g0ta@ow-emdqbc9k-2!&g3ni_'
 )
 
-# SECURITY WARNING: don't run with debug turned on in production!
-# (Override via Heroku config var DJANGO_DEBUG=False)
 DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
 
-# Allow hosts (Override via DJANGO_ALLOWED_HOSTS)
 ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '*').split(',')
 
 # ----------------------------------------------------------------------------
-# Application definition
+# Installed Applications
 # ----------------------------------------------------------------------------
 
 INSTALLED_APPS = [
@@ -41,23 +42,30 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # working apps
+    # Custom apps
     'users',
     'issues',
     'department',
 
-    # third-party
+    # Third-party apps
     'rest_framework',
     'corsheaders',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
-    
-]
-AUTHENTICATION_BACKENDS = [
-    'users.authentication.EmailBackend',  #  custom backend 
-    'django.contrib.auth.backends.ModelBackend',  # default, as fallback
 ]
 
+# ----------------------------------------------------------------------------
+# Authentication Backends
+# ----------------------------------------------------------------------------
+
+AUTHENTICATION_BACKENDS = [
+    'users.authentication.EmailBackend',  # Custom backend
+    'django.contrib.auth.backends.ModelBackend',  # Default
+]
+
+# ----------------------------------------------------------------------------
+# Middleware
+# ----------------------------------------------------------------------------
 
 MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -68,10 +76,18 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',  # Ensure CORS middleware is listed
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
+# ----------------------------------------------------------------------------
+# URL Configuration
+# ----------------------------------------------------------------------------
+
 ROOT_URLCONF = 'AITS_backendproject.urls'
+
+# ----------------------------------------------------------------------------
+# Templates
+# ----------------------------------------------------------------------------
 
 TEMPLATES = [
     {
@@ -89,12 +105,16 @@ TEMPLATES = [
     },
 ]
 
+# ----------------------------------------------------------------------------
+# WSGI Application
+# ----------------------------------------------------------------------------
+
 WSGI_APPLICATION = 'AITS_backendproject.wsgi.application'
 
 # ----------------------------------------------------------------------------
-# Database
+# Database Configuration
 # ----------------------------------------------------------------------------
-# Use DATABASE_URL from environment (Heroku Postgres), fallback to SQLite locally
+
 DATABASES = {
     'default': dj_database_url.config(
         default=os.environ.get('DATABASE_URL'),
@@ -112,7 +132,7 @@ if not os.environ.get('DATABASE_URL'):
     }
 
 # ----------------------------------------------------------------------------
-# Password validation
+# Password Validation
 # ----------------------------------------------------------------------------
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -132,7 +152,7 @@ USE_I18N = True
 USE_TZ = True
 
 # ----------------------------------------------------------------------------
-# Static files (CSS, JavaScript, Images)
+# Static Files
 # ----------------------------------------------------------------------------
 
 STATIC_URL = '/static/'
@@ -140,7 +160,7 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # ----------------------------------------------------------------------------
-# Default primary key field type
+# Default Primary Key Field Type
 # ----------------------------------------------------------------------------
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -164,26 +184,18 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
+    'PASSWORD_RESET_TOKEN_LIFETIME': timedelta(hours=1),
 }
 
 # ----------------------------------------------------------------------------
-# CORS settings
+# CORS Settings
 # ----------------------------------------------------------------------------
 
 CORS_ALLOWED_ORIGINS = [
-    "https://group-k-academic-issue-tracking-system-atis-i1751nod2.vercel.app",  # Allow Vercel frontend URL
+    "https://group-k-academic-issue-tracking-system-atis-i1751nod2.vercel.app",
 ]
 
-# ------------------------------------------------------------------------------
-CORS_ALLOW_ALL_ORIGINS = True
-
-# ----------------------------------------------------------------------------
-# Activate Django-Heroku (must be at the bottom!)
-# ----------------------------------------------------------------------------
-
-django_heroku.settings(locals())
-
-
+CORS_ALLOW_ALL_ORIGINS = True  # Allow all origins (consider removing in production)
 
 # ----------------------------------------------------------------------------
 # Email (Gmail SMTP Configuration)
@@ -194,13 +206,11 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'aitswebsite576@gmail.com')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'yzhgibfihrddajcz')  
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'yzhgibfihrddajcz')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
+# ----------------------------------------------------------------------------
+# Activate Django-Heroku Settings
+# ----------------------------------------------------------------------------
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+django_heroku.settings(locals())

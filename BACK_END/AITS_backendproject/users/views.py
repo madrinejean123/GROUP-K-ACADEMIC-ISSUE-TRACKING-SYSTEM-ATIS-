@@ -14,7 +14,13 @@ from .serializers import (
     LecturerSerializer,
     CollegeRegisterSerializer,
     UserLogoutSerializer,
+    PasswordResetRequestSerializer,
+    PasswordResetConfirmSerializer,
 )
+
+from django.core.mail import send_mail
+from django.urls import reverse
+from django.conf import settings
 
 User = get_user_model()
 
@@ -153,5 +159,54 @@ class UserLogoutViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
         except TokenError:
             return Response(
                 {'detail': 'Invalid or expired token.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+
+class PasswordResetViewSet(viewsets.GenericViewSet):
+    permission_classes = [AllowAny]
+
+    @action(detail=False, methods=['post'], url_path='forgot-password')
+    def forgot_password(self, request):
+        serializer = PasswordResetRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        user = User.objects.get(notification_email=serializer.validated_data['email'])
+        token = RefreshToken.for_user(user).access_token
+        
+        reset_link = f"{settings.FRONTEND_URL}/reset-password?token={str(token)}"
+        
+        # Send to notification_email (Gmail)
+        send_mail(
+            "Password Reset Request",
+            f"Click to reset your password: {reset_link}\n\n"
+            f"If you didn't request this, please ignore this email.",
+            settings.DEFAULT_FROM_EMAIL,
+            [user.notification_email],  # Send to Gmail, not mak_email
+            fail_silently=False,
+        )
+        
+        return Response(
+            {"detail": "Password reset link sent to your registered Gmail."},
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, methods=['post'], url_path='reset-password')
+    def reset_password(self, request):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        try:
+            token = serializer.validated_data['token']
+            user = User.objects.get(id=AccessToken(token)['user_id'])
+            user.set_password(serializer.validated_data['new_password'])
+            user.save()
+            return Response(
+                {"detail": "Password updated successfully."},
+                status=status.HTTP_200_OK
+            )
+        except Exception as e:
+            return Response(
+                {"detail": "Invalid or expired token."},
                 status=status.HTTP_400_BAD_REQUEST
             )
