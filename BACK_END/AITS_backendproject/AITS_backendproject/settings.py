@@ -1,36 +1,36 @@
-from pathlib import Path
 import os
 from datetime import timedelta
 
 import dj_database_url
 import django_heroku
 
-# Custom user model
+# ----------------------------------------------------------------------------
+# Custom User Model
+# ----------------------------------------------------------------------------
+
 AUTH_USER_MODEL = 'users.User'
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'
+# ----------------------------------------------------------------------------
+# Base Directory
+# ----------------------------------------------------------------------------
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ----------------------------------------------------------------------------
-# Quick-start development settings - unsuitable for production
+# Security Settings
 # ----------------------------------------------------------------------------
 
-# SECURITY WARNING: keep the secret key used in production secret!
-# Override via Heroku config var DJANGO_SECRET_KEY
 SECRET_KEY = os.environ.get(
     'DJANGO_SECRET_KEY',
     'django-insecure-x&9+)hjc6k(tq_ob(m%dnc0r!g0ta@ow-emdqbc9k-2!&g3ni_'  # fallback for local dev
 )
 
-# SECURITY WARNING: don't run with debug turned on in production!
-# Override via Heroku config var DJANGO_DEBUG=False
 DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
 
-# Allow hosts (Override via DJANGO_ALLOWED_HOSTS)
 ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '*').split(',')
 
 # ----------------------------------------------------------------------------
-# Application definition
+# Installed Applications
 # ----------------------------------------------------------------------------
 
 INSTALLED_APPS = [
@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'issues',
     'department',
 
-    # Third-party
+    # Third-party apps
     'rest_framework',
     'corsheaders',
     'rest_framework_simplejwt',
@@ -70,7 +70,15 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ]
 
+# ----------------------------------------------------------------------------
+# URL Configuration
+# ----------------------------------------------------------------------------
+
 ROOT_URLCONF = 'AITS_backendproject.urls'
+
+# ----------------------------------------------------------------------------
+# Templates
+# ----------------------------------------------------------------------------
 
 TEMPLATES = [
     {
@@ -88,12 +96,16 @@ TEMPLATES = [
     },
 ]
 
+# ----------------------------------------------------------------------------
+# WSGI Application
+# ----------------------------------------------------------------------------
+
 WSGI_APPLICATION = 'AITS_backendproject.wsgi.application'
 
 # ----------------------------------------------------------------------------
-# Database
+# Database Configuration
 # ----------------------------------------------------------------------------
-# Use DATABASE_URL from environment (Heroku Postgres), fallback to SQLite locally
+
 DATABASES = {
     'default': dj_database_url.config(
         default=os.environ.get('DATABASE_URL'),
@@ -112,7 +124,7 @@ if not os.environ.get('DATABASE_URL'):
     }
 
 # ----------------------------------------------------------------------------
-# Password validation
+# Password Validation
 # ----------------------------------------------------------------------------
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -132,7 +144,7 @@ USE_I18N = True
 USE_TZ = True
 
 # ----------------------------------------------------------------------------
-# Static files (CSS, JavaScript, Images)
+# Static Files
 # ----------------------------------------------------------------------------
 
 STATIC_URL = '/static/'
@@ -140,7 +152,7 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # ----------------------------------------------------------------------------
-# Default primary key field type
+# Default Primary Key Field Type
 # ----------------------------------------------------------------------------
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -164,10 +176,11 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
+    'PASSWORD_RESET_TOKEN_LIFETIME': timedelta(hours=1),
 }
 
 # ----------------------------------------------------------------------------
-# CORS settings
+# CORS Settings
 # ----------------------------------------------------------------------------
 
 CORS_ALLOWED_ORIGINS = [
@@ -184,10 +197,11 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'aitswebsite576@gmail.com')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'yzhgibfihrddajcz')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # ----------------------------------------------------------------------------
-# Activate Django-Heroku (must be at the bottom!)
+# Activate Django-Heroku Settings
 # ----------------------------------------------------------------------------
+
 django_heroku.settings(locals())
