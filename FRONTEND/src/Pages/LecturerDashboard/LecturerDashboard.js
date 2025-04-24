@@ -19,6 +19,8 @@ const LecturerDashboard = () => {
   const [showIssueDetailModal, setShowIssueDetailModal] = useState(false);
   const [activeTab, setActiveTab] = useState("assigned");
   const [resolvingIssueId, setResolvingIssueId] = useState(null);
+  const [noteIssueId, setNoteIssueId] = useState(null);
+  const [noteText, setNoteText] = useState("");
 
   // Fetch the lecturer's profile
   useEffect(() => {
@@ -59,41 +61,45 @@ const LecturerDashboard = () => {
     }
   }, [lecturerProfile]);
 
-  // Handle resolving an issue — gather resolution notes and send in payload
-  const handleResolve = async (issueId) => {
-    // Prompt lecturer for resolution notes
-    const notes = window.prompt(
-      "Enter resolution notes (required) before resolving this issue:"
-    );
-    if (notes === null) {
-      // Cancelled prompt
-      return;
-    }
-    if (notes.trim() === "") {
+  // Begin resolution flow by showing note input
+  const handleResolve = (issueId) => {
+    setNoteIssueId(issueId);
+    setNoteText("");
+  };
+
+  const handleCancelResolution = () => {
+    setNoteIssueId(null);
+    setNoteText("");
+  };
+
+  const handleSubmitResolution = async (issueId) => {
+    if (noteText.trim() === "") {
       alert("Resolution notes cannot be empty.");
       return;
     }
-
     setResolvingIssueId(issueId);
     try {
       const token = localStorage.getItem("access_token");
       if (!token) throw new Error("No auth token");
-      const payload = { status: "resolved", resolution_notes: notes };
+      const payload = { status: "resolved", resolution_notes: noteText };
       await axios.patch(
         `${UPDATE_STATUS_API_URL}${issueId}/`,
         payload,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      // Update local state with new status and notes
-      setIssues((prev) =>
-        prev.map((i) =>
-          i.id === issueId ? { ...i, status: "resolved", resolution_notes: notes } : i
+      setIssues(prev =>
+        prev.map(i =>
+          i.id === issueId
+            ? { ...i, status: "resolved", resolution_notes: noteText }
+            : i
         )
       );
     } catch (err) {
       console.error("❌ Error resolving issue:", err);
     } finally {
       setResolvingIssueId(null);
+      setNoteIssueId(null);
+      setNoteText("");
     }
   };
 
@@ -105,14 +111,18 @@ const LecturerDashboard = () => {
 
   // Status change callback from the IssueDetail modal
   const handleStatusChange = (newStatus, notes = null) => {
-    setIssues((all) =>
-      all.map((i) =>
+    setIssues(all =>
+      all.map(i =>
         i.id === selectedIssue.id
-          ? { ...i, status: newStatus, resolution_notes: notes || i.resolution_notes }
+          ? { ...i, status: newStatus, resolution_notes: notes ?? i.resolution_notes }
           : i
       )
     );
-    setSelectedIssue((i) => ({ ...i, status: newStatus, resolution_notes: notes || i.resolution_notes }));
+    setSelectedIssue(i => ({
+      ...i,
+      status: newStatus,
+      resolution_notes: notes ?? i.resolution_notes
+    }));
   };
 
   // Add the comment locally
@@ -122,26 +132,26 @@ const LecturerDashboard = () => {
       date: new Date().toISOString().split("T")[0],
       content: commentText,
     };
-    setIssues((all) =>
-      all.map((i) =>
+    setIssues(all =>
+      all.map(i =>
         i.id === selectedIssue.id
           ? { ...i, comments: [...(i.comments || []), newComment] }
           : i
       )
     );
-    setSelectedIssue((i) => ({
+    setSelectedIssue(i => ({
       ...i,
       comments: [...(i.comments || []), newComment],
     }));
   };
 
   // Helpers for filtering
-  const normalize = (s) => s.replace(/_/g, " ").toLowerCase();
-  const assignedIssues = issues.filter((i) => {
+  const normalize = s => s.replace(/_/g, " ").toLowerCase();
+  const assignedIssues = issues.filter(i => {
     const st = normalize(i.status);
     return st === "open" || st === "in progress";
   });
-  const resolvedIssues = issues.filter((i) => {
+  const resolvedIssues = issues.filter(i => {
     const st = normalize(i.status);
     return st === "resolved" || st === "closed";
   });
@@ -151,7 +161,7 @@ const LecturerDashboard = () => {
   const stats = {
     assigned: assignedIssues.length,
     resolved: resolvedIssues.length,
-    students: new Set(issues.map((i) => i.author.user.id)).size,
+    students: new Set(issues.map(i => i.author.user.id)).size,
   };
 
   return (
@@ -210,8 +220,8 @@ const LecturerDashboard = () => {
             </thead>
             <tbody>
               {filteredIssues.length > 0 ? (
-                filteredIssues.map((issue) => (
-                  <tr key={issue.id}>
+                filteredIssues.map(issue => (
+                  <tr key={issue.id}>                    
                     <td>#{issue.id}</td>
                     <td>{issue.title}</td>
                     <td>{issue.description}</td>
@@ -219,13 +229,28 @@ const LecturerDashboard = () => {
                     <td>{normalize(issue.status)}</td>
                     {activeTab === "assigned" && (
                       <td>
-                        <button
-                          className="action-button"
-                          onClick={() => handleResolve(issue.id)}
-                          disabled={resolvingIssueId === issue.id}
-                        >
-                          {resolvingIssueId === issue.id ? "Resolving..." : "Resolve"}
-                        </button>
+                        {noteIssueId === issue.id ? (
+                          <div className="resolution-input">
+                            <textarea
+                              value={noteText}
+                              onChange={e => setNoteText(e.target.value)}
+                              placeholder="Enter resolution notes"
+                            />
+                            <button
+                              onClick={() => handleSubmitResolution(issue.id)}
+                              disabled={resolvingIssueId === issue.id}
+                            >Done</button>
+                            <button onClick={handleCancelResolution}>Cancel</button>
+                          </div>
+                        ) : (
+                          <button
+                            className="action-button"
+                            onClick={() => handleResolve(issue.id)}
+                            disabled={resolvingIssueId === issue.id}
+                          >
+                            {resolvingIssueId === issue.id ? "Resolving..." : "Resolve"}
+                          </button>
+                        )}
                       </td>
                     )}
                   </tr>
