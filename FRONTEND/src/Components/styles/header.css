@@ -1,4 +1,4 @@
-/* Header styles */
+/* Header-styles */
 .header {
   display: flex;
   justify-content: space-between;
@@ -30,7 +30,7 @@
 }
 .logo h1 {
   color: black;
-  font-size: clamp(0.7rem, 2vw,1.5rem);
+  font-size: clamp(0.7rem, 2vw, 1.5rem);
   font-weight: 700;
   /* color: var(--text-primary); */
 }

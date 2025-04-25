@@ -1,12 +1,6 @@
 // src/components/Header.js
 import { useState, useEffect } from "react";
-import {
-  FaBell,
-  FaBars,
-  FaTimes,
-  FaSignOutAlt,
-  FaUser,
-} from "react-icons/fa";
+import { FaBell, FaBars, FaTimes, FaSignOutAlt, FaUser } from "react-icons/fa";
 import { FiSettings } from "react-icons/fi";
 import { MdEmail } from "react-icons/md";
 import axios from "axios";
@@ -14,7 +8,7 @@ import "../styles/header.css";
 import MakLogo from "../assets/logo.png";
 
 // ——————————————————————————————————————————————
-// 1. Front‑end hierarchy: keys = college.code.toUpperCase()
+// 1. Frontend hierarchy: keys = college.code.toUpperCase()
 // ——————————————————————————————————————————————
 const hierarchy = {
   CAES: {
@@ -39,7 +33,8 @@ const hierarchy = {
       "Department of Adult & Community Education (DACE)",
       "Institute of Open Distance and eLearning",
     ],
-    "The East African School of Higher Education Studies and Development (EASHESD)": [],
+    "The East African School of Higher Education Studies and Development (EASHESD)":
+      [],
   },
   CEDAT: {
     "School of Engineering": [
@@ -218,9 +213,7 @@ const Header = ({
     // map that; otherwise leave empty and let user pick.
     setFormData({
       ...initial,
-      college: initial.college_code
-        ? initial.college_code.toUpperCase()
-        : "",
+      college: initial.college_code ? initial.college_code.toUpperCase() : "",
       school: initial.school || "",
       department: initial.department || "",
     });
@@ -487,17 +480,17 @@ const Header = ({
                 onChange={handleInputChange}
               />
             </label>
-             {/* Notification Email */}
+            {/* Notification Email */}
             <label>
               Notification Email:
               <input
-               type="email"
-               name="notification_email"
-               value={formData.notification_email || ""}
-               onChange={handleInputChange}
-               placeholder="Enter notification email"
+                type="email"
+                name="notification_email"
+                value={formData.notification_email || ""}
+                onChange={handleInputChange}
+                placeholder="Enter notification email"
               />
-           </label>
+            </label>
 
             <button type="submit">Save Changes</button>
             <button
