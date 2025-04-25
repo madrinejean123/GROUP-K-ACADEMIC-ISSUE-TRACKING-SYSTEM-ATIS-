@@ -10,14 +10,17 @@ from django.views import View
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.db.models import prefetch_related_objects
-from .models import Issue, CollegeRegister
+from django.conf import settings
+
+from .models import Issue
 from .serializers import (
     IssueCreateSerializer,
     IssueAssignSerializer,
     IssueStatusUpdateSerializer,
     IssueDetailSerializer,
 )
-from users.models import Lecturer
+from users.models import CollegeRegister, Lecturer, Student
+
 from .utils import send_notification_email
 import logging
 import os
@@ -59,20 +62,19 @@ class ListIssuesView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        queryset = Issue.objects.select_related(
+        qs = Issue.objects.select_related(
             'author__user',
             'assigned_lecturer__user',
             'handled_by__user'
         )
 
-        if user.user_role == 'student' and hasattr(user, 'student'):
-            return queryset.filter(author=user.student)
+        if user.user_role == 'student':
+            return qs.filter(author=user.student)
         elif user.user_role == 'registrar':
-            return queryset.filter(college=user.college)
-        elif hasattr(user, 'lecturer'):
-            return queryset.filter(assigned_lecturer__user=user)
-        
-        return queryset.none()
+            return qs.filter(college=user.college)
+        elif user.user_role == 'lecturer':
+            return qs.filter(assigned_lecturer__user=user)
+        return qs.none()
 
 class CollegeRegisterAssignView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -84,7 +86,8 @@ class CollegeRegisterAssignView(APIView):
                 'author__user'
             ).get(id=issue_id)
             
-            if not hasattr(request.user, 'collegeregister'):
+            # Only allow users with registrar role
+            if request.user.user_role != 'registrar':
                 return Response(
                     {"error": "Only registrars can assign issues."},
                     status=status.HTTP_403_FORBIDDEN
@@ -129,7 +132,7 @@ class LecturerUpdateIssueStatusView(APIView):
                 'assigned_lecturer__user'
             ).get(id=issue_id)
             
-            if not hasattr(request.user, 'lecturer'):
+            if request.user.user_role != 'lecturer':
                 return Response(
                     {"error": "Only lecturers can update issue status."},
                     status=status.HTTP_403_FORBIDDEN
@@ -144,7 +147,6 @@ class LecturerUpdateIssueStatusView(APIView):
             serializer.is_valid(raise_exception=True)
             updated_issue = serializer.save()
 
-            # Notify student on resolution
             if updated_issue.status == 'resolved':
                 send_notification_email(
                     subject=f'Issue #{issue.id} Resolved',
@@ -161,6 +163,10 @@ class LecturerUpdateIssueStatusView(APIView):
                 {"error": "Issue not found."},
                 status=status.HTTP_404_NOT_FOUND
             )
+
+    def put(self, request, issue_id):
+        # Allow full updates via PUT by delegating to patch logic
+        return self.patch(request, issue_id)
 
 class RetrieveIssueView(generics.RetrieveAPIView):
     queryset = Issue.objects.select_related(
@@ -182,7 +188,7 @@ class SecureFileDownloadView(LoginRequiredMixin, View):
             if not (
                 issue.author.user == request.user or
                 (issue.assigned_lecturer and issue.assigned_lecturer.user == request.user) or
-                hasattr(request.user, 'collegeregister')
+                request.user.user_role == 'registrar'
             ):
                 raise PermissionError("Not authorized")
 
@@ -205,9 +211,7 @@ class HealthCheckView(APIView):
     
     def get(self, request):
         try:
-            # Test database connection
             Issue.objects.first()
-            # Test file storage
             test_file = os.path.isfile(settings.MEDIA_ROOT + '/test.txt')
             return Response(
                 {"status": "healthy", "storage": "available" if test_file else "unavailable"},
