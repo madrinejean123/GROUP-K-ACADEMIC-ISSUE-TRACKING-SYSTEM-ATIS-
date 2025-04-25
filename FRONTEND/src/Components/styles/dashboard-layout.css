@@ -78,7 +78,7 @@ body {
   }
 }
 
-/* Medium screens (tablets) */
+/* Medium screen (tablets) */
 @media (min-width: 577px) and (max-width: 768px) {
   .main-content {
     width: 100%;
