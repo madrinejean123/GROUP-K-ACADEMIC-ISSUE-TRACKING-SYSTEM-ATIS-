@@ -13,6 +13,10 @@
 }
 
 /* Modal Header */
+
+button {
+  width: auto;
+}
 .modal-header {
   display: flex;
   justify-content: space-between;
@@ -27,6 +31,7 @@
 }
 
 .close-modal-button {
+  width: auto;
   background: none;
   border: none;
   font-size: 1.2rem;

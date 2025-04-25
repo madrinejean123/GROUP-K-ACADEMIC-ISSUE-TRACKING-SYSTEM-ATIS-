@@ -135,14 +135,14 @@ const CreateIssueForm = ({ onCancel }) => {
       [name]: value,
     }));
 
-    // Mark field as touched
+    // Mark fields as touched
     setTouched((prev) => ({
       ...prev,
       [name]: true,
     }));
   };
 
-  // Handle file attachment change
+  // Handle files attachment change
   const handleFileChange = (e) => {
     const file = e.target.files[0];
 
