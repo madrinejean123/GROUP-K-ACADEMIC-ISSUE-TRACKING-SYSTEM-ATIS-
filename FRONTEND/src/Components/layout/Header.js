@@ -8,7 +8,7 @@ import "../styles/header.css";
 import MakLogo from "../assets/logo.png";
 
 // ——————————————————————————————————————————————
-// 1. Front-end hierarchy: keys = college.code.toUpperCase()
+// 1. Front-end hierarchy:  keys = college.code.toUpperCase()
 // ——————————————————————————————————————————————
 const hierarchy = {
   CAES: {
