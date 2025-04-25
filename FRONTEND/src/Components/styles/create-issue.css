@@ -14,9 +14,7 @@
 
 /* Modal Header */
 
-button {
-  width: auto;
-}
+
 .modal-header {
   display: flex;
   justify-content: space-between;
