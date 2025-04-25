@@ -17,14 +17,14 @@ const DashboardLayout = ({ children, userRole, profile }) => {
       }
     };
 
-    handleResize(); 
+    handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
-    //  Add class to prevent body scrolling
+    //  Add class to prevent body-scrolling
     if (isMobile && !sidebarOpen) {
       document.body.classList.add("sidebar-open");
     } else {
@@ -39,13 +39,13 @@ const DashboardLayout = ({ children, userRole, profile }) => {
         isMobile={isMobile}
         sidebarOpen={sidebarOpen}
         userRole={userRole}
-        profile={profile}              
+        profile={profile}
       />
       <div className="dashboard-container">
         <Sidebar
           sidebarOpen={sidebarOpen}
           userRole={userRole}
-          profile={profile}          
+          profile={profile}
         />
         <main className={`main-content ${sidebarOpen ? "" : "expanded"}`}>
           {children}
