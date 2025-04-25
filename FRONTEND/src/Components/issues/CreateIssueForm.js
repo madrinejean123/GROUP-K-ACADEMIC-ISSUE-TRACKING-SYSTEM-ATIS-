@@ -348,7 +348,7 @@ const CreateIssueForm = ({ onCancel }) => {
                 name="description"
                 value={newIssue.description}
                 onChange={handleInputChange}
-                placeholder="Describe the issue"
+                placeholder="Enter description here e.g Missing marks for CourseX CourseCode, taught by Lecturer-Y and more relevant info..."
                 required
               />
               {errors.description && touched.description && (
