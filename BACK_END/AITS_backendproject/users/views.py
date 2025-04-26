@@ -96,8 +96,7 @@ class UserProfileViewSet(viewsets.ViewSet):
     """
     permission_classes = [IsAuthenticated]
 
-    def list(self, request):
-        
+    def list(self, request):     
         """
         Retrieve the profile of the authenticated user.
         (This is now wired to GET /users/profile/)
