@@ -1,5 +1,5 @@
-import os
 from pathlib import Path
+import os
 from datetime import timedelta
 
 import dj_database_url
@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get(
     'DJANGO_SECRET_KEY',
-    'django-insecure-x&9+)hjc6k(tq_ob(m%dnc0r!g0ta@ow-emdqbc9k-2!&g3ni_'
+    'django-insecure-x&9+)hjc6k(tq_ob(m%dnc0r!g0ta@ow-emdqbc9k-2!&g3ni_'  # fallback for local dev
 )
 
 DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # Custom apps
+    # Local apps
     'users',
     'issues',
     'department',
@@ -54,18 +54,10 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
 ]
 
-# ----------------------------------------------------------------------------
-# Authentication Backends
-# ----------------------------------------------------------------------------
-
 AUTHENTICATION_BACKENDS = [
-    'users.authentication.EmailBackend',  # Custom backend
-    'django.contrib.auth.backends.ModelBackend',  # Default
+    'users.authentication.EmailBackend',  # custom backend
+    'django.contrib.auth.backends.ModelBackend',  # default
 ]
-
-# ----------------------------------------------------------------------------
-# Middleware
-# ----------------------------------------------------------------------------
 
 MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -123,6 +115,7 @@ DATABASES = {
     )
 }
 
+# If no DATABASE_URL is provided, use local SQLite
 if not os.environ.get('DATABASE_URL'):
     DATABASES = {
         'default': {
@@ -194,8 +187,7 @@ SIMPLE_JWT = {
 CORS_ALLOWED_ORIGINS = [
     "https://group-k-academic-issue-tracking-system-atis-i1751nod2.vercel.app",
 ]
-
-CORS_ALLOW_ALL_ORIGINS = True  # Allow all origins (consider removing in production)
+CORS_ALLOW_ALL_ORIGINS = True
 
 # ----------------------------------------------------------------------------
 # Email (Gmail SMTP Configuration)

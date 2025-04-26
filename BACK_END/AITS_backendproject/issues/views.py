@@ -68,11 +68,11 @@ class ListIssuesView(generics.ListAPIView):
             'handled_by__user'
         )
 
-        if user.user_role == 'student' and hasattr(user, 'student'):
+        if user.user_role == 'student':
             return qs.filter(author=user.student)
         elif user.user_role == 'registrar':
             return qs.filter(college=user.college)
-        elif hasattr(user, 'lecturer'):
+        elif user.user_role == 'lecturer':
             return qs.filter(assigned_lecturer__user=user)
         return qs.none()
 
@@ -86,7 +86,8 @@ class CollegeRegisterAssignView(APIView):
                 'author__user'
             ).get(id=issue_id)
             
-            if not hasattr(request.user, 'collegeregister'):
+            # Only allow users with registrar role
+            if request.user.user_role != 'registrar':
                 return Response(
                     {"error": "Only registrars can assign issues."},
                     status=status.HTTP_403_FORBIDDEN
@@ -131,7 +132,7 @@ class LecturerUpdateIssueStatusView(APIView):
                 'assigned_lecturer__user'
             ).get(id=issue_id)
             
-            if not hasattr(request.user, 'lecturer'):
+            if request.user.user_role != 'lecturer':
                 return Response(
                     {"error": "Only lecturers can update issue status."},
                     status=status.HTTP_403_FORBIDDEN
@@ -163,6 +164,10 @@ class LecturerUpdateIssueStatusView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
+    def put(self, request, issue_id):
+        # Allow full updates via PUT by delegating to patch logic
+        return self.patch(request, issue_id)
+
 class RetrieveIssueView(generics.RetrieveAPIView):
     queryset = Issue.objects.select_related(
         'author__user',
@@ -183,7 +188,7 @@ class SecureFileDownloadView(LoginRequiredMixin, View):
             if not (
                 issue.author.user == request.user or
                 (issue.assigned_lecturer and issue.assigned_lecturer.user == request.user) or
-                hasattr(request.user, 'collegeregister')
+                request.user.user_role == 'registrar'
             ):
                 raise PermissionError("Not authorized")
 
@@ -206,9 +211,7 @@ class HealthCheckView(APIView):
     
     def get(self, request):
         try:
-            # Test database connection
             Issue.objects.first()
-            # Test file storage
             test_file = os.path.isfile(settings.MEDIA_ROOT + '/test.txt')
             return Response(
                 {"status": "healthy", "storage": "available" if test_file else "unavailable"},

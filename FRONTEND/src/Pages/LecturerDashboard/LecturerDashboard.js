@@ -19,8 +19,10 @@ const LecturerDashboard = () => {
   const [showIssueDetailModal, setShowIssueDetailModal] = useState(false);
   const [activeTab, setActiveTab] = useState("assigned");
   const [resolvingIssueId, setResolvingIssueId] = useState(null);
+  const [noteIssueId, setNoteIssueId] = useState(null);
+  const [noteText, setNoteText] = useState("");
 
-  // Fetch the lecturer's profile
+  // Fetch lecturer profile
   useEffect(() => {
     const fetchLecturerProfile = async () => {
       const token = localStorage.getItem("access_token");
@@ -30,16 +32,16 @@ const LecturerDashboard = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         setLecturerProfile(Array.isArray(data) ? data[0] : data);
-        console.log("✅ Fetched profile:", data);
       } catch (err) {
-        console.error("❌ Error fetching profile:", err);
+        console.error("Error fetching profile", err);
       }
     };
     fetchLecturerProfile();
   }, []);
 
-  // Fetch thee issues once we have a profile
+  // Fetch issues once profile is loaded
   useEffect(() => {
+    if (!lecturerProfile.id) return;
     const fetchIssues = async () => {
       const token = localStorage.getItem("access_token");
       if (!token) return;
@@ -47,56 +49,78 @@ const LecturerDashboard = () => {
         const { data } = await axios.get(ALL_ISSUES_API_URL, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        console.log("📥 Received issues:", data);
         setIssues(data);
       } catch (err) {
-        console.error("❌ Error fetching issue list:", err);
+        console.error("Error fetching issues", err);
       }
     };
-
-    if (lecturerProfile.id) {
-      fetchIssues();
-    }
+    fetchIssues();
   }, [lecturerProfile]);
 
-  // Handle resolving an issue — now using PATCH instead of PUT
-  const handleResolve = async (issueId) => {
+  // Show inline input for resolution notes
+  const handleResolve = (issueId) => {
+    setNoteIssueId(issueId);
+    setNoteText("");
+  };
+
+  const handleCancelResolution = () => {
+    setNoteIssueId(null);
+    setNoteText("");
+  };
+
+  const handleSubmitResolution = async (issueId) => {
+    if (noteText.trim() === "") {
+      alert("Resolution notes cannot be empty.");
+      return;
+    }
     setResolvingIssueId(issueId);
     try {
       const token = localStorage.getItem("access_token");
-      if (!token) throw new Error("No auth token");
+      const payload = { status: "resolved", resolution_notes: noteText };
       await axios.patch(
-        `${UPDATE_STATUS_API_URL}${issueId}/`, // ← PATCH method matches Django view
-        { status: "resolved" },
+        `${UPDATE_STATUS_API_URL}${issueId}/`,
+        payload,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setIssues((prev) =>
-        prev.map((i) => (i.id === issueId ? { ...i, status: "resolved" } : i))
+        prev.map((i) =>
+          i.id === issueId
+            ? { ...i, status: "resolved", resolution_notes: noteText }
+            : i
+        )
       );
     } catch (err) {
-      console.error("❌ Error resolving issue:", err);
+      console.error("Error resolving issue", err);
     } finally {
       setResolvingIssueId(null);
+      setNoteIssueId(null);
+      setNoteText("");
     }
   };
 
-  // View the issue details
+  // Open detail modal
   const handleViewIssue = (issue) => {
     setSelectedIssue(issue);
     setShowIssueDetailModal(true);
   };
 
-  // Status change callback from the IssueDetail modal
-  const handleStatusChange = (newStatus) => {
+  // Callback for detail modal status change
+  const handleStatusChange = (newStatus, notes = null) => {
     setIssues((all) =>
       all.map((i) =>
-        i.id === selectedIssue.id ? { ...i, status: newStatus } : i
+        i.id === selectedIssue.id
+          ? { ...i, status: newStatus, resolution_notes: notes ?? i.resolution_notes }
+          : i
       )
     );
-    setSelectedIssue((i) => ({ ...i, status: newStatus }));
+    setSelectedIssue((i) => ({
+      ...i,
+      status: newStatus,
+      resolution_notes: notes ?? i.resolution_notes,
+    }));
   };
 
-  // Add the comment locally
+  // Add comment locally
   const handleAddComment = (commentText) => {
     const newComment = {
       author: `Dr. ${lecturerProfile.full_name}`,
@@ -116,20 +140,21 @@ const LecturerDashboard = () => {
     }));
   };
 
-  // Helpers for the filtering
+  // Filtering and stats
   const normalize = (s) => s.replace(/_/g, " ").toLowerCase();
-  const assignedIssues = issues.filter((i) => {
-    const st = normalize(i.status);
-    return st === "open" || st === "in progress";
-  });
-  const resolvedIssues = issues.filter((i) => {
-    const st = normalize(i.status);
-    return st === "resolved" || st === "closed";
-  });
-  const filteredIssues =
-    activeTab === "assigned" ? assignedIssues : resolvedIssues;
-
-  // Quick Stats
+  const assignedIssues = issues.filter(
+    (i) => {
+      const st = normalize(i.status);
+      return st === "open" || st === "in progress";
+    }
+  );
+  const resolvedIssues = issues.filter(
+    (i) => {
+      const st = normalize(i.status);
+      return st === "resolved" || st === "closed";
+    }
+  );
+  const filteredIssues = activeTab === "assigned" ? assignedIssues : resolvedIssues;
   const stats = {
     assigned: assignedIssues.length,
     resolved: resolvedIssues.length,
@@ -139,7 +164,7 @@ const LecturerDashboard = () => {
   return (
     <DashboardLayout userRole="Lecturer" profile={lecturerProfile}>
       <div className="lecturer-dashboard">
-        {/* Welcome / Stats */}
+        {/* Welcome & Stats */}
         <div className="welcome-section">
           <h2>Welcome, Dr. {lecturerProfile.full_name || "Lecturer"}!</h2>
           <div className="stats-cards">
@@ -174,16 +199,7 @@ const LecturerDashboard = () => {
           </button>
         </div>
 
-        {/* Issues List & Table */}
-        <IssueList
-          issues={filteredIssues}
-          title={
-            activeTab === "assigned" ? "Assigned Issues" : "Resolved Issues"
-          }
-          showCreateButton={false}
-          onViewIssue={handleViewIssue}
-          userRole="Lecturer"
-        />
+        {/* Issues Table */}
         <div className="issues-table-container">
           <table className="issues-table">
             <thead>
@@ -207,15 +223,30 @@ const LecturerDashboard = () => {
                     <td>{normalize(issue.status)}</td>
                     {activeTab === "assigned" && (
                       <td>
-                        <button
-                          className="action-button"
-                          onClick={() => handleResolve(issue.id)}
-                          disabled={resolvingIssueId === issue.id}
-                        >
-                          {resolvingIssueId === issue.id
-                            ? "Resolving..."
-                            : "Resolve"}
-                        </button>
+                        {noteIssueId === issue.id ? (
+                          <div className="resolution-input">   
+                            <textarea
+                              value={noteText}
+                              onChange={(e) => setNoteText(e.target.value)}
+                              placeholder="Enter resolution notes"
+                            />
+                            <button
+                              onClick={() => handleSubmitResolution(issue.id)}
+                              disabled={resolvingIssueId === issue.id}
+                            >
+                              Done
+                            </button>
+                            <button onClick={handleCancelResolution}>Cancel</button>
+                          </div>
+                        ) : (
+                          <button
+                            className="action-button"
+                            onClick={() => handleResolve(issue.id)}
+                            disabled={resolvingIssueId === issue.id}
+                          >
+                            {resolvingIssueId === issue.id ? "Resolving..." : "Resolve"}
+                          </button>
+                        )}
                       </td>
                     )}
                   </tr>
