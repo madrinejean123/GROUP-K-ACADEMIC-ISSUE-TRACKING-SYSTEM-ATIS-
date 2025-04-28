@@ -1,4 +1,4 @@
-/* SPECIFIC STYLES */
+/* SPECIFIC-STYLES */
 .registrar-dashboard {
   display: flex;
   flex-direction: column;
@@ -80,7 +80,7 @@
 .welcome-msg {
   color: black;
 }
-.stat-card p{
+.stat-card p {
   color: blue;
 }
 
