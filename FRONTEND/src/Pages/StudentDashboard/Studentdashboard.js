@@ -212,7 +212,7 @@ const StudentDashboard = () => {
             />
           )}
 
-          {/* History Tab */}
+          {/* History  Tab */}
           {activeTab === "history" && (
             <div className="history-content">
               <h3>Issue History</h3>

@@ -260,6 +260,9 @@
   background-color: var(--accent-color);
   color: white;
 }
+.history-item p{
+  color: black;
+}
 
 @media (max-width: 992px) {
   .welcome-section {
