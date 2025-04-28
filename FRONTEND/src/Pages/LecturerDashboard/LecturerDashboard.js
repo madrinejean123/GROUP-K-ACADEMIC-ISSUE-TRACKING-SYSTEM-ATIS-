@@ -57,7 +57,7 @@ const LecturerDashboard = () => {
     fetchIssues();
   }, [lecturerProfile]);
 
-  // Show inline input for resolution notes
+  // Show inline input for resolution notes 
   const handleResolve = (issueId) => {
     setNoteIssueId(issueId);
     setNoteText("");
