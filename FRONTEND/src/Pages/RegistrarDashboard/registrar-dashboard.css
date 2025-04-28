@@ -77,6 +77,12 @@
   flex-direction: column;
   gap: 20px;
 }
+.welcome-msg {
+  color: black;
+}
+.stat-card p{
+  color: blue;
+}
 
 .lecturers-section {
   background-color: var(--bg-secondary);

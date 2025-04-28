@@ -168,7 +168,7 @@ const StudentDashboard = () => {
                 </ul>
               </div>
 
-              {/* Issues Table */}
+              {/* Issues  Table */}
               <div className="issues-table-container">
                 <table className="issues-table">
                   <thead>
