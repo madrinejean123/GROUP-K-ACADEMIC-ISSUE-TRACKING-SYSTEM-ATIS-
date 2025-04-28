@@ -24,7 +24,7 @@ const DashboardLayout = ({ children, userRole, profile }) => {
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
-    //  Add a class to prevent body-scrolling
+    //  Add class to prevent body-scrolling
     if (isMobile && !sidebarOpen) {
       document.body.classList.add("sidebar-open");
     } else {
