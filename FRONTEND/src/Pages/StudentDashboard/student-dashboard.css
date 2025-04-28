@@ -80,6 +80,7 @@
 .tabs-container {
   margin-bottom: 10px;
   display: flex;
+  justify-content: space-between;
   flex-direction: row;
 }
 .tabs-container button {
