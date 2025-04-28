@@ -137,7 +137,7 @@ const RegistrarDashboard = () => {
     }
   };
 
-  // Stats & filters
+  // Stats  & filters
   const stats = {
     total: issues.length,
     open: issues.filter((i) => i.status?.toLowerCase() === "open").length,
