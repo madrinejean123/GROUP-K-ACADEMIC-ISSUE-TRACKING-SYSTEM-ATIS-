@@ -9,7 +9,7 @@ const IssueDetail = ({
   onAddComment,
   userRole,
 }) => {
-  const [newComment, setNewComment]  = useState("");
+  const [newComment, setNewComment] = useState("");
 
   const getStatusClass = (s) => {
     switch (s.toLowerCase()) {
