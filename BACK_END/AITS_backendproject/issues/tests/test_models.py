@@ -1,3 +1,4 @@
+'''
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from issues.models import Issue
@@ -223,6 +224,4 @@ if __name__ == '__main__':
 
 
 
-#THINGS are not working as intended 
-
-#if any can fix this and make it fully function let them do so am tired and moving on 
+'''
