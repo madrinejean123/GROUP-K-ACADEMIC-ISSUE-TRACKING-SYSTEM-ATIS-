@@ -153,7 +153,7 @@ const RegistrarDashboard = () => {
     count: issues.filter((i) => i.assigneeId === l.id).length,
   }));
 
-  // Render based on activeView
+  // Render based  on activeView
   const renderContent = () => {
     switch (activeView) {
       case "issues":
