@@ -68,7 +68,7 @@ body {
   width: 100%;
 }
 
-/* Improve sidebar responsiveness for all screen sizes */
+/* Improve sidebar responsiveness for all screen size */
 /* Small screens (phones) */
 @media (max-width: 576px) {
   .main-content {
