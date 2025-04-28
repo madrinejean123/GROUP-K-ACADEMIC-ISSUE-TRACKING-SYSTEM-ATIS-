@@ -22,7 +22,7 @@ const LecturerDashboard = () => {
   const [noteIssueId, setNoteIssueId] = useState(null);
   const [noteText, setNoteText] = useState("");
 
-  // Fetch lecturer profile
+  // Fetch the lecturer profile
   useEffect(() => {
     const fetchLecturerProfile = async () => {
       const token = localStorage.getItem("access_token");
@@ -39,7 +39,7 @@ const LecturerDashboard = () => {
     fetchLecturerProfile();
   }, []);
 
-  // Fetch issues once profile is loaded
+  // Fetch the issues once profile is loaded
   useEffect(() => {
     if (!lecturerProfile.id) return;
     const fetchIssues = async () => {
@@ -57,7 +57,7 @@ const LecturerDashboard = () => {
     fetchIssues();
   }, [lecturerProfile]);
 
-  // Show inline input for resolution notes
+  // Show inline input for resolution notes 
   const handleResolve = (issueId) => {
     setNoteIssueId(issueId);
     setNoteText("");
@@ -98,7 +98,7 @@ const LecturerDashboard = () => {
     }
   };
 
-  // Open detail modal
+  // Open  detail modal
   const handleViewIssue = (issue) => {
     setSelectedIssue(issue);
     setShowIssueDetailModal(true);

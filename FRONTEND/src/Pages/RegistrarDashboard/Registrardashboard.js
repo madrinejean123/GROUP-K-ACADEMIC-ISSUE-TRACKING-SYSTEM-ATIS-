@@ -137,7 +137,7 @@ const RegistrarDashboard = () => {
     }
   };
 
-  // Stats & filters
+  // Stats  & filters
   const stats = {
     total: issues.length,
     open: issues.filter((i) => i.status?.toLowerCase() === "open").length,
@@ -153,7 +153,7 @@ const RegistrarDashboard = () => {
     count: issues.filter((i) => i.assigneeId === l.id).length,
   }));
 
-  // Render based  on activeView
+  // Render based on activeView
   const renderContent = () => {
     switch (activeView) {
       case "issues":
@@ -208,7 +208,9 @@ const RegistrarDashboard = () => {
       default:
         return (
           <div className="dashboard-overview">
-            <h2 className="welcome-msg" >Welcome, {registrarProfile.full_name || "Registrar"}</h2>
+            <h2 className="welcome-msg">
+              Welcome, {registrarProfile.full_name || "Registrar"}
+            </h2>
             <div className="stats-cards">
               <div className="stat-card">
                 <h3>Total Issues</h3>
