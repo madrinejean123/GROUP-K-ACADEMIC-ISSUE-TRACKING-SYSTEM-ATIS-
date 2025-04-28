@@ -98,7 +98,7 @@ const LecturerDashboard = () => {
     }
   };
 
-  // Open detail modal
+  // Open  detail modal
   const handleViewIssue = (issue) => {
     setSelectedIssue(issue);
     setShowIssueDetailModal(true);
