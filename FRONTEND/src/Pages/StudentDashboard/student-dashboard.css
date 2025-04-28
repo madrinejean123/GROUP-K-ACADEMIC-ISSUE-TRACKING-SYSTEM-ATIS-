@@ -80,11 +80,11 @@
 .tabs-container {
   margin-bottom: 10px;
   display: flex;
+  flex-direction: row;
 }
-.tabs-container button{
+.tabs-container button {
   width: auto;
 }
-
 
 .tabs {
   display: flex;
@@ -264,7 +264,7 @@
   background-color: var(--accent-color);
   color: white;
 }
-.history-item p{
+.history-item p {
   color: black;
 }
 
