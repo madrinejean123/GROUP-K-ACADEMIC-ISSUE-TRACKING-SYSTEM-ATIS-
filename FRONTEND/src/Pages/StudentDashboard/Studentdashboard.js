@@ -53,7 +53,7 @@ const StudentDashboard = () => {
     fetchStudentData();
   }, []);
 
-  // Normalize the status for filtering
+  // Normalize the  status for filtering
   const normalize = (status) => status.replace(/_/g, " ").toLowerCase();
 
   // Filter issues by status
@@ -131,7 +131,7 @@ const StudentDashboard = () => {
             </div>
           </div>
 
-          {/* Tabs */}
+          {/* Tabs  */}
           <div className="tabs-container">
             <button
               className={activeTab === "dashboard" ? "tab active" : "tab"}
@@ -212,7 +212,7 @@ const StudentDashboard = () => {
             />
           )}
 
-          {/* History Tab */}
+          {/* History-Tab */}
           {activeTab === "history" && (
             <div className="history-content">
               <h3>Issue History</h3>
