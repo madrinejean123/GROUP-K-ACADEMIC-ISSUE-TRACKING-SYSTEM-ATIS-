@@ -131,7 +131,7 @@ const StudentDashboard = () => {
             </div>
           </div>
 
-          {/* Tabs */}
+          {/* Tabs  */}
           <div className="tabs-container">
             <button
               className={activeTab === "dashboard" ? "tab active" : "tab"}

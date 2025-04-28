@@ -79,8 +79,12 @@
 
 .tabs-container {
   margin-bottom: 10px;
-  width: 100%;
+  display: flex;
 }
+.tabs-container button{
+  width: auto;
+}
+
 
 .tabs {
   display: flex;
