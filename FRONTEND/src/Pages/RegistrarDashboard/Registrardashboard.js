@@ -208,7 +208,7 @@ const RegistrarDashboard = () => {
       default:
         return (
           <div className="dashboard-overview">
-            <h2>Welcome, {registrarProfile.full_name || "Registrar"}</h2>
+            <h2 className="welcome-msg" >Welcome, {registrarProfile.full_name || "Registrar"}</h2>
             <div className="stats-cards">
               <div className="stat-card">
                 <h3>Total Issues</h3>
