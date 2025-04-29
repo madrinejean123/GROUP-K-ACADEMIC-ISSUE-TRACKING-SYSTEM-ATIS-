@@ -39,7 +39,7 @@ const CreateIssueForm = ({ onCancel }) => {
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   ];
 
-  // Fetch the  user data from the backend profile
+  // Fetch the user data from the backend profile
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -93,7 +93,7 @@ const CreateIssueForm = ({ onCancel }) => {
       newErrors.title = "Title must be less than 100 characters";
     }
 
-    // Description validations
+    // Description validation
     if (!newIssue.description.trim()) {
       newErrors.description = "Description is required";
     } else if (newIssue.description.length < 10) {
