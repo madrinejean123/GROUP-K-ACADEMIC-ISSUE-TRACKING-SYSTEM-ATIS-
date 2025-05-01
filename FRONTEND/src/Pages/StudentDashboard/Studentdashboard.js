@@ -108,23 +108,14 @@ const StudentDashboard = () => {
           <div className="welcome-section">
             <div className="welcome-banner">
               <h2>
-                {getGreeting()}, {studentProfile.full_name || "Student"}!
+                {getGreeting()}, {studentProfile.full_name || "Student"} !
               </h2>
               <p>
-                Welcome to Makerere University Academic Issue Tracker. Log,
-                track, and manage your academic-related issues here.
+                Welcome to Makerere University Academic Issue Tracker. <br />
+                Log, track, and manage your academic-related issues here.
               </p>
             </div>
-            {/* <div className="welcome-text">
-              <h2>Welcome, {studentProfile.full_name || "Student"}!</h2>
-              <p>Log, track, and manage your academic-related issues here.</p>
-              <div className="student-details">
-                <p>
-                  <strong>Student No:</strong>{" "}
-                  {studentProfile.student_no || "N/A"}
-                </p>
-              </div>
-            </div> */}
+
             <div className="stats-cards">
               <div className="stat-card">
                 <div className="stat-value">{stats.total}</div>

@@ -27,7 +27,7 @@
 .welcome-banner {
   background-color: #f0f7ff;
   border-radius: 8px;
-  padding: 20px;
+  padding: 20px 20px 5px 20px;
   margin-bottom: 24px;
   border-left: 4px solid #3b82f6;
 }
