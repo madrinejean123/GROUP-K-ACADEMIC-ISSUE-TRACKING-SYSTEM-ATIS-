@@ -76,7 +76,12 @@ const StudentDashboard = () => {
     inProgress: inProgressIssues.length,
     resolved: resolvedIssues.length,
   };
-
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 18) return "Good afternoon";
+    return "Good evening";
+  };
   return (
     <div className="student-dashboard">
       {/* Header */}
@@ -99,9 +104,18 @@ const StudentDashboard = () => {
 
         {/* Main Content */}
         <div className="dashboard-main-content">
-          {/* Welcome Section */}
+          {/* Welcome Section  */}
           <div className="welcome-section">
-            <div className="welcome-text">
+            <div className="welcome-banner">
+              <h2>
+                {getGreeting()}, {studentProfile.full_name || "Student"}!
+              </h2>
+              <p>
+                Welcome to Makerere University Academic Issue Tracker. Log,
+                track, and manage your academic-related issues here.
+              </p>
+            </div>
+            {/* <div className="welcome-text">
               <h2>Welcome, {studentProfile.full_name || "Student"}!</h2>
               <p>Log, track, and manage your academic-related issues here.</p>
               <div className="student-details">
@@ -110,7 +124,7 @@ const StudentDashboard = () => {
                   {studentProfile.student_no || "N/A"}
                 </p>
               </div>
-            </div>
+            </div> */}
             <div className="stats-cards">
               <div className="stat-card">
                 <div className="stat-value">{stats.total}</div>
