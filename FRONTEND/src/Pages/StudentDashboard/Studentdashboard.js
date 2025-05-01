@@ -99,7 +99,7 @@ const StudentDashboard = () => {
 
         {/* Main Content */}
         <div className="dashboard-main-content">
-          {/* Welcome Section */}
+          {/* Welcome Section  */}
           <div className="welcome-section">
             <div className="welcome-text">
               <h2>Welcome, {studentProfile.full_name || "Student"}!</h2>
