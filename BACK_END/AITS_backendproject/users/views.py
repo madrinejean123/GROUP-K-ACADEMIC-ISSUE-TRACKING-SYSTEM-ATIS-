@@ -170,6 +170,7 @@ class UserLogoutViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
 
 logger = logging.getLogger(__name__)
+# this views for forgot password are not working currently 
 
 @method_decorator(never_cache, name='dispatch')
 class PasswordResetViewSet(viewsets.GenericViewSet):
