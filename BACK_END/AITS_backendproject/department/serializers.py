@@ -17,7 +17,7 @@ class SchoolSerializer(serializers.ModelSerializer):
 
 # Department Serializer
 class DepartmentSerializer(serializers.ModelSerializer):
-    school = SchoolSerializer(read_only=True)  # Include school details
+    school = SchoolSerializer(read_only=True)  # for school details
 
     class Meta:
         model = Department
