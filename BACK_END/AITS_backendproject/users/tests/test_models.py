@@ -127,4 +127,3 @@ class UserModelTests(TestCase):
         user.save()
         student.refresh_from_db()
         self.assertEqual(student.college, self.college)
-'''
