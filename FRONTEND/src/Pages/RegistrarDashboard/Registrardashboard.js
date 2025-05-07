@@ -214,7 +214,8 @@ const RegistrarDashboard = () => {
               </h2>
               <p>
                 Welcome to Makerere University Academic Issue Tracker. <br />
-                Manage and assign student issues to appropriate lecturers here.
+                Manage and assign students' academic issues to appropriate
+                lecturers here.
               </p>
             </div>
 
