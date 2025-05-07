@@ -170,7 +170,15 @@ const LecturerDashboard = () => {
       <div className="lecturer-dashboard">
         {/* Welcome & Stats */}
         <div className="welcome-section">
-          <h2>Welcome, Dr. {lecturerProfile.full_name || "Lecturer"}!</h2>
+          <div className="welcome-banner">
+            <h2>
+              {getGreeting()}, Dr. {lecturerProfile.full_name || "Lecturer"} !
+            </h2>
+            <p>
+              Welcome to Makerere University Academic Issue Tracker. <br />
+              Manage and resolve assigned student academic related issues here.
+            </p>
+          </div>
           <div className="stats-cards">
             <div className="stat-card">
               <div className="stat-value">{stats.assigned}</div>
