@@ -5,7 +5,24 @@
   gap: 20px;
   width: 100%;
 }
+.welcome-banner {
+  background-color: #f0f7ff;
+  border-radius: 8px;
+  padding: 20px 20px 5px 20px;
+  margin-bottom: 24px;
+  border-left: 4px solid #3b82f6;
+}
 
+.welcome-banner h2 {
+  font-size: 25px;
+  margin-bottom: 8px;
+  color: #1e40af;
+}
+
+.welcome-banner p {
+  color: #4b5563;
+  font-size: 14px;
+}
 .welcome-section {
   display: grid;
   grid-template-columns: 1fr 2fr;

@@ -208,9 +208,16 @@ const RegistrarDashboard = () => {
       default:
         return (
           <div className="dashboard-overview">
-            <h2 className="welcome-msg">
-              Welcome, {registrarProfile.full_name || "Registrar"}
-            </h2>
+            <div className="welcome-banner">
+              <h2>
+                {getGreeting()}, {registrarProfile.full_name || "Registrar"} !
+              </h2>
+              <p>
+                Welcome to Makerere University Academic Issue Tracker. <br />
+                Manage and assign student issues to appropriate lecturers here.
+              </p>
+            </div>
+            
             <div className="stats-cards">
               <div className="stat-card">
                 <h3>Total Issues</h3>
@@ -233,7 +240,12 @@ const RegistrarDashboard = () => {
         );
     }
   };
-
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 18) return "Good afternoon";
+    return "Good evening";
+  };
   return (
     <DashboardLayout userRole="Registrar" profile={registrarProfile}>
       <div className="registrar-dashboard">{renderContent()}</div>
