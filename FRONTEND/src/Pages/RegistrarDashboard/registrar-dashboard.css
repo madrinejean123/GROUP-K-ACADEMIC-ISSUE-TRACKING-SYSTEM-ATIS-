@@ -40,12 +40,9 @@
   border: 1px solid var(--border-color);
 }
 
-
-
 .welcome-text p {
   color: var(--text-secondary);
 }
-
 .stats-cards {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
