@@ -233,7 +233,12 @@ const RegistrarDashboard = () => {
         );
     }
   };
-
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 18) return "Good afternoon";
+    return "Good evening";
+  };
   return (
     <DashboardLayout userRole="Registrar" profile={registrarProfile}>
       <div className="registrar-dashboard">{renderContent()}</div>
