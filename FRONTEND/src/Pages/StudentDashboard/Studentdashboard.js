@@ -20,7 +20,7 @@ const StudentDashboard = () => {
   const [showIssueDetailModal, setShowIssueDetailModal] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
 
-  // Fetch the student profile and issues
+  // Fetch the  student profile and issues
   useEffect(() => {
     const fetchStudentData = async () => {
       try {
