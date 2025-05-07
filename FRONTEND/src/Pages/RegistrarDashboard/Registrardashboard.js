@@ -217,23 +217,23 @@ const RegistrarDashboard = () => {
                 Manage and assign student issues to appropriate lecturers here.
               </p>
             </div>
-            
+
             <div className="stats-cards">
               <div className="stat-card">
-                <h3>Total Issues</h3>
-                <p>{stats.total}</p>
+                <div className="stat-value">{stats.total}</div>
+                <div className="stat-label">Total Issues</div>
               </div>
               <div className="stat-card">
-                <h3>Open</h3>
-                <p>{stats.open}</p>
+                <div className="stat-value">{stats.open}</div>
+                <div className="stat-label">Open Issues</div>
               </div>
               <div className="stat-card">
-                <h3>In Progress</h3>
-                <p>{stats.inProgress}</p>
+                <div className="stat-value">{stats.inProgress}</div>
+                <div className="stat-label">In Progress</div>
               </div>
               <div className="stat-card">
-                <h3>Resolved</h3>
-                <p>{stats.resolved}</p>
+                <div className="stat-value">{stats.resolved}</div>
+                <div className="stat-label">Resolved</div>
               </div>
             </div>
           </div>
