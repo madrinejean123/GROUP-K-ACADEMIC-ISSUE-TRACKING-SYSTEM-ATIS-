@@ -17,6 +17,7 @@
   font-size: 25px;
   margin-bottom: 8px;
   color: #1e40af;
+  text-align: start;
 }
 
 .welcome-banner p {
@@ -39,11 +40,7 @@
   border: 1px solid var(--border-color);
 }
 
-.welcome-text h2 {
-  font-size: 1.8rem;
-  margin-bottom: 10px;
-  color: var(--text-primary);
-}
+
 
 .welcome-text p {
   color: var(--text-secondary);
