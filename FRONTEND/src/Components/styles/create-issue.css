@@ -103,6 +103,27 @@
   outline: none;
 }
 
+/* Highlight invalid fields with a red border and light red background */
+.form-group.error input,
+.form-group.error textarea,
+.form-group.error select {
+  border: 2px solid #e63946 !important;
+  background-color: #fff0f0 !important;
+}
+
+/* Error message styling */
+.error-message {
+  color: #e63946;
+  font-size: 0.97rem;
+  margin-top: 5px;
+  font-weight: 600;
+}
+
+/* Make the label red for error fields */
+.form-group.error label {
+  color: #e63946;
+}
+
 /* File Input */
 .file-input {
   padding: 10px 0;
