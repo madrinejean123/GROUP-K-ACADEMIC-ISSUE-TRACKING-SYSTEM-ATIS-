@@ -3,9 +3,14 @@ import { useState, useEffect } from "react";
 import { FaBell, FaBars, FaTimes, FaSignOutAlt, FaUser } from "react-icons/fa";
 import { FiSettings } from "react-icons/fi";
 import { MdEmail } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../styles/header.css";
 import MakLogo from "../assets/logo.png";
+
+
+
+
 
 // ——————————————————————————————————————————————
 // 1. Front-end hierarchy:  keys = college.code.toUpperCase()
@@ -366,7 +371,8 @@ const Header = ({
                   </button>
                   <button
                     className="profile-option logout-option"
-                    onClick={handleLogout}
+                    onClick={() => navigate('/login')}
+
                   >
                     <FaSignOutAlt /> Logout
                   </button>
