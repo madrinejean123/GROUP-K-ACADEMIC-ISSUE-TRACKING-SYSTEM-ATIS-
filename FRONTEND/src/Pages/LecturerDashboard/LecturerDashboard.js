@@ -22,7 +22,7 @@ const LecturerDashboard = () => {
   const [noteIssueId, setNoteIssueId] = useState(null);
   const [noteText, setNoteText] = useState("");
 
-  // Fetch lecturer profile
+  // Fetch the lecturer profile
   useEffect(() => {
     const fetchLecturerProfile = async () => {
       const token = localStorage.getItem("access_token");
@@ -39,7 +39,7 @@ const LecturerDashboard = () => {
     fetchLecturerProfile();
   }, []);
 
-  // Fetch issues once profile is loaded
+  // Fetch the issues once profile is loaded
   useEffect(() => {
     if (!lecturerProfile.id) return;
     const fetchIssues = async () => {
@@ -77,11 +77,9 @@ const LecturerDashboard = () => {
     try {
       const token = localStorage.getItem("access_token");
       const payload = { status: "resolved", resolution_notes: noteText };
-      await axios.patch(
-        `${UPDATE_STATUS_API_URL}${issueId}/`,
-        payload,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await axios.patch(`${UPDATE_STATUS_API_URL}${issueId}/`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setIssues((prev) =>
         prev.map((i) =>
           i.id === issueId
@@ -98,7 +96,7 @@ const LecturerDashboard = () => {
     }
   };
 
-  // Open detail modal
+  // Open  detail modal
   const handleViewIssue = (issue) => {
     setSelectedIssue(issue);
     setShowIssueDetailModal(true);
@@ -109,7 +107,11 @@ const LecturerDashboard = () => {
     setIssues((all) =>
       all.map((i) =>
         i.id === selectedIssue.id
-          ? { ...i, status: newStatus, resolution_notes: notes ?? i.resolution_notes }
+          ? {
+              ...i,
+              status: newStatus,
+              resolution_notes: notes ?? i.resolution_notes,
+            }
           : i
       )
     );
@@ -140,33 +142,43 @@ const LecturerDashboard = () => {
     }));
   };
 
-  // Filtering and stats
+  // Filtering and the stats
   const normalize = (s) => s.replace(/_/g, " ").toLowerCase();
-  const assignedIssues = issues.filter(
-    (i) => {
-      const st = normalize(i.status);
-      return st === "open" || st === "in progress";
-    }
-  );
-  const resolvedIssues = issues.filter(
-    (i) => {
-      const st = normalize(i.status);
-      return st === "resolved" || st === "closed";
-    }
-  );
-  const filteredIssues = activeTab === "assigned" ? assignedIssues : resolvedIssues;
+  const assignedIssues = issues.filter((i) => {
+    const st = normalize(i.status);
+    return st === "open" || st === "in progress";
+  });
+  const resolvedIssues = issues.filter((i) => {
+    const st = normalize(i.status);
+    return st === "resolved" || st === "closed";
+  });
+  const filteredIssues =
+    activeTab === "assigned" ? assignedIssues : resolvedIssues;
   const stats = {
     assigned: assignedIssues.length,
     resolved: resolvedIssues.length,
     students: new Set(issues.map((i) => i.author.user.id)).size,
   };
-
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 18) return "Good afternoon";
+    return "Good evening";
+  };
   return (
     <DashboardLayout userRole="Lecturer" profile={lecturerProfile}>
       <div className="lecturer-dashboard">
         {/* Welcome & Stats */}
         <div className="welcome-section">
-          <h2>Welcome, Dr. {lecturerProfile.full_name || "Lecturer"}!</h2>
+          <div className="welcome-banner">
+            <h2>
+              {getGreeting()}, Dr. {lecturerProfile.full_name || "Lecturer"} !
+            </h2>
+            <p>
+              Welcome to Makerere University Academic Issue Tracker. <br />
+              Manage and resolve assigned student academic related issues here.
+            </p>
+          </div>
           <div className="stats-cards">
             <div className="stat-card">
               <div className="stat-value">{stats.assigned}</div>
@@ -224,7 +236,7 @@ const LecturerDashboard = () => {
                     {activeTab === "assigned" && (
                       <td>
                         {noteIssueId === issue.id ? (
-                          <div className="resolution-input">   
+                          <div className="resolution-input">
                             <textarea
                               value={noteText}
                               onChange={(e) => setNoteText(e.target.value)}
@@ -236,7 +248,9 @@ const LecturerDashboard = () => {
                             >
                               Done
                             </button>
-                            <button onClick={handleCancelResolution}>Cancel</button>
+                            <button onClick={handleCancelResolution}>
+                              Cancel
+                            </button>
                           </div>
                         ) : (
                           <button
@@ -244,7 +258,9 @@ const LecturerDashboard = () => {
                             onClick={() => handleResolve(issue.id)}
                             disabled={resolvingIssueId === issue.id}
                           >
-                            {resolvingIssueId === issue.id ? "Resolving..." : "Resolve"}
+                            {resolvingIssueId === issue.id
+                              ? "Resolving..."
+                              : "Resolve"}
                           </button>
                         )}
                       </td>

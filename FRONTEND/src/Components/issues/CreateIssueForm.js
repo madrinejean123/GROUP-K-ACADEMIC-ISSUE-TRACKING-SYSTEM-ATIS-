@@ -1,6 +1,3 @@
-"use client";
-
-// src/components/CreateIssueForm.jsx
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
@@ -96,7 +93,7 @@ const CreateIssueForm = ({ onCancel }) => {
       newErrors.title = "Title must be less than 100 characters";
     }
 
-    // Description validations
+    // Description validation
     if (!newIssue.description.trim()) {
       newErrors.description = "Description is required";
     } else if (newIssue.description.length < 10) {
@@ -138,14 +135,14 @@ const CreateIssueForm = ({ onCancel }) => {
       [name]: value,
     }));
 
-    // Mark field as touched
+    // Mark fields as touched
     setTouched((prev) => ({
       ...prev,
       [name]: true,
     }));
   };
 
-  // Handle file attachment change
+  // Handle files attachment change
   const handleFileChange = (e) => {
     const file = e.target.files[0];
 
@@ -351,7 +348,7 @@ const CreateIssueForm = ({ onCancel }) => {
                 name="description"
                 value={newIssue.description}
                 onChange={handleInputChange}
-                placeholder="Describe the issue"
+                placeholder="Enter description here e.g Missing marks for CourseX CourseCode, taught by Lecturer-Y and more relevant info..."
                 required
               />
               {errors.description && touched.description && (

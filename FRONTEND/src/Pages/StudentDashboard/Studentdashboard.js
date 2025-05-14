@@ -20,7 +20,7 @@ const StudentDashboard = () => {
   const [showIssueDetailModal, setShowIssueDetailModal] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
 
-  // Fetch the student profile and issues
+  // Fetch the  student profile and issues
   useEffect(() => {
     const fetchStudentData = async () => {
       try {
@@ -53,7 +53,7 @@ const StudentDashboard = () => {
     fetchStudentData();
   }, []);
 
-  // Normalize the status for filtering
+  // Normalize the  status for filtering
   const normalize = (status) => status.replace(/_/g, " ").toLowerCase();
 
   // Filter issues by status
@@ -76,7 +76,12 @@ const StudentDashboard = () => {
     inProgress: inProgressIssues.length,
     resolved: resolvedIssues.length,
   };
-
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 18) return "Good afternoon";
+    return "Good evening";
+  };
   return (
     <div className="student-dashboard">
       {/* Header */}
@@ -99,18 +104,18 @@ const StudentDashboard = () => {
 
         {/* Main Content */}
         <div className="dashboard-main-content">
-          {/* Welcome Section */}
+          {/* Welcome Section  */}
           <div className="welcome-section">
-            <div className="welcome-text">
-              <h2>Welcome, {studentProfile.full_name || "Student"}!</h2>
-              <p>Log, track, and manage your academic-related issues here.</p>
-              <div className="student-details">
-                <p>
-                  <strong>Student No:</strong>{" "}
-                  {studentProfile.student_no || "N/A"}
-                </p>
-              </div>
+            <div className="welcome-banner">
+              <h2>
+                {getGreeting()}, {studentProfile.full_name || "Student"} !
+              </h2>
+              <p>
+                Welcome to Makerere University Academic Issue Tracker. <br />
+                Log, track, and manage your academic-related issues here.
+              </p>
             </div>
+
             <div className="stats-cards">
               <div className="stat-card">
                 <div className="stat-value">{stats.total}</div>
@@ -131,7 +136,7 @@ const StudentDashboard = () => {
             </div>
           </div>
 
-          {/* Tabs */}
+          {/* Tabs  */}
           <div className="tabs-container">
             <button
               className={activeTab === "dashboard" ? "tab active" : "tab"}
@@ -168,7 +173,7 @@ const StudentDashboard = () => {
                 </ul>
               </div>
 
-              {/* Issues Table */}
+              {/* Issues  Table */}
               <div className="issues-table-container">
                 <table className="issues-table">
                   <thead>
@@ -212,7 +217,7 @@ const StudentDashboard = () => {
             />
           )}
 
-          {/* History Tab */}
+          {/* History-Tab */}
           {activeTab === "history" && (
             <div className="history-content">
               <h3>Issue History</h3>

@@ -1,11 +1,29 @@
-/* SPECIFIC STYLES */
+/* SPECIFIC  STYLES */
 .registrar-dashboard {
   display: flex;
   flex-direction: column;
   gap: 20px;
   width: 100%;
 }
+.welcome-banner {
+  background-color: #f0f7ff;
+  border-radius: 8px;
+  padding: 20px 20px 5px 20px;
+  margin-bottom: 24px;
+  border-left: 4px solid #3b82f6;
+}
 
+.welcome-banner h2 {
+  font-size: 25px;
+  margin-bottom: 8px;
+  color: #1e40af;
+  text-align: start;
+}
+
+.welcome-banner p {
+  color: #4b5563;
+  font-size: 14px;
+}
 .welcome-section {
   display: grid;
   grid-template-columns: 1fr 2fr;
@@ -22,16 +40,9 @@
   border: 1px solid var(--border-color);
 }
 
-.welcome-text h2 {
-  font-size: 1.8rem;
-  margin-bottom: 10px;
-  color: var(--text-primary);
-}
-
 .welcome-text p {
   color: var(--text-secondary);
 }
-
 .stats-cards {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -76,6 +87,12 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+.welcome-msg {
+  color: black;
+}
+.stat-card p {
+  color: blue;
 }
 
 .lecturers-section {

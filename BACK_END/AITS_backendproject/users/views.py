@@ -1,10 +1,13 @@
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from django.contrib.auth import authenticate, get_user_model
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.exceptions import TokenError,InvalidToken
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import never_cache
+
 from .models import Student, Lecturer, CollegeRegister
 from .serializers import (
     UserRegistrationSerializer,
@@ -21,6 +24,8 @@ from .serializers import (
 from django.core.mail import send_mail
 from django.urls import reverse
 from django.conf import settings
+from .models import User
+import logging
 
 User = get_user_model()
 
@@ -91,7 +96,7 @@ class UserProfileViewSet(viewsets.ViewSet):
     """
     permission_classes = [IsAuthenticated]
 
-    def list(self, request):
+    def list(self, request):           
         """
         Retrieve the profile of the authenticated user.
         (This is now wired to GET /users/profile/)
@@ -163,50 +168,99 @@ class UserLogoutViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             )
         
 
+
+logger = logging.getLogger(__name__)
+# this views for forgot password are not working currently 
+
+@method_decorator(never_cache, name='dispatch')
 class PasswordResetViewSet(viewsets.GenericViewSet):
+    """
+    Handles:
+    POST /password-reset/forgot-password/
+    POST /password-reset/reset-password/
+    """
     permission_classes = [AllowAny]
+    serializer_classes = {
+        'forgot_password': PasswordResetRequestSerializer,
+        'reset_password': PasswordResetConfirmSerializer,
+    }
+
+    def get_serializer_class(self):
+        return self.serializer_classes.get(self.action)
 
     @action(detail=False, methods=['post'], url_path='forgot-password')
     def forgot_password(self, request):
-        serializer = PasswordResetRequestSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        
-        user = User.objects.get(notification_email=serializer.validated_data['email'])
-        token = RefreshToken.for_user(user).access_token
-        
-        reset_link = f"{settings.FRONTEND_URL}/reset-password?token={str(token)}"
-        
-        # Send to notification_email (Gmail)
-        send_mail(
-            "Password Reset Request",
-            f"Click to reset your password: {reset_link}\n\n"
-            f"If you didn't request this, please ignore this email.",
-            settings.DEFAULT_FROM_EMAIL,
-            [user.notification_email],  # Send to Gmail, not mak_email
-            fail_silently=False,
-        )
-        
-        return Response(
-            {"detail": "Password reset link sent to your registered Gmail."},
-            status=status.HTTP_200_OK
-        )
-
-    @action(detail=False, methods=['post'], url_path='reset-password')
-    def reset_password(self, request):
-        serializer = PasswordResetConfirmSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
         try:
-            token = serializer.validated_data['token']
-            user = User.objects.get(id=AccessToken(token)['user_id'])
+            user = User.objects.get(
+                notification_email=serializer.validated_data['email']
+            )
+            token = str(RefreshToken.for_user(user).access_token)
+            
+            reset_link = f"{settings.FRONTEND_URL}/reset-password?token={token}"
+            
+            send_mail(
+                subject="Your Password Reset Request",
+                message=(
+                    f"Click the link to reset your password:\n{reset_link}\n\n"
+                    "This link will expire in 1 hour.\n"
+                    "If you didn't request this, please ignore this email."
+                ),
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.notification_email],
+                fail_silently=False,
+            )
+            
+            logger.info(f"Password reset email sent to {user.notification_email}")
+            
+            return Response(
+                {"detail": "Password reset link sent to your notification email."},
+                status=status.HTTP_200_OK
+            )
+            
+        except Exception as e:
+            logger.error(f"Password reset error: {str(e)}")
+            return Response(
+                {"detail": "Failed to process reset request."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @action(detail=False, methods=['post'], url_path='reset-password')
+    def reset_password(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        try:
+            # Secure token verification
+            access_token = AccessToken(serializer.validated_data['token'])
+            access_token.verify()
+            
+            user = User.objects.get(id=access_token['user_id'])
             user.set_password(serializer.validated_data['new_password'])
             user.save()
+            
+            # Blacklist all refresh tokens for the user
+            for token in user.refreshtoken_set.all():
+                token.blacklist()
+            
+            logger.info(f"Password reset successful for user {user.id}")
+            
             return Response(
                 {"detail": "Password updated successfully."},
                 status=status.HTTP_200_OK
             )
-        except Exception as e:
+            
+        except (TokenError, InvalidToken, User.DoesNotExist) as e:
+            logger.warning(f"Invalid password reset attempt: {str(e)}")
             return Response(
                 {"detail": "Invalid or expired token."},
                 status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            logger.error(f"Password reset error: {str(e)}")
+            return Response(
+                {"detail": "Failed to reset password."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
