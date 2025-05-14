@@ -48,7 +48,7 @@ const RegistrarDashboard = () => {
         );
         const withAssignees = data.map((i) => ({
           ...i,
-          assignee: i.assigned_lecturer?.user.full_name || null,
+          assigneeName: i.assigned_lecturer?.user?.full_name || "",
           assigneeId: i.assigned_lecturer?.id || null,
         }));
         setIssues(withAssignees);
@@ -69,6 +69,7 @@ const RegistrarDashboard = () => {
           "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/users/lecturers/",
           { headers: { Authorization: `Bearer ${token}` } }
         );
+        setLecturers(data);
       } catch (e) {
         console.error("Lecturers error:", e);
       }
@@ -94,9 +95,7 @@ const RegistrarDashboard = () => {
 
   const handleStatusChange = (newStatus) => {
     setIssues((prev) =>
-      prev.map((i) =>
-        i.id === selectedIssue.id ? { ...i, status: newStatus } : i
-      )
+      prev.map((i) => (i.id === selectedIssue.id ? { ...i, status: newStatus } : i))
     );
     setSelectedIssue((prev) => ({ ...prev, status: newStatus }));
   };
@@ -114,42 +113,35 @@ const RegistrarDashboard = () => {
           : i
       )
     );
-    setSelectedIssue((prev) => ({
-      ...prev,
-      comments: [...(prev.comments || []), newComment],
-    }));
+    setSelectedIssue((prev) => ({ ...prev, comments: [...(prev.comments || []), newComment] }));
   };
 
   const handleAssign = (issueId, lecturerId, lecturerName) => {
     setIssues((prev) =>
       prev.map((i) =>
         i.id === issueId
-          ? { ...i, assignee: lecturerName, assigneeId: lecturerId }
+          ? { ...i, assigneeName: lecturerName, assigneeId: lecturerId }
           : i
       )
     );
     if (selectedIssue?.id === issueId) {
-      setSelectedIssue((prev) => ({
-        ...prev,
-        assignee: lecturerName,
-        assigneeId: lecturerId,
-      }));
+      setSelectedIssue((prev) => ({ ...prev, assigneeName: lecturerName, assigneeId: lecturerId }));
     }
   };
 
-  // Stats  & filters
+  // Stats & filters
   const stats = {
     total: issues.length,
     open: issues.filter((i) => i.status?.toLowerCase() === "open").length,
-    inProgress: issues.filter((i) => i.status?.toLowerCase() === "in progress")
-      .length,
-    resolved: issues.filter((i) =>
-      ["resolved", "closed"].includes(normalizeStatus(i.status))
-    ).length,
+    inProgress: issues.filter((i) => i.status?.toLowerCase() === "in progress").length,
+    resolved: issues.filter((i) => ["resolved", "closed"].includes(normalizeStatus(i.status))).length,
   };
+
   const assignedIssues = issues.filter((i) => i.assigneeId);
+
   const lecturerCounts = lecturers.map((l) => ({
-    ...l,
+    id: l.id,
+    name: l.user?.full_name || l.full_name || "",
     count: issues.filter((i) => i.assigneeId === l.id).length,
   }));
 
@@ -187,7 +179,7 @@ const RegistrarDashboard = () => {
             {lecturerCounts.map((l) => (
               <div key={l.id} className="lecturer-card-full">
                 <h3>{l.name}</h3>
-                <p>{l.count} assigned issues</p>
+                <p>{l.count} assigned issue{l.count !== 1 ? 's' : ''}</p>
               </div>
             ))}
           </div>
@@ -210,10 +202,11 @@ const RegistrarDashboard = () => {
           <div className="dashboard-overview">
             <div className="welcome-banner">
               <h2>
-                {getGreeting()}, {registrarProfile.full_name || "Registrar"} !
+                {getGreeting()}, {registrarProfile.full_name || "Registrar"}!
               </h2>
               <p>
-                Welcome to Makerere University Academic Issue Tracker. <br />
+                Welcome to Makerere University Academic Issue Tracker.
+                <br />
                 Manage and assign student issues to appropriate lecturers here.
               </p>
             </div>
@@ -240,12 +233,14 @@ const RegistrarDashboard = () => {
         );
     }
   };
+
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good morning";
     if (hour < 18) return "Good afternoon";
     return "Good evening";
   };
+
   return (
     <DashboardLayout userRole="Registrar" profile={registrarProfile}>
       <div className="registrar-dashboard">{renderContent()}</div>
