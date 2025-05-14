@@ -8,10 +8,6 @@ import axios from "axios";
 import "../styles/header.css";
 import MakLogo from "../assets/logo.png";
 
-
-
-
-
 // ——————————————————————————————————————————————
 // 1. Front-end hierarchy:  keys = college.code.toUpperCase()
 // ——————————————————————————————————————————————
@@ -38,8 +34,7 @@ const hierarchy = {
       "Department of Adult & Community Education (DACE)",
       "Institute of Open Distance and eLearning",
     ],
-    "The East African School of Higher Education Studies and Development (EASHESD)":
-      [],
+    "The East African School of Higher Education Studies and Development (EASHESD)": [],
   },
   CEDAT: {
     "School of Engineering": [
@@ -181,9 +176,7 @@ const Header = ({
   userRole,
   profile,
 }) => {
-  // ——————————
-  // State
-  // ——————————
+  const navigate = useNavigate();
   const [profileData, setProfileData] = useState({});
   const [colleges, setColleges] = useState([]);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -191,9 +184,6 @@ const Header = ({
   const [showProfileForm, setShowProfileForm] = useState(false);
   const [formData, setFormData] = useState({});
 
-  // ——————————
-  // 2. Fetch colleges from backend
-  // ——————————
   useEffect(() => {
     axios
       .get(
@@ -203,9 +193,6 @@ const Header = ({
       .catch((err) => console.error("Error fetching colleges:", err));
   }, []);
 
-  // ——————————
-  // 3. Initialize profileData & formData from prop
-  // ——————————
   useEffect(() => {
     const initial = profile
       ? Array.isArray(profile)
@@ -214,8 +201,6 @@ const Header = ({
       : {};
     setProfileData(initial);
 
-    // If your profile object has a college code field (e.g. initial.college_code),
-    // map that; otherwise leave empty and let user pick.
     setFormData({
       ...initial,
       college: initial.college_code ? initial.college_code.toUpperCase() : "",
@@ -224,9 +209,6 @@ const Header = ({
     });
   }, [profile]);
 
-  // ——————————
-  // Helpers for cascading options
-  // ——————————
   const getInitials = (name) =>
     name
       ? name
@@ -245,9 +227,6 @@ const Header = ({
       ? hierarchy[formData.college][formData.school] || []
       : [];
 
-  // ——————————
-  // Handlers
-  // ——————————
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => {
@@ -269,7 +248,6 @@ const Header = ({
       const { full_name, mak_email, user_role, student_no, ...payload } =
         formData;
 
-      // Map college code back to its numeric ID
       const collegeObj = colleges.find(
         (c) => c.code.toUpperCase() === payload.college
       );
@@ -292,17 +270,20 @@ const Header = ({
   };
 
   const handleLogout = () => {
-    alert("Logout clicked");
+    // optional cleanup: localStorage.removeItem('access_token');
     navigate('/login');
   };
+
   const handleMyAccount = () => {
     setShowProfileForm(true);
     setProfileOpen(false);
   };
+
   const handleSettings = () => {
     alert("Settings clicked");
     setProfileOpen(false);
   };
+
 
   // ——————————
   // Render
