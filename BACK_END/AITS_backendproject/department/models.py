@@ -1,6 +1,7 @@
 from django.db import models
 
-# College Choices
+# College of choices
+# This is a list of colleges with their respective codes and full names.
 COLLEGE_CHOICES = [
     ('cees', 'College of Education and External Studies (CEES)'),
     ('cocis', 'College of Computing and Information Sciences (COCIS)'),
