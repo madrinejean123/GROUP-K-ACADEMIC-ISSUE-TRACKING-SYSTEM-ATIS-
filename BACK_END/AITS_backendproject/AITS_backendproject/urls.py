@@ -30,5 +30,5 @@ urlpatterns = [
     path('issues/', include('issues.urls')),
     
     # Add the home view for the root URL
-    path('', home, name='home'),  # This is where the home view is linked to the root URL
+    path('', home, name='home'),  # This is where the home view links to the root URL
 ]
