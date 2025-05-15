@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.shortcuts import render
 
-# Define the home view
+# Defining the home view
 def home(request):
     return render(request, 'home.html')
 
