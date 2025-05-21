@@ -19,8 +19,9 @@ const StudentDashboard = () => {
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [showIssueDetailModal, setShowIssueDetailModal] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [successMessage, setSuccessMessage] = useState("");  // Added success message state
 
-  // Fetch the  student profile and issues
+  // Fetch the student profile and issues
   useEffect(() => {
     const fetchStudentData = async () => {
       try {
@@ -53,7 +54,7 @@ const StudentDashboard = () => {
     fetchStudentData();
   }, []);
 
-  // Normalize the  status for filtering
+  // Normalize the status for filtering
   const normalize = (status) => status.replace(/_/g, " ").toLowerCase();
 
   // Filter issues by status
@@ -76,12 +77,14 @@ const StudentDashboard = () => {
     inProgress: inProgressIssues.length,
     resolved: resolvedIssues.length,
   };
+
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good morning";
     if (hour < 18) return "Good afternoon";
     return "Good evening";
   };
+
   return (
     <div className="student-dashboard">
       {/* Header */}
@@ -104,6 +107,13 @@ const StudentDashboard = () => {
 
         {/* Main Content */}
         <div className="dashboard-main-content">
+          {/* Success message */}
+          {successMessage && (
+            <div className="success-message">
+              {successMessage}
+            </div>
+          )}
+
           {/* Welcome Section  */}
           <div className="welcome-section">
             <div className="welcome-banner">
@@ -173,7 +183,7 @@ const StudentDashboard = () => {
                 </ul>
               </div>
 
-              {/* Issues  Table */}
+              {/* Issues Table */}
               <div className="issues-table-container">
                 <table className="issues-table">
                   <thead>
@@ -217,7 +227,7 @@ const StudentDashboard = () => {
             />
           )}
 
-          {/* History-Tab */}
+          {/* History Tab */}
           {activeTab === "history" && (
             <div className="history-content">
               <h3>Issue History</h3>
@@ -251,6 +261,8 @@ const StudentDashboard = () => {
                 };
                 setIssues([newIssueWithId, ...issues]);
                 setShowCreateIssueModal(false);
+                setSuccessMessage("Issue submitted successfully!"); // Show success message
+                setTimeout(() => setSuccessMessage(""), 3000); // Hide after 3 seconds
               }}
               onCancel={() => setShowCreateIssueModal(false)}
             />
