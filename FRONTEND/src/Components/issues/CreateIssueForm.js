@@ -227,7 +227,16 @@ const CreateIssueForm = ({ onCancel }) => {
       );
 
       console.log("Issue created:", response.data);
-      toast.success("Issue created successfully!");
+      toast.success("Issue created successfully!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+      });
       onCancel(); // Close the modal after submission
     } catch (error) {
       console.error("Error creating issue:", error);
