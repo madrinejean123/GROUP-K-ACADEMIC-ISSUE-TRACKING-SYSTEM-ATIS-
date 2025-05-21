@@ -202,7 +202,14 @@ EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'yzhgibfihrddajcz')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # ----------------------------------------------------------------------------
-# Activate Django-Heroku Settings
+# Activate Django-Heroku Settings (wen needed)
+# 
 # ----------------------------------------------------------------------------
+IS_HEROKU = "DYNO" in os.environ
+IS_RENDER = "RENDER" in os.environ
 
-django_heroku.settings(locals())
+if IS_HEROKU:
+    django_heroku.settings(locals())
+
+
+
