@@ -15,7 +15,7 @@ urlpatterns = [
     # 2️⃣ Registrar Assignment 
     path('assign/<int:issue_id>/', CollegeRegisterAssignView.as_view(), name='assign-issue'),
     
-    # 3️⃣ Status Updates 
+    # 3️⃣ Updating statuses
     path('update-status/<int:issue_id>/', LecturerUpdateIssueStatusView.as_view(), name='update-issue-status'),
     
     # 4️⃣ Issue Listing 
