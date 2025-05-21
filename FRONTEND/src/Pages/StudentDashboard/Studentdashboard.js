@@ -19,7 +19,7 @@ const StudentDashboard = () => {
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [showIssueDetailModal, setShowIssueDetailModal] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [successMessage, setSuccessMessage] = useState("");  // Added success message state
+  const [successMessage, setSuccessMessage] = useState(""); // Success message state
 
   // Fetch the student profile and issues
   useEffect(() => {
@@ -114,7 +114,7 @@ const StudentDashboard = () => {
             </div>
           )}
 
-          {/* Welcome Section  */}
+          {/* Welcome Section */}
           <div className="welcome-section">
             <div className="welcome-banner">
               <h2>
@@ -146,7 +146,7 @@ const StudentDashboard = () => {
             </div>
           </div>
 
-          {/* Tabs  */}
+          {/* Tabs */}
           <div className="tabs-container">
             <button
               className={activeTab === "dashboard" ? "tab active" : "tab"}
@@ -217,7 +217,7 @@ const StudentDashboard = () => {
             </div>
           )}
 
-          {/* Issues tab */}
+          {/* Issues Tab */}
           {activeTab === "issues" && (
             <IssueList
               issues={issues}
@@ -249,7 +249,7 @@ const StudentDashboard = () => {
             </div>
           )}
 
-          {/* Create the Issue Modal */}
+          {/* Create Issue Modal */}
           {showCreateIssueModal && (
             <CreateIssueForm
               onSubmit={(newIssue) => {
