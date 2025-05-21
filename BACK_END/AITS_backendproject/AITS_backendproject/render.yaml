@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: aits-backend
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn AITS_backendproject.wsgi:application
+    autoDeploy: true
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: AITS_backendproject.settings
+      - key: PYTHON_VERSION
+        value: 3.11 # or whatever version you're using
+      - key: DATABASE_URL
+        fromDatabase:
+          name: aits-db
+          property: connectionString
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_DEBUG
+        value: False
+      - key: ALLOWED_HOSTS
+        value: aits-backend.onrender.com
+      - key: EMAIL_HOST_USER
+        value: aitswebsite576@gmail.com
+      - key: EMAIL_HOST_PASSWORD
+        sync: false # You can manually add this in the Render dashboard
+
+databases:
+  - name: aits-db
+    plan: free
