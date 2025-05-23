@@ -1,15 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Header from "../../Components/layout/Header";
-import Sidebar from "../../Components/layout/Sidebar";
+import DashboardLayout from "../../Components/layout/DashboardLayout";
 import IssueList from "../../Components/issues/IssueList";
 import IssueDetail from "../../Components/issues/IssueDetail";
+import "./registrar-dashboard.css";
+import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import "./registrar-dashboard.css";
-
-import axios from "axios";
 
 const RegistrarDashboard = () => {
   const [issues, setIssues] = useState([]);
@@ -17,24 +15,10 @@ const RegistrarDashboard = () => {
   const [showIssueDetailModal, setShowIssueDetailModal] = useState(false);
   const [lecturers, setLecturers] = useState([]);
   const [registrarProfile, setRegistrarProfile] = useState({});
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const [activeView, setActiveView] = useState("dashboard");
 
   // Normalize snake_case → human‑readable
   const normalizeStatus = (s = "") => s.replace(/_/g, " ").trim().toLowerCase();
-
-  // Listen for sidebar navigation events
-  useEffect(() => {
-    const handleSidebarNavigation = (event) => {
-      const { navItem } = event.detail;
-      setActiveTab(navItem);
-    };
-
-    window.addEventListener("sidebarNavigation", handleSidebarNavigation);
-
-    return () => {
-      window.removeEventListener("sidebarNavigation", handleSidebarNavigation);
-    };
-  }, []);
 
   // Fetch the registrar profile
   useEffect(() => {
@@ -97,6 +81,17 @@ const RegistrarDashboard = () => {
       }
     }
     fetchLecturers();
+  }, []);
+
+  // Sidebar navigation
+  useEffect(() => {
+    const onNav = (e) => {
+      if (e.detail?.navItem) {
+        setActiveView(e.detail.navItem);
+      }
+    };
+    window.addEventListener("sidebarNavigation", onNav);
+    return () => window.removeEventListener("sidebarNavigation", onNav);
   }, []);
 
   const handleViewIssue = (issue) => {
@@ -176,7 +171,6 @@ const RegistrarDashboard = () => {
     resolved: issues.filter((i) =>
       ["resolved", "closed"].includes(normalizeStatus(i.status))
     ).length,
-    assigned: issues.filter((i) => i.assigneeId).length,
   };
 
   const assignedIssues = issues.filter((i) => i.assigneeId);
@@ -187,134 +181,9 @@ const RegistrarDashboard = () => {
     count: issues.filter((i) => i.assigneeId === l.id).length,
   }));
 
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return "Good morning";
-    if (hour < 18) return "Good afternoon";
-    return "Good evening";
-  };
-
-  // Render content based on active tab
+  // Render based on activeView
   const renderContent = () => {
-    switch (activeTab) {
-      case "dashboard":
-        return (
-          <div className="dashboard-content">
-            {/* Welcome Section */}
-            <div className="welcome-section">
-              <div className="welcome-banner">
-                <h2>
-                  {getGreeting()}, {registrarProfile.full_name || "Registrar"}!
-                </h2>
-                <p>
-                  Welcome to Makerere University Academic Issue Tracker. <br />
-                  Manage and assign students' academic issues to appropriate
-                  lecturers here.
-                </p>
-              </div>
-
-              <div className="stats-cards">
-                <div className="stat-card">
-                  <div className="stat-value">{stats.total}</div>
-                  <div className="stat-label">Total Issues</div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-value">{stats.open}</div>
-                  <div className="stat-label">Open Issues</div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-value">{stats.assigned}</div>
-                  <div className="stat-label">Assigned</div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-value">{stats.resolved}</div>
-                  <div className="stat-label">Resolved</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Tabs Container */}
-            <div className="tabs-container">
-              <button
-                className={activeTab === "dashboard" ? "tab active" : "tab"}
-                onClick={() => setActiveTab("dashboard")}
-              >
-                Dashboard
-              </button>
-              <button
-                className={activeTab === "issues" ? "tab active" : "tab"}
-                onClick={() => setActiveTab("issues")}
-              >
-                All Issues
-              </button>
-              <button
-                className={activeTab === "assigned" ? "tab active" : "tab"}
-                onClick={() => setActiveTab("assigned")}
-              >
-                Assigned Issues
-              </button>
-              <button
-                className={activeTab === "lecturers" ? "tab active" : "tab"}
-                onClick={() => setActiveTab("lecturers")}
-              >
-                Lecturers
-              </button>
-            </div>
-
-            {/* Recent Issues Table */}
-            <div className="issues-table-container">
-              <h3>Recent Issues</h3>
-              <table className="issues-table">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Title</th>
-                    <th>Description</th>
-                    <th>Submitted At</th>
-                    <th>Status</th>
-                    <th>Assigned To</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {issues.length > 0 ? (
-                    issues.slice(0, 5).map((issue) => (
-                      <tr key={issue.id}>
-                        <td>#{issue.id}</td>
-                        <td>{issue.title}</td>
-                        <td>{issue.description}</td>
-                        <td>{new Date(issue.created_at).toLocaleString()}</td>
-                        <td>
-                          <span
-                            className={`status-badge status-${normalizeStatus(
-                              issue.status
-                            ).replace(" ", "-")}`}
-                          >
-                            {normalizeStatus(issue.status)}
-                          </span>
-                        </td>
-                        <td>{issue.assigneeName || "Unassigned"}</td>
-                        <td>
-                          <button
-                            className="action-button"
-                            onClick={() => handleViewIssue(issue)}
-                          >
-                            View Details
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="7">No issues to display.</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        );
-
+    switch (activeView) {
       case "issues":
         return (
           <IssueList
@@ -341,36 +210,77 @@ const RegistrarDashboard = () => {
 
       case "lecturers":
         return (
-          <div className="lecturers-content">
-            <h3>Lecturers Overview</h3>
-            <div className="lecturers-grid">
-              {lecturerCounts.map((l) => (
-                <div key={l.id} className="lecturer-card">
-                  <h4>{l.name}</h4>
-                  <div className="lecturer-stats">
-                    <span className="issue-count">{l.count}</span>
-                    <span className="issue-label">
-                      assigned issue{l.count !== 1 ? "s" : ""}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
+          <div className="lecturers-view">
+            <h2>Lecturers</h2>
+            {lecturerCounts.map((l) => (
+              <div key={l.id} className="lecturer-card-full">
+                <h3>{l.name}</h3>
+                <p>
+                  {l.count} assigned issue{l.count !== 1 ? "s" : ""}
+                </p>
+              </div>
+            ))}
+          </div>
+        );
+
+      case "help":
+        return (
+          <div className="help-view">
+            <h2>Help & Support</h2>
+            <ul>
+              <li>Email: support@mak.ac.ug</li>
+              <li>Call: +256 414 123456</li>
+              <li>Visit: Room 101, CIT Building</li>
+            </ul>
           </div>
         );
 
       default:
         return (
-          <div className="dashboard-content">
-            <h2>Page Not Found</h2>
-            <p>The requested page could not be found.</p>
+          <div className="dashboard-overview">
+            <div className="welcome-banner">
+              <h2>
+                {getGreeting()}, {registrarProfile.full_name || "Registrar"}!
+              </h2>
+              <p>
+                Welcome to Makerere University Academic Issue Tracker. <br />
+                Manage and assign students' academic issues to appropriate
+                lecturers here.
+              </p>
+            </div>
+
+            <div className="stats-cards">
+              <div className="stat-card">
+                <div className="stat-value">{stats.total}</div>
+                <div className="stat-label">Total Issues</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-value">{stats.open}</div>
+                <div className="stat-label">Open Issues</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-value">{stats.inProgress}</div>
+                <div className="stat-label">In Progress</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-value">{stats.resolved}</div>
+                <div className="stat-label">Resolved</div>
+              </div>
+            </div>
           </div>
         );
     }
   };
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 18) return "Good afternoon";
+    return "Good evening";
+  };
+
   return (
-    <div className="registrar-dashboard">
+    <DashboardLayout userRole="Registrar" profile={registrarProfile}>
       <ToastContainer
         position="top-right"
         autoClose={4000}
@@ -383,46 +293,20 @@ const RegistrarDashboard = () => {
         pauseOnHover
         theme="colored"
       />
-      {/* Header */}
-      <Header
-        toggleSidebar={() => {}}
-        isMobile={false}
-        sidebarOpen={false}
-        userRole="Registrar"
-        profile={registrarProfile}
-      />
+      <div className="registrar-dashboard">{renderContent()}</div>
 
-      {/* Layout */}
-      <div className="dashboard-layout">
-        {/* Sidebar */}
-        <Sidebar
-          sidebarOpen={true}
+      {showIssueDetailModal && selectedIssue && (
+        <IssueDetail
+          issue={selectedIssue}
+          onClose={() => setShowIssueDetailModal(false)}
+          onStatusChange={handleStatusChange}
+          onAddComment={handleAddComment}
+          onAssign={handleAssign}
           userRole="Registrar"
-          profile={registrarProfile}
-          activeTab={activeTab}
-          onNavigate={(tab) => setActiveTab(tab)}
+          lecturers={lecturers}
         />
-
-        {/* Main Content */}
-        <div className="dashboard-main-content">
-          {/* Dynamic Content Based on Active Tab */}
-          {renderContent()}
-
-          {/* Issue Detail Modal */}
-          {showIssueDetailModal && selectedIssue && (
-            <IssueDetail
-              issue={selectedIssue}
-              onClose={() => setShowIssueDetailModal(false)}
-              onStatusChange={handleStatusChange}
-              onAddComment={handleAddComment}
-              onAssign={handleAssign}
-              userRole="Registrar"
-              lecturers={lecturers}
-            />
-          )}
-        </div>
-      </div>
-    </div>
+      )}
+    </DashboardLayout>
   );
 };
 
