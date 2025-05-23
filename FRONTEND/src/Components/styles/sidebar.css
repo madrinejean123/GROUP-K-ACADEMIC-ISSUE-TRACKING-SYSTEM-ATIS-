@@ -9,6 +9,7 @@
   top: 60px;
   border-right: 1px solid var(--border-color);
   z-index: 10;
+  overflow: hidden;
 }
 
 .sidebar.closed {
@@ -54,7 +55,8 @@
 .sidebar-nav {
   display: flex;
   flex-direction: column;
-  height: calc(100% - 140px); 
+  height: calc(100% - 140px);
+  overflow-x: hidden;
 }
 
 .sidebar-nav-main {
@@ -165,5 +167,3 @@
     width: 0;
   }
 }
-
-               
