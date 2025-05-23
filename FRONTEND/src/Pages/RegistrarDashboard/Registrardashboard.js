@@ -95,7 +95,9 @@ const RegistrarDashboard = () => {
 
   const handleStatusChange = (newStatus) => {
     setIssues((prev) =>
-      prev.map((i) => (i.id === selectedIssue.id ? { ...i, status: newStatus } : i))
+      prev.map((i) =>
+        i.id === selectedIssue.id ? { ...i, status: newStatus } : i
+      )
     );
     setSelectedIssue((prev) => ({ ...prev, status: newStatus }));
   };
@@ -113,7 +115,10 @@ const RegistrarDashboard = () => {
           : i
       )
     );
-    setSelectedIssue((prev) => ({ ...prev, comments: [...(prev.comments || []), newComment] }));
+    setSelectedIssue((prev) => ({
+      ...prev,
+      comments: [...(prev.comments || []), newComment],
+    }));
   };
 
   const handleAssign = (issueId, lecturerId, lecturerName) => {
@@ -125,7 +130,11 @@ const RegistrarDashboard = () => {
       )
     );
     if (selectedIssue?.id === issueId) {
-      setSelectedIssue((prev) => ({ ...prev, assigneeName: lecturerName, assigneeId: lecturerId }));
+      setSelectedIssue((prev) => ({
+        ...prev,
+        assigneeName: lecturerName,
+        assigneeId: lecturerId,
+      }));
     }
   };
 
@@ -133,8 +142,11 @@ const RegistrarDashboard = () => {
   const stats = {
     total: issues.length,
     open: issues.filter((i) => i.status?.toLowerCase() === "open").length,
-    inProgress: issues.filter((i) => i.status?.toLowerCase() === "in progress").length,
-    resolved: issues.filter((i) => ["resolved", "closed"].includes(normalizeStatus(i.status))).length,
+    inProgress: issues.filter((i) => i.status?.toLowerCase() === "in progress")
+      .length,
+    resolved: issues.filter((i) =>
+      ["resolved", "closed"].includes(normalizeStatus(i.status))
+    ).length,
   };
 
   const assignedIssues = issues.filter((i) => i.assigneeId);
@@ -179,7 +191,9 @@ const RegistrarDashboard = () => {
             {lecturerCounts.map((l) => (
               <div key={l.id} className="lecturer-card-full">
                 <h3>{l.name}</h3>
-                <p>{l.count} assigned issue{l.count !== 1 ? 's' : ''}</p>
+                <p>
+                  {l.count} assigned issue{l.count !== 1 ? "s" : ""}
+                </p>
               </div>
             ))}
           </div>
@@ -205,9 +219,9 @@ const RegistrarDashboard = () => {
                 {getGreeting()}, {registrarProfile.full_name || "Registrar"}!
               </h2>
               <p>
-                Welcome to Makerere University Academic Issue Tracker.
-                <br />
-                Manage and assign student issues to appropriate lecturers here.
+                Welcome to Makerere University Academic Issue Tracker. <br />
+                Manage and assign students' academic issues to appropriate
+                lecturers here.
               </p>
             </div>
 
