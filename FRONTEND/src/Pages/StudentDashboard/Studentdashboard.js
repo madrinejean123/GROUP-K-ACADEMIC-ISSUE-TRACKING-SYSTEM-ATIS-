@@ -3,6 +3,8 @@ import Header from "../../Components/layout/Header";
 import Sidebar from "../../Components/layout/Sidebar";
 import IssueList from "../../Components/issues/IssueList";
 import CreateIssueForm from "../../Components/issues/CreateIssueForm";
+import { ToastContainer, toast } from "react-toastify";
+
 import IssueDetail from "../../Components/issues/IssueDetail";
 import "./student-dashboard.css";
 import axios from "axios";
@@ -109,9 +111,7 @@ const StudentDashboard = () => {
         <div className="dashboard-main-content">
           {/* Success message */}
           {successMessage && (
-            <div className="success-message">
-              {successMessage}
-            </div>
+            <div className="success-message">{successMessage}</div>
           )}
 
           {/* Welcome Section */}
