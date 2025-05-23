@@ -26,36 +26,6 @@ const StudentDashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [successMessage, setSuccessMessage] = useState("");
 
-  // Mock data for preview environment
-  const mockProfile = {
-    full_name: "John Doe",
-    student_no: "2021/BCS/001",
-    college: { name: "College of Computing and Information Sciences" },
-    school: { school_name: "School of Computing and Informatics Technology" },
-    department: { name: "Computer Science" },
-  };
-
-  const mockIssues = [
-    {
-      id: 1,
-      title: "Missing marks for CSC2101",
-      description: "Missing coursework marks for Computer Programming course",
-      status: "Open",
-      category: "missing_marks",
-      created_at: "2024-01-15T10:30:00Z",
-      comments: [],
-    },
-    {
-      id: 2,
-      title: "Grade appeal for MATH1201",
-      description: "Requesting review of final exam grade",
-      status: "In Progress",
-      category: "appeals",
-      created_at: "2024-01-10T14:20:00Z",
-      comments: [],
-    },
-  ];
-
   // Listen for sidebar navigation events
   useEffect(() => {
     const handleSidebarNavigation = (event) => {
@@ -77,9 +47,7 @@ const StudentDashboard = () => {
         const token = localStorage.getItem("access_token");
 
         if (!token) {
-          console.log("No access token found, using mock data for preview");
-          setStudentProfile(mockProfile);
-          setIssues(mockIssues);
+          console.log("No access token found");
           return;
         }
 
@@ -100,17 +68,6 @@ const StudentDashboard = () => {
         setIssues(issuesResponse.data);
       } catch (error) {
         console.error("Error fetching student data:", error);
-
-        // Handle authentication errors gracefully
-        if (error.response?.status === 401) {
-          console.log("Authentication failed, using mock data for preview");
-          setStudentProfile(mockProfile);
-          setIssues(mockIssues);
-        } else {
-          console.log("API error, using mock data for preview");
-          setStudentProfile(mockProfile);
-          setIssues(mockIssues);
-        }
       }
     };
 

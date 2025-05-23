@@ -272,6 +272,7 @@
 }
 
 .action-button {
+  width: auto;
   background-color: var(--hover-bg);
   border: none;
   padding: 5px 10px;
