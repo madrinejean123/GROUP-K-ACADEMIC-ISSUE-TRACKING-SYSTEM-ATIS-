@@ -161,6 +161,10 @@
   width: 100%;
 }
 
+.lecturers-view p {
+  font-size: 1rem;
+  color: black;
+}
 .lecturers-view h2 {
   margin-bottom: 20px;
   color: var(--text-primary);
