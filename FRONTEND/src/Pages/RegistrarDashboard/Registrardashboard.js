@@ -210,16 +210,21 @@ const RegistrarDashboard = () => {
 
       case "lecturers":
         return (
-          <div className="lecturers-view">
-            <h2>Lecturers</h2>
-            {lecturerCounts.map((l) => (
-              <div key={l.id} className="lecturer-card-full">
-                <h3>{l.name}</h3>
-                <p>
-                  {l.count} assigned issue{l.count !== 1 ? "s" : ""}
-                </p>
-              </div>
-            ))}
+          <div className="lecturers-content">
+            <h3>Lecturers Overview</h3>
+            <div className="lecturers-grid">
+              {lecturerCounts.map((l) => (
+                <div key={l.id} className="lecturer-card">
+                  <h4>{l.name}</h4>
+                  <div className="lecturer-stats">
+                    <span className="issue-count">{l.count}</span>
+                    <span className="issue-label">
+                      assigned issue{l.count !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         );
 
@@ -237,35 +242,119 @@ const RegistrarDashboard = () => {
 
       default:
         return (
-          <div className="dashboard-overview">
-            <div className="welcome-banner">
-              <h2>
-                {getGreeting()}, {registrarProfile.full_name || "Registrar"}!
-              </h2>
-              <p>
-                Welcome to Makerere University Academic Issue Tracker. <br />
-                Manage and assign students' academic issues to appropriate
-                lecturers here.
-              </p>
+          <div className="dashboard-content">
+            {/* Welcome Section */}
+            <div className="welcome-section">
+              <div className="welcome-banner">
+                <h2>
+                  {getGreeting()}, {registrarProfile.full_name || "Registrar"}!
+                </h2>
+                <p>
+                  Welcome to Makerere University Academic Issue Tracker. <br />
+                  Manage and assign students' academic issues to appropriate
+                  lecturers here.
+                </p>
+              </div>
+
+              <div className="stats-cards">
+                <div className="stat-card">
+                  <div className="stat-value">{stats.total}</div>
+                  <div className="stat-label">Total Issues</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-value">{stats.open}</div>
+                  <div className="stat-label">Open Issues</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-value">{stats.inProgress}</div>
+                  <div className="stat-label">In Progress</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-value">{stats.resolved}</div>
+                  <div className="stat-label">Resolved</div>
+                </div>
+              </div>
             </div>
 
-            <div className="stats-cards">
-              <div className="stat-card">
-                <div className="stat-value">{stats.total}</div>
-                <div className="stat-label">Total Issues</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-value">{stats.open}</div>
-                <div className="stat-label">Open Issues</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-value">{stats.inProgress}</div>
-                <div className="stat-label">In Progress</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-value">{stats.resolved}</div>
-                <div className="stat-label">Resolved</div>
-              </div>
+            {/* Tabs Container */}
+            <div className="tabs-container">
+              <button
+                className={activeView === "dashboard" ? "tab active" : "tab"}
+                onClick={() => setActiveView("dashboard")}
+              >
+                Dashboard
+              </button>
+              <button
+                className={activeView === "issues" ? "tab active" : "tab"}
+                onClick={() => setActiveView("issues")}
+              >
+                All Issues
+              </button>
+              <button
+                className={activeView === "assigned" ? "tab active" : "tab"}
+                onClick={() => setActiveView("assigned")}
+              >
+                Assigned Issues
+              </button>
+              <button
+                className={activeView === "lecturers" ? "tab active" : "tab"}
+                onClick={() => setActiveView("lecturers")}
+              >
+                Lecturers
+              </button>
+            </div>
+
+            
+            {/* Recent Issues Table */}
+            <div className="issues-table-container">
+              <h3>Recent Issues</h3>
+              <table className="issues-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Submitted At</th>
+                    <th>Status</th>
+                    <th>Assigned To</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {issues.length > 0 ? (
+                    issues.slice(0, 5).map((issue) => (
+                      <tr key={issue.id}>
+                        <td>#{issue.id}</td>
+                        <td>{issue.title}</td>
+                        <td>{issue.description}</td>
+                        <td>{new Date(issue.created_at).toLocaleString()}</td>
+                        <td>
+                          <span
+                            className={`status-badge status-${normalizeStatus(
+                              issue.status
+                            ).replace(" ", "-")}`}
+                          >
+                            {normalizeStatus(issue.status)}
+                          </span>
+                        </td>
+                        <td>{issue.assigneeName || "Unassigned"}</td>
+                        <td>
+                          <button
+                            className="action-button"
+                            onClick={() => handleViewIssue(issue)}
+                          >
+                            View Details
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="7">No issues to display.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
         );
