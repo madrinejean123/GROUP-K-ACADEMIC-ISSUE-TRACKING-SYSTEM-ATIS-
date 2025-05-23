@@ -1,193 +1,146 @@
-// import React, { useState, useEffect } from "react";
-// import DashboardLayout from "../../Components/layout/DashboardLayout";
-// import IssueList from "../../Components/issues/IssueList";
-// import IssueDetail from "../../Components/issues/IssueDetail";
-// import axios from "axios";
-
-"use client"
-
-import { useState, useEffect } from "react"
-import Header from "../../Components/layout/Header"
-import Sidebar from "../../Components/layout/Sidebar"
-import IssueDetail from "../../Components/issues/IssueDetail"
-import { ToastContainer, toast } from "react-toastify"
+import { useState, useEffect } from "react";
+import Header from "../../Components/layout/Header";
+import Sidebar from "../../Components/layout/Sidebar";
+import IssueDetail from "../../Components/issues/IssueDetail";
+import { ToastContainer, toast } from "react-toastify";
 
 import "./lecturer-dashboard.css";
 
-import axios from "axios"
+import axios from "axios";
 
-const PROFILE_API_URL = "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/profile/"
-const ALL_ISSUES_API_URL = "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/list/"
-const UPDATE_STATUS_API_URL = "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/update-status/"
+const PROFILE_API_URL =
+  "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/profile/";
+const ALL_ISSUES_API_URL =
+  "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/list/";
+const UPDATE_STATUS_API_URL =
+  "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/update-status/";
 
 const LecturerDashboard = () => {
-  const [lecturerProfile, setLecturerProfile] = useState({})
-  const [issues, setIssues] = useState([])
-  const [selectedIssue, setSelectedIssue] = useState(null)
-  const [showIssueDetailModal, setShowIssueDetailModal] = useState(false)
-  const [activeTab, setActiveTab] = useState("dashboard")
-  const [resolvingIssueId, setResolvingIssueId] = useState(null)
-  const [noteIssueId, setNoteIssueId] = useState(null)
-  const [noteText, setNoteText] = useState("")
-
-  // Mock data for preview environment
-  const mockProfile = {
-    id: 1,
-    full_name: "John Smith",
-    email: "jsmith@example.com",
-    role: "Lecturer",
-  }
-
-  const mockIssues = [
-    {
-      id: 1,
-      title: "Missing marks for CSC2101",
-      description: "Missing coursework marks for Computer Programming course",
-      status: "Open",
-      category: "missing_marks",
-      created_at: "2024-01-15T10:30:00Z",
-      author: { user: { id: 101 } },
-      comments: [],
-    },
-    {
-      id: 2,
-      title: "Grade appeal for MATH1201",
-      description: "Requesting review of final exam grade",
-      status: "In Progress",
-      category: "appeals",
-      created_at: "2024-01-10T14:20:00Z",
-      author: { user: { id: 102 } },
-      comments: [],
-    },
-    {
-      id: 3,
-      title: "Correction for CSC3102",
-      description: "Correction needed for final project grade",
-      status: "Resolved",
-      category: "correction",
-      created_at: "2024-01-05T09:15:00Z",
-      author: { user: { id: 103 } },
-      resolution_notes: "Grade has been corrected in the system",
-      comments: [],
-    },
-  ]
+  const [lecturerProfile, setLecturerProfile] = useState({});
+  const [issues, setIssues] = useState([]);
+  const [selectedIssue, setSelectedIssue] = useState(null);
+  const [showIssueDetailModal, setShowIssueDetailModal] = useState(false);
+  const [activeTab, setActiveTab] = useState("dashboard");
+  const [resolvingIssueId, setResolvingIssueId] = useState(null);
+  const [noteIssueId, setNoteIssueId] = useState(null);
+  const [noteText, setNoteText] = useState("");
 
   // Listen for sidebar navigation events
   useEffect(() => {
     const handleSidebarNavigation = (event) => {
-      const { navItem } = event.detail
-      setActiveTab(navItem)
-    }
+      const { navItem } = event.detail;
+      setActiveTab(navItem);
+    };
 
-    window.addEventListener("sidebarNavigation", handleSidebarNavigation)
+    window.addEventListener("sidebarNavigation", handleSidebarNavigation);
 
     return () => {
-      window.removeEventListener("sidebarNavigation", handleSidebarNavigation)
-    }
-  }, [])
+      window.removeEventListener("sidebarNavigation", handleSidebarNavigation);
+    };
+  }, []);
 
   // Fetch the lecturer profile
   useEffect(() => {
     const fetchLecturerProfile = async () => {
+      const token = localStorage.getItem("access_token");
+      if (!token) return;
       try {
-        const token = localStorage.getItem("access_token")
-
-        if (!token) {
-          console.log("No access token found, using mock data for preview")
-          setLecturerProfile(mockProfile)
-          setIssues(mockIssues)
-          return
-        }
-
         const { data } = await axios.get(PROFILE_API_URL, {
           headers: { Authorization: `Bearer ${token}` },
-        })
-        setLecturerProfile(Array.isArray(data) ? data[0] : data)
-
-        // Fetch issues after profile is loaded
-        const { data: issuesData } = await axios.get(ALL_ISSUES_API_URL, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        setIssues(issuesData)
+        });
+        setLecturerProfile(Array.isArray(data) ? data[0] : data);
       } catch (err) {
-        console.error("Error fetching data", err)
-
-        // Handle authentication errors gracefully
-        if (err.response?.status === 401) {
-          console.log("Authentication failed, using mock data for preview")
-          setLecturerProfile(mockProfile)
-          setIssues(mockIssues)
-        } else {
-          console.log("API error, using mock data for preview")
-          setLecturerProfile(mockProfile)
-          setIssues(mockIssues)
-        }
+        console.error("Error fetching profile", err);
       }
-    }
+    };
+    fetchLecturerProfile();
+  }, []);
 
-    fetchLecturerProfile()
-  }, [])
+  // Fetch the issues once profile is loaded
+  useEffect(() => {
+    if (!lecturerProfile.id) return;
+    const fetchIssues = async () => {
+      const token = localStorage.getItem("access_token");
+      if (!token) return;
+      try {
+        const { data } = await axios.get(ALL_ISSUES_API_URL, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setIssues(data);
+      } catch (err) {
+        console.error("Error fetching issues", err);
+      }
+    };
+    fetchIssues();
+  }, [lecturerProfile]);
 
   // Show inline input for resolution notes
   const handleResolve = (issueId) => {
-    setNoteIssueId(issueId)
-    setNoteText("")
-  }
+    setNoteIssueId(issueId);
+    setNoteText("");
+  };
 
   const handleCancelResolution = () => {
-    setNoteIssueId(null)
-    setNoteText("")
-  }
+    setNoteIssueId(null);
+    setNoteText("");
+  };
 
   const handleSubmitResolution = async (issueId) => {
     if (noteText.trim() === "") {
-      toast.error("Resolution notes cannot be empty.")
-      return
+      toast.error("Resolution notes cannot be empty.");
+      return;
     }
-    setResolvingIssueId(issueId)
+    setResolvingIssueId(issueId);
     try {
-      const token = localStorage.getItem("access_token")
+      const token = localStorage.getItem("access_token");
 
       if (!token) {
-        // Simulate API delay for preview
-        await new Promise((resolve) => setTimeout(resolve, 1000))
+        await new Promise((resolve) => setTimeout(resolve, 1000));
 
         setIssues((prev) =>
-          prev.map((i) => (i.id === issueId ? { ...i, status: "Resolved", resolution_notes: noteText } : i)),
-        )
+          prev.map((i) =>
+            i.id === issueId
+              ? { ...i, status: "Resolved", resolution_notes: noteText }
+              : i
+          )
+        );
 
-        toast.success("Issue resolved successfully!")
-        setResolvingIssueId(null)
-        setNoteIssueId(null)
-        setNoteText("")
-        return
+        toast.success("Issue resolved successfully!");
+        setResolvingIssueId(null);
+        setNoteIssueId(null);
+        setNoteText("");
+        return;
       }
 
-      const payload = { status: "resolved", resolution_notes: noteText }
+      const payload = { status: "resolved", resolution_notes: noteText };
       await axios.patch(`${UPDATE_STATUS_API_URL}${issueId}/`, payload, {
         headers: { Authorization: `Bearer ${token}` },
-      })
+      });
 
       setIssues((prev) =>
-        prev.map((i) => (i.id === issueId ? { ...i, status: "Resolved", resolution_notes: noteText } : i)),
-      )
+        prev.map((i) =>
+          i.id === issueId
+            ? { ...i, status: "Resolved", resolution_notes: noteText }
+            : i
+        )
+      );
 
-      toast.success("Issue resolved successfully!")
+      toast.success("Issue resolved successfully!");
     } catch (err) {
-      console.error("Error resolving issue", err)
-      toast.error("Failed to resolve issue. Please try again.")
+      console.error("Error resolving issue", err);
+      toast.error("Failed to resolve issue. Please try again.");
     } finally {
-      setResolvingIssueId(null)
-      setNoteIssueId(null)
-      setNoteText("")
+      setResolvingIssueId(null);
+      setNoteIssueId(null);
+      setNoteText("");
     }
-  }
+  };
 
   // Open detail modal
   const handleViewIssue = (issue) => {
-    setSelectedIssue(issue)
-    setShowIssueDetailModal(true)
-  }
+    setSelectedIssue(issue);
+    setShowIssueDetailModal(true);
+  };
 
   // Callback for detail modal status change
   const handleStatusChange = (newStatus, notes = null) => {
@@ -199,15 +152,15 @@ const LecturerDashboard = () => {
               status: newStatus,
               resolution_notes: notes ?? i.resolution_notes,
             }
-          : i,
-      ),
-    )
+          : i
+      )
+    );
     setSelectedIssue((i) => ({
       ...i,
       status: newStatus,
       resolution_notes: notes ?? i.resolution_notes,
-    }))
-  }
+    }));
+  };
 
   // Add comment locally
   const handleAddComment = (commentText) => {
@@ -215,41 +168,45 @@ const LecturerDashboard = () => {
       author: `Dr. ${lecturerProfile.full_name}`,
       date: new Date().toISOString().split("T")[0],
       content: commentText,
-    }
+    };
     setIssues((all) =>
-      all.map((i) => (i.id === selectedIssue.id ? { ...i, comments: [...(i.comments || []), newComment] } : i)),
-    )
+      all.map((i) =>
+        i.id === selectedIssue.id
+          ? { ...i, comments: [...(i.comments || []), newComment] }
+          : i
+      )
+    );
     setSelectedIssue((i) => ({
       ...i,
       comments: [...(i.comments || []), newComment],
-    }))
-  }
+    }));
+  };
 
   // Filtering and the stats
-  const normalize = (s) => s.replace(/_/g, " ").toLowerCase()
+  const normalize = (s) => s.replace(/_/g, " ").toLowerCase();
 
   const assignedIssues = issues.filter((i) => {
-    const st = normalize(i.status)
-    return st === "open" || st === "in progress"
-  })
+    const st = normalize(i.status);
+    return st === "open" || st === "in progress";
+  });
 
   const resolvedIssues = issues.filter((i) => {
-    const st = normalize(i.status)
-    return st === "resolved" || st === "closed"
-  })
+    const st = normalize(i.status);
+    return st === "resolved" || st === "closed";
+  });
 
   const stats = {
     assigned: assignedIssues.length,
     resolved: resolvedIssues.length,
     students: new Set(issues.map((i) => i.author?.user?.id || i.id)).size,
-  }
+  };
 
   const getGreeting = () => {
-    const hour = new Date().getHours()
-    if (hour < 12) return "Good morning"
-    if (hour < 18) return "Good afternoon"
-    return "Good evening"
-  }
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 18) return "Good afternoon";
+    return "Good evening";
+  };
 
   // Render content based on active tab
   const renderContent = () => {
@@ -261,11 +218,13 @@ const LecturerDashboard = () => {
             <div className="welcome-section">
               <div className="welcome-banner">
                 <h2>
-                  {getGreeting()}, Dr. {lecturerProfile.full_name || "Lecturer"} !
+                  {getGreeting()}, Dr. {lecturerProfile.full_name || "Lecturer"}{" "}
+                  !
                 </h2>
                 <p>
                   Welcome to Makerere University Academic Issue Tracker. <br />
-                  Manage and resolve assigned student academic related issues here.
+                  Manage and resolve assigned student academic related issues
+                  here.
                 </p>
               </div>
 
@@ -330,12 +289,19 @@ const LecturerDashboard = () => {
                         <td>{issue.description}</td>
                         <td>{new Date(issue.created_at).toLocaleString()}</td>
                         <td>
-                          <span className={`status-badge status-${normalize(issue.status).replace(" ", "-")}`}>
+                          <span
+                            className={`status-badge status-${normalize(
+                              issue.status
+                            ).replace(" ", "-")}`}
+                          >
                             {normalize(issue.status)}
                           </span>
                         </td>
                         <td>
-                          <button className="action-button" onClick={() => handleViewIssue(issue)}>
+                          <button
+                            className="action-button"
+                            onClick={() => handleViewIssue(issue)}
+                          >
                             View Details
                           </button>
                         </td>
@@ -350,7 +316,7 @@ const LecturerDashboard = () => {
               </table>
             </div>
           </div>
-        )
+        );
 
       case "assigned":
         return (
@@ -377,7 +343,11 @@ const LecturerDashboard = () => {
                         <td>{issue.description}</td>
                         <td>{new Date(issue.created_at).toLocaleString()}</td>
                         <td>
-                          <span className={`status-badge status-${normalize(issue.status).replace(" ", "-")}`}>
+                          <span
+                            className={`status-badge status-${normalize(
+                              issue.status
+                            ).replace(" ", "-")}`}
+                          >
                             {normalize(issue.status)}
                           </span>
                         </td>
@@ -392,19 +362,29 @@ const LecturerDashboard = () => {
                               <div className="resolution-actions">
                                 <button
                                   className="submit-button"
-                                  onClick={() => handleSubmitResolution(issue.id)}
+                                  onClick={() =>
+                                    handleSubmitResolution(issue.id)
+                                  }
                                   disabled={resolvingIssueId === issue.id}
                                 >
-                                  {resolvingIssueId === issue.id ? "Resolving..." : "Done"}
+                                  {resolvingIssueId === issue.id
+                                    ? "Resolving..."
+                                    : "Done"}
                                 </button>
-                                <button className="cancel-button" onClick={handleCancelResolution}>
+                                <button
+                                  className="cancel-button"
+                                  onClick={handleCancelResolution}
+                                >
                                   Cancel
                                 </button>
                               </div>
                             </div>
                           ) : (
                             <div className="action-buttons">
-                              <button className="action-button" onClick={() => handleViewIssue(issue)}>
+                              <button
+                                className="action-button"
+                                onClick={() => handleViewIssue(issue)}
+                              >
                                 View
                               </button>
                               <button
@@ -412,7 +392,9 @@ const LecturerDashboard = () => {
                                 onClick={() => handleResolve(issue.id)}
                                 disabled={resolvingIssueId === issue.id}
                               >
-                                {resolvingIssueId === issue.id ? "Resolving..." : "Resolve"}
+                                {resolvingIssueId === issue.id
+                                  ? "Resolving..."
+                                  : "Resolve"}
                               </button>
                             </div>
                           )}
@@ -428,7 +410,7 @@ const LecturerDashboard = () => {
               </table>
             </div>
           </div>
-        )
+        );
 
       case "resolved":
         return (
@@ -456,13 +438,20 @@ const LecturerDashboard = () => {
                         <td>{issue.description}</td>
                         <td>{new Date(issue.created_at).toLocaleString()}</td>
                         <td>
-                          <span className={`status-badge status-${normalize(issue.status).replace(" ", "-")}`}>
+                          <span
+                            className={`status-badge status-${normalize(
+                              issue.status
+                            ).replace(" ", "-")}`}
+                          >
                             {normalize(issue.status)}
                           </span>
                         </td>
                         <td>{issue.resolution_notes || "No notes provided"}</td>
                         <td>
-                          <button className="action-button" onClick={() => handleViewIssue(issue)}>
+                          <button
+                            className="action-button"
+                            onClick={() => handleViewIssue(issue)}
+                          >
                             View Details
                           </button>
                         </td>
@@ -477,7 +466,7 @@ const LecturerDashboard = () => {
               </table>
             </div>
           </div>
-        )
+        );
 
       default:
         return (
@@ -485,9 +474,9 @@ const LecturerDashboard = () => {
             <h2>Page Not Found</h2>
             <p>The requested page could not be found.</p>
           </div>
-        )
+        );
     }
-  }
+  };
 
   return (
     <div className="lecturer-dashboard">
@@ -530,11 +519,10 @@ const LecturerDashboard = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default LecturerDashboard
-
+export default LecturerDashboard;
 
 // const PROFILE_API_URL =
 //   "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/profile/";
