@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import DashboardLayout from "../../Components/layout/DashboardLayout";
 import IssueList from "../../Components/issues/IssueList";
 import IssueDetail from "../../Components/issues/IssueDetail";
 import "./registrar-dashboard.css";
 import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const RegistrarDashboard = () => {
   const [issues, setIssues] = useState([]);
@@ -26,7 +28,9 @@ const RegistrarDashboard = () => {
       try {
         const { data } = await axios.get(
           "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/profile/",
-          { headers: { Authorization: `Bearer ${token}` } }
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
         );
         setRegistrarProfile(Array.isArray(data) ? data[0] : data);
       } catch (e) {
@@ -44,7 +48,9 @@ const RegistrarDashboard = () => {
       try {
         const { data } = await axios.get(
           "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/list/",
-          { headers: { Authorization: `Bearer ${token}` } }
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
         );
         const withAssignees = data.map((i) => ({
           ...i,
@@ -122,6 +128,7 @@ const RegistrarDashboard = () => {
   };
 
   const handleAssign = (issueId, lecturerId, lecturerName) => {
+    // Update the issues state
     setIssues((prev) =>
       prev.map((i) =>
         i.id === issueId
@@ -129,6 +136,8 @@ const RegistrarDashboard = () => {
           : i
       )
     );
+
+    // Update selected issue if it's the one being assigned
     if (selectedIssue?.id === issueId) {
       setSelectedIssue((prev) => ({
         ...prev,
@@ -136,6 +145,21 @@ const RegistrarDashboard = () => {
         assigneeId: lecturerId,
       }));
     }
+
+    // Show success toast notification
+    toast.success(
+      `Issue #${issueId} successfully assigned to ${lecturerName}`,
+      {
+        position: "top-right",
+        autoClose: 4000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+      }
+    );
   };
 
   // Stats & filters
@@ -205,8 +229,8 @@ const RegistrarDashboard = () => {
             <h2>Help & Support</h2>
             <ul>
               <li>Email: support@mak.ac.ug</li>
-              <li>Call: +256 414 123456</li>
-              <li>Visit: Room 101, CIT Building</li>
+              <li>Call: +256 414 123456</li>
+              <li>Visit: Room 101, CIT Building</li>
             </ul>
           </div>
         );
@@ -257,6 +281,18 @@ const RegistrarDashboard = () => {
 
   return (
     <DashboardLayout userRole="Registrar" profile={registrarProfile}>
+      <ToastContainer
+        position="top-right"
+        autoClose={4000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
       <div className="registrar-dashboard">{renderContent()}</div>
 
       {showIssueDetailModal && selectedIssue && (
