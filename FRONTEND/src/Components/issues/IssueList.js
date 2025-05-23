@@ -9,7 +9,7 @@ const IssueList = ({
   showCreateButton = true,
   onCreateIssue,
   onViewIssue,
-  onAssign,          // <-- accept onAssign prop
+  onAssign, // <-- accept onAssign prop
   userRole,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -24,18 +24,10 @@ const IssueList = ({
         .includes(searchTerm.toLowerCase())
     )
     .filter(
-      (i) =>
-        statusFilter === "all" ||
-        i.status.toLowerCase() === statusFilter
+      (i) => statusFilter === "all" || i.status.toLowerCase() === statusFilter
     )
-    .filter(
-      (i) =>
-        categoryFilter === "all" ||
-        i.category === categoryFilter
-    )
-    .sort(
-      (a, b) => new Date(b.created_at) - new Date(a.created_at)
-    );
+    .filter((i) => categoryFilter === "all" || i.category === categoryFilter)
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
   return (
     <div className="issues-section">
@@ -89,7 +81,7 @@ const IssueList = ({
       <IssueTable
         issues={filtered}
         onViewIssue={onViewIssue}
-        onAssign={onAssign}       // <-- pass onAssign down
+        onAssign={onAssign} // <-- pass onAssign down
         userRole={userRole}
       />
     </div>
