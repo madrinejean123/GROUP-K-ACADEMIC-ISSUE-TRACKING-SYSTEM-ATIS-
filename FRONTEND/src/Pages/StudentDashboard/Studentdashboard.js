@@ -180,6 +180,11 @@ const StudentDashboard = () => {
                   <li>Attach supporting documents (PDFs, images, etc.).</li>
                   <li>Provide screenshots when applicable.</li>
                   <li>Check existing issues before creating a new one.</li>
+                  <li>
+                    After creation of an issue, check the issue list for
+                    satisfactory confirmation.
+                  </li>
+                  <li>Reload the page to update the time of creation.</li>
                 </ul>
               </div>
 
