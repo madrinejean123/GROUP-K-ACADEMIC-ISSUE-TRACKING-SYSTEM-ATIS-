@@ -6,8 +6,6 @@ from django.core.validators import (
 from django.core.exceptions import ValidationError
 from users.models import Student, Lecturer, CollegeRegister
 from department.models import Department, College, School
-import os
-from datetime import timedelta
 from django.utils import timezone
 
 def validate_file_size(value):
@@ -16,9 +14,9 @@ def validate_file_size(value):
         raise ValidationError('File too large. Size should not exceed 5MB.')
 
 def issue_attachment_path(instance, filename):
-    """Organizes attachments by year/month/issue_id"""
-    date = instance.created_at.strftime("%Y/%m")
-    return f'issues/attachments/{date}/{instance.id}/{filename}'
+    """Organizes attachments by year/month/temp folder (since issue not saved yet)"""
+    date = timezone.now().strftime("%Y/%m")
+    return f'issues/attachments/{date}/temp/{filename}'
 
 class Issue(models.Model):
     STATUS_CHOICES = [
