@@ -2,8 +2,8 @@ from rest_framework import generics, permissions, status
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.decorators import throttle_classes
 from rest_framework.throttling import UserRateThrottle
+from rest_framework.decorators import throttle_classes
 from django.core.exceptions import ValidationError
 from django.http import FileResponse, Http404
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -32,34 +32,36 @@ logger = logging.getLogger(__name__)
 class IssueCreateThrottle(UserRateThrottle):
     rate = '10/minute'
 
+
 class CreateIssueView(generics.CreateAPIView):
     serializer_class   = IssueCreateSerializer
     permission_classes = [permissions.IsAuthenticated]
-    parser_classes     = (MultiPartParser, FormParser)   # ← allow file uploads
+    parser_classes     = (MultiPartParser, FormParser)    # ← enable file uploads
+    throttle_classes   = [IssueCreateThrottle]            # ← apply your throttle
 
-    @throttle_classes([IssueCreateThrottle])
+    def create(self, request, *args, **kwargs):
+        # Log exactly what arrived for debugging:
+        logger.debug("CreateIssueView: request.data = %s", request.data)
+        logger.debug("CreateIssueView: request.FILES = %s", request.FILES)
+        return super().create(request, *args, **kwargs)
+
     def perform_create(self, serializer):
-        try:
-            instance = serializer.save()
-            if instance.handled_by:
-                send_notification_email(
-                    subject=f'New Issue #{instance.id}',
-                    message=(
-                        f"Issue submitted by {instance.author.user.get_full_name()}\n"
-                        f"Direct link: /issues/{instance.id}"
-                    ),
-                    recipient_email=instance.handled_by.user.notification_email
-                )
-        except ValidationError as e:
-            logger.error(f"Issue creation validation error: {str(e)}")
-            return Response(
-                {"error": str(e)},
-                status=status.HTTP_400_BAD_REQUEST
+        # No more generic except–catch here, so any validation errors bubble out
+        instance = serializer.save()
+        if instance.handled_by:
+            send_notification_email(
+                subject=f'New Issue #{instance.id}',
+                message=(
+                    f"Issue submitted by {instance.author.user.get_full_name()}\n"
+                    f"Direct link: /issues/{instance.id}"
+                ),
+                recipient_email=instance.handled_by.user.notification_email
             )
+
 
 @method_decorator(cache_page(30), name='dispatch')
 class ListIssuesView(generics.ListAPIView):
-    serializer_class = IssueDetailSerializer
+    serializer_class   = IssueDetailSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
@@ -69,7 +71,6 @@ class ListIssuesView(generics.ListAPIView):
             'assigned_lecturer__user',
             'handled_by__user'
         )
-
         if user.user_role == 'student':
             return qs.filter(author=user.student)
         elif user.user_role == 'registrar':
@@ -77,6 +78,7 @@ class ListIssuesView(generics.ListAPIView):
         elif user.user_role == 'lecturer':
             return qs.filter(assigned_lecturer__user=user)
         return qs.none()
+
 
 class CollegeRegisterAssignView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -87,8 +89,6 @@ class CollegeRegisterAssignView(APIView):
                 'assigned_lecturer__user',
                 'author__user'
             ).get(id=issue_id)
-            
-            # Only allow users with registrar role
             if request.user.user_role != 'registrar':
                 return Response(
                     {"error": "Only registrars can assign issues."},
@@ -124,6 +124,7 @@ class CollegeRegisterAssignView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
+
 class LecturerUpdateIssueStatusView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -133,7 +134,6 @@ class LecturerUpdateIssueStatusView(APIView):
                 'author__user',
                 'assigned_lecturer__user'
             ).get(id=issue_id)
-            
             if request.user.user_role != 'lecturer':
                 return Response(
                     {"error": "Only lecturers can update issue status."},
@@ -152,7 +152,10 @@ class LecturerUpdateIssueStatusView(APIView):
             if updated_issue.status == 'resolved':
                 send_notification_email(
                     subject=f'Issue #{issue.id} Resolved',
-                    message=f"Your issue has been resolved by {request.user.get_full_name()}",
+                    message=(
+                        f"Your issue has been resolved by "
+                        f"{request.user.get_full_name()}"
+                    ),
                     recipient_email=updated_issue.author.user.notification_email
                 )
 
@@ -167,17 +170,18 @@ class LecturerUpdateIssueStatusView(APIView):
             )
 
     def put(self, request, issue_id):
-        # Allow full updates via PUT by delegating to patch logic
         return self.patch(request, issue_id)
 
+
 class RetrieveIssueView(generics.RetrieveAPIView):
-    queryset = Issue.objects.select_related(
+    queryset           = Issue.objects.select_related(
         'author__user',
         'assigned_lecturer__user',
         'handled_by__user'
     )
-    serializer_class = IssueDetailSerializer
+    serializer_class   = IssueDetailSerializer
     permission_classes = [permissions.IsAuthenticated]
+
 
 class SecureFileDownloadView(LoginRequiredMixin, View):
     def get(self, request, issue_id):
@@ -186,7 +190,6 @@ class SecureFileDownloadView(LoginRequiredMixin, View):
                 'author__user',
                 'assigned_lecturer__user'
             ).get(id=issue_id)
-            
             if not (
                 issue.author.user == request.user or
                 (issue.assigned_lecturer and issue.assigned_lecturer.user == request.user) or
@@ -208,15 +211,17 @@ class SecureFileDownloadView(LoginRequiredMixin, View):
                 status=status.HTTP_403_FORBIDDEN
             )
 
+
 class HealthCheckView(APIView):
     permission_classes = [permissions.AllowAny]
-    
+
     def get(self, request):
         try:
             Issue.objects.first()
             test_file = os.path.isfile(settings.MEDIA_ROOT + '/test.txt')
             return Response(
-                {"status": "healthy", "storage": "available" if test_file else "unavailable"},
+                {"status": "healthy",
+                 "storage": "available" if test_file else "unavailable"},
                 status=status.HTTP_200_OK
             )
         except Exception as e:
