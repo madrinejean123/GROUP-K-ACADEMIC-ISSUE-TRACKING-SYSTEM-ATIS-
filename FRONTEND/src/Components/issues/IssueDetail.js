@@ -82,7 +82,7 @@ const IssueDetail = ({
         <div className="issue-detail-content">
           <div className="issue-detail-header">
             <div className="issue-id-badge">#{issue.id}</div>
-            <span className={`status-badge ${getStatusClass(issue.status)}`}> 
+            <span className={`status-badge ${getStatusClass(issue.status)}`}>
               {issue.status}
             </span>
           </div>
@@ -111,7 +111,7 @@ const IssueDetail = ({
             {userRole === "Lecturer" && (
               <div>
                 <strong>Student:</strong>{" "}
-                {issue.student || "Unknown"}
+                {issue.author?.user?.full_name || "Unknown"}
               </div>
             )}
           </div>
@@ -119,24 +119,21 @@ const IssueDetail = ({
           <div className="issue-detail-section">
             <h4>Description</h4>
             <p className="issue-detail-description">{issue.description}</p>
+          </div>
 
-            {issue.attachments?.length > 0 && (
-              <div className="issue-attachments">
-                <h5>Attachments</h5>
-                {issue.attachments.map((file, idx) => (
-                  <a
-                    key={idx}
-                    href="#"
-                    className="attachment-link"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      alert(`Downloading file: ${file.name}`);
-                    }}
-                  >
-                    <FaFile /> {file.name}
-                  </a>
-                ))}
-              </div>
+          <div className="issue-detail-section">
+            <h4>Attachment</h4>
+            {issue.attachment_url ? (
+              <a
+                href={issue.attachment_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="attachment-link"
+              >
+                <FaFile /> Download Attachment
+              </a>
+            ) : (
+              <p className="no-attachment">No attachment provided.</p>
             )}
           </div>
 
