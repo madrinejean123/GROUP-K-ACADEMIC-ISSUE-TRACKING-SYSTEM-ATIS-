@@ -3,6 +3,7 @@ from .models import Issue
 from users.serializers import StudentSerializer, LecturerSerializer, CollegeRegisterSerializer
 from users.models import Lecturer, CollegeRegister
 import logging
+import traceback
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +20,7 @@ class IssueCreateSerializer(serializers.ModelSerializer):
                 'help_text': 'Format: 3-4 capital letters + 4 digits (e.g., CSC1200)'
             }
         }
-    
+
     def validate_category(self, value):
         valid_categories = ['missing_marks', 'appeals', 'correction']
         if value not in valid_categories:
@@ -31,7 +32,7 @@ class IssueCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         request = self.context['request']
         student = getattr(request.user, 'student', None)
-        
+
         if not student:
             raise serializers.ValidationError(
                 {"error": "Only students can create issues"},
@@ -56,11 +57,13 @@ class IssueCreateSerializer(serializers.ModelSerializer):
             issue = Issue.objects.create(**validated_data)
             return issue
         except Exception as e:
-            logger.error(f"Issue creation failed: {str(e)}")
-            raise serializers.ValidationError(
-                {"error": "Failed to create issue. Please try again."},
-                code='creation_failed'
-            )
+            tb = traceback.format_exc()
+            logger.error(f"Issue creation failed: {str(e)}\n{tb}")
+            raise serializers.ValidationError({
+                "error": "Issue creation failed.",
+                "details": str(e)
+            }, code='creation_failed')
+
 
 class IssueAssignSerializer(serializers.ModelSerializer):
     assigned_lecturer = LecturerSerializer(read_only=True)
@@ -78,7 +81,6 @@ class IssueAssignSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         request = self.context['request']
-        # Only allow users with registrar role
         if request.user.user_role != 'registrar':
             raise serializers.ValidationError(
                 {"error": "Only registrars can assign issues."},
@@ -95,6 +97,7 @@ class IssueAssignSerializer(serializers.ModelSerializer):
         instance.status = 'in_progress'
         instance.save()
         return instance
+
 
 class IssueStatusUpdateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -127,6 +130,7 @@ class IssueStatusUpdateSerializer(serializers.ModelSerializer):
         instance.resolution_notes = validated_data.get('resolution_notes', '')
         instance.save()
         return instance
+
 
 class IssueDetailSerializer(serializers.ModelSerializer):
     author = StudentSerializer(read_only=True)
