@@ -9,8 +9,7 @@ const CreateIssueForm = ({ onCancel }) => {
     title: "",
     description: "",
     courseCode: "",
-    category: "Missing Marks",
-    status: "Open",
+    category: "missing_marks",  // match serializer choices
     attachment: null,
   });
   const [userData, setUserData] = useState({
@@ -21,15 +20,12 @@ const CreateIssueForm = ({ onCancel }) => {
     department: "",
   });
 
-  // Validation state
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState(null);
 
-  // File size limit in bytes (5MB)
   const MAX_FILE_SIZE = 5 * 1024 * 1024;
-  // Allowed file types
   const ALLOWED_FILE_TYPES = [
     "image/jpeg",
     "image/png",
@@ -39,7 +35,6 @@ const CreateIssueForm = ({ onCancel }) => {
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   ];
 
-  // Fetch the user data from the backend profile
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -50,13 +45,8 @@ const CreateIssueForm = ({ onCancel }) => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        // API now returns nested objects:
-        //   response.data.college = { id, name, code }
-        //   response.data.school = { id, school_name, college }
-        //   response.data.department = { id, department_name, school }
         const { full_name, student_no, college, school, department } =
           response.data;
-
         setUserData({
           fullName: full_name,
           studentNo: student_no,
@@ -69,22 +59,18 @@ const CreateIssueForm = ({ onCancel }) => {
         toast.error("Failed to fetch user profile.");
       }
     };
-
     fetchUserData();
   }, []);
 
-  // Validate the form on input change
   useEffect(() => {
     if (Object.keys(touched).length > 0) {
       validateForm();
     }
   }, [newIssue, touched]);
 
-  // Form validation function
   const validateForm = () => {
     const newErrors = {};
 
-    // Title validations
     if (!newIssue.title.trim()) {
       newErrors.title = "Title is required";
     } else if (newIssue.title.length < 5) {
@@ -93,14 +79,12 @@ const CreateIssueForm = ({ onCancel }) => {
       newErrors.title = "Title must be less than 100 characters";
     }
 
-    // Description validation
     if (!newIssue.description.trim()) {
       newErrors.description = "Description is required";
     } else if (newIssue.description.length < 10) {
       newErrors.description = "Description must be at least 10 characters";
     }
 
-    // Course code validations
     if (!newIssue.courseCode.trim()) {
       newErrors.courseCode = "Course code is required";
     } else if (!/^[A-Z]{3,4}\d{4}$/.test(newIssue.courseCode.trim())) {
@@ -108,12 +92,10 @@ const CreateIssueForm = ({ onCancel }) => {
         "Invalid course code format (e.g., CSC1234 or MATH1234)";
     }
 
-    // Category validations
     if (!newIssue.category) {
       newErrors.category = "Please select a category";
     }
 
-    // File validations (if a file is selected)
     if (newIssue.attachment) {
       if (!ALLOWED_FILE_TYPES.includes(newIssue.attachment.type)) {
         newErrors.attachment = "File type not supported";
@@ -126,75 +108,45 @@ const CreateIssueForm = ({ onCancel }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle the input changes for text fields
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-
-    setNewIssue((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    // Mark fields as touched
-    setTouched((prev) => ({
-      ...prev,
-      [name]: true,
-    }));
+    setNewIssue((prev) => ({ ...prev, [name]: value }));
+    setTouched((prev) => ({ ...prev, [name]: true }));
   };
 
-  // Handle files attachment change
   const handleFileChange = (e) => {
     const file = e.target.files[0];
+    if (!file) return;
 
-    if (!file) {
-      return;
-    }
-
-    // Check file type
     if (!ALLOWED_FILE_TYPES.includes(file.type)) {
       toast.error(
         "Please upload a valid file type (image, PDF, or Word document)."
       );
-      e.target.value = null; // Reset the input
+      e.target.value = null;
       return;
     }
 
-    // Check file size
     if (file.size > MAX_FILE_SIZE) {
       toast.error("File size must be less than 5MB.");
-      e.target.value = null; // Reset the input
+      e.target.value = null;
       return;
     }
 
-    setNewIssue((prev) => ({
-      ...prev,
-      attachment: file,
-    }));
-
-    setTouched((prev) => ({
-      ...prev,
-      attachment: true,
-    }));
+    setNewIssue((prev) => ({ ...prev, attachment: file }));
+    setTouched((prev) => ({ ...prev, attachment: true }));
   };
 
-  // Handle form submission using FormData for the file attachment
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Mark all fields as touched to trigger validation
-    const allFields = {
+    setTouched({
       title: true,
       description: true,
       courseCode: true,
       category: true,
       attachment: true,
-    };
-    setTouched(allFields);
+    });
 
-    // Validate the form
-    const isValid = validateForm();
-
-    if (!isValid) {
+    if (!validateForm()) {
       setFormError("Please fix the errors in the form before submitting.");
       return;
     }
@@ -207,10 +159,8 @@ const CreateIssueForm = ({ onCancel }) => {
       const formData = new FormData();
       formData.append("title", newIssue.title);
       formData.append("description", newIssue.description);
-      formData.append("courseCode", newIssue.courseCode);
+      formData.append("course_code", newIssue.courseCode);
       formData.append("category", newIssue.category);
-      formData.append("status", newIssue.status);
-
       if (newIssue.attachment) {
         formData.append("attachment", newIssue.attachment);
       }
@@ -230,18 +180,13 @@ const CreateIssueForm = ({ onCancel }) => {
       toast.success("Issue created successfully!", {
         position: "top-right",
         autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
         theme: "colored",
       });
-      onCancel(); // Close the modal after submission
+      onCancel();
     } catch (error) {
       console.error("Error creating issue:", error);
       const errorMessage =
-        error.response?.data?.message ||
+        error.response?.data?.error ||
         "Failed to create issue. Please try again.";
       toast.error(errorMessage);
       setFormError(errorMessage);
@@ -262,33 +207,18 @@ const CreateIssueForm = ({ onCancel }) => {
             </button>
           </div>
 
-          {/* Display User Profile Info */}
           <div className="user-info">
-            <p>
-              <strong>Name:</strong> {userData.fullName || "Loading..."}
-            </p>
-            <p>
-              <strong>Student No:</strong> {userData.studentNo || "Loading..."}
-            </p>
-            <p>
-              <strong>College:</strong> {userData.college || "Loading..."}
-            </p>
-            <p>
-              <strong>School:</strong> {userData.school || "Loading..."}
-            </p>
-            <p>
-              <strong>Department:</strong> {userData.department || "Loading..."}
-            </p>
+            <p><strong>Name:</strong> {userData.fullName || "Loading..."}</p>
+            <p><strong>Student No:</strong> {userData.studentNo || "Loading..."}</p>
+            <p><strong>College:</strong> {userData.college || "Loading..."}</p>
+            <p><strong>School:</strong> {userData.school || "Loading..."}</p>
+            <p><strong>Department:</strong> {userData.department || "Loading..."}</p>
           </div>
 
           {formError && <div className="form-error">{formError}</div>}
 
           <form onSubmit={handleSubmit} noValidate>
-            <div
-              className={`form-group ${
-                errors.title && touched.title ? "error" : ""
-              }`}
-            >
+            <div className={`form-group ${errors.title && touched.title ? "error" : ""}`}>
               <label htmlFor="title">Title</label>
               <input
                 type="text"
@@ -297,18 +227,13 @@ const CreateIssueForm = ({ onCancel }) => {
                 value={newIssue.title}
                 onChange={handleInputChange}
                 placeholder="Enter the issue title"
-                required
               />
               {errors.title && touched.title && (
                 <div className="error-message">{errors.title}</div>
               )}
             </div>
 
-            <div
-              className={`form-group ${
-                errors.courseCode && touched.courseCode ? "error" : ""
-              }`}
-            >
+            <div className={`form-group ${errors.courseCode && touched.courseCode ? "error" : ""}`}>
               <label htmlFor="courseCode">Course Code</label>
               <input
                 type="text"
@@ -316,26 +241,20 @@ const CreateIssueForm = ({ onCancel }) => {
                 name="courseCode"
                 value={newIssue.courseCode}
                 onChange={handleInputChange}
-                placeholder="Enter course code (e.g., CSC1200 or MATH1201)"
-                required
+                placeholder="E.g., CSC1200 or MATH1234"
               />
               {errors.courseCode && touched.courseCode && (
                 <div className="error-message">{errors.courseCode}</div>
               )}
             </div>
 
-            <div
-              className={`form-group ${
-                errors.category && touched.category ? "error" : ""
-              }`}
-            >
+            <div className={`form-group ${errors.category && touched.category ? "error" : ""}`}>
               <label htmlFor="category">Category</label>
               <select
                 id="category"
                 name="category"
                 value={newIssue.category}
                 onChange={handleInputChange}
-                required
               >
                 <option value="missing_marks">Missing Marks</option>
                 <option value="appeals">Appeals</option>
@@ -346,49 +265,37 @@ const CreateIssueForm = ({ onCancel }) => {
               )}
             </div>
 
-            <div
-              className={`form-group ${
-                errors.description && touched.description ? "error" : ""
-              }`}
-            >
+            <div className={`form-group ${errors.description && touched.description ? "error" : ""}`}>
               <label htmlFor="description">Description</label>
               <textarea
                 id="description"
                 name="description"
                 value={newIssue.description}
                 onChange={handleInputChange}
-                placeholder="Enter description here e.g Missing marks for CourseX CourseCode, taught by Lecturer-Y and more relevant info..."
-                required
+                placeholder="Describe your issue..."
               />
               {errors.description && touched.description && (
                 <div className="error-message">{errors.description}</div>
               )}
             </div>
 
-            <div
-              className={`form-group ${
-                errors.attachment && touched.attachment ? "error" : ""
-              }`}
-            >
-              <label htmlFor="attachment">
-                Attach Supporting File (Optional)
-              </label>
+            <div className={`form-group ${errors.attachment && touched.attachment ? "error" : ""}`}>
+              <label htmlFor="attachment">Attach Supporting File (Optional)</label>
               <input
                 type="file"
                 id="attachment"
                 name="attachment"
                 onChange={handleFileChange}
-                className="file-input"
               />
               <div className="file-info">
-                Optional: Upload images, PDF, or Word documents (Max size: 5MB)
+                Optional: JPG/PNG/PDF/DOC (Max 5MB)
               </div>
               {errors.attachment && touched.attachment && (
                 <div className="error-message">{errors.attachment}</div>
               )}
               {newIssue.attachment && (
                 <div className="file-preview">
-                  Selected file: {newIssue.attachment.name} (
+                  Selected: {newIssue.attachment.name} (
                   {(newIssue.attachment.size / 1024 / 1024).toFixed(2)} MB)
                 </div>
               )}
