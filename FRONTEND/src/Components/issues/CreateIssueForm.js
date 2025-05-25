@@ -4,7 +4,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "../styles/create-issue.css";
 
-const CreateIssueForm = ({ onSubmit,onCancel }) => {
+const CreateIssueForm = ({ onSubmit, onCancel }) => {
   const [newIssue, setNewIssue] = useState({
     title: "",
     description: "",
@@ -45,8 +45,7 @@ const CreateIssueForm = ({ onSubmit,onCancel }) => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        const { full_name, student_no, college, school, department } =
-          response.data;
+        const { full_name, student_no, college, school, department } = response.data;
         setUserData({
           fullName: full_name,
           studentNo: student_no,
@@ -157,27 +156,14 @@ const CreateIssueForm = ({ onSubmit,onCancel }) => {
     try {
       const token = localStorage.getItem("access_token");
 
-      // If no token, simulate successful submission for preview
+      // If no token, simulate success (for preview)
       if (!token) {
-        console.log(
-          "No access token, simulating successful submission for preview"
-        );
-
-        // Simulate API delay
         await new Promise((resolve) => setTimeout(resolve, 1000));
-
         toast.success(`Issue "${newIssue.title}" created successfully!`, {
           position: "top-right",
           autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
           theme: "colored",
         });
-
-        // Pass the created issue back to the parent component
         onSubmit(newIssue);
         return;
       }
@@ -197,13 +183,12 @@ const CreateIssueForm = ({ onSubmit,onCancel }) => {
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
+            // Do NOT set Content-Type; let the browser/Axios add the correct multipart boundary
           },
         }
       );
 
       console.log("Issue created:", response.data);
-
       toast.success(`Issue "${newIssue.title}" created successfully!`, {
         position: "top-right",
         autoClose: 3000,
@@ -212,8 +197,13 @@ const CreateIssueForm = ({ onSubmit,onCancel }) => {
       onCancel();
     } catch (error) {
       console.error("Error creating issue:", error);
+      const data = error.response?.data;
+      // Gather field errors or generic error
       const errorMessage =
-        error.response?.data?.error ||
+        data?.error ||
+        (data && typeof data === "object"
+          ? Object.values(data).flat().join(" ")
+          : null) ||
         "Failed to create issue. Please try again.";
       toast.error(errorMessage);
       setFormError(errorMessage);
@@ -235,17 +225,32 @@ const CreateIssueForm = ({ onSubmit,onCancel }) => {
           </div>
 
           <div className="user-info">
-            <p><strong>Name:</strong> {userData.fullName || "Loading..."}</p>
-            <p><strong>Student No:</strong> {userData.studentNo || "Loading..."}</p>
-            <p><strong>College:</strong> {userData.college || "Loading..."}</p>
-            <p><strong>School:</strong> {userData.school || "Loading..."}</p>
-            <p><strong>Department:</strong> {userData.department || "Loading..."}</p>
+            <p>
+              <strong>Name:</strong> {userData.fullName || "Loading..."}
+            </p>
+            <p>
+              <strong>Student No:</strong> {userData.studentNo || "Loading..."}
+            </p>
+            <p>
+              <strong>College:</strong> {userData.college || "Loading..."}
+            </p>
+            <p>
+              <strong>School:</strong> {userData.school || "Loading..."}
+            </p>
+            <p>
+              <strong>Department:</strong>{" "}
+              {userData.department || "Loading..."}
+            </p>
           </div>
 
           {formError && <div className="form-error">{formError}</div>}
 
           <form onSubmit={handleSubmit} noValidate>
-            <div className={`form-group ${errors.title && touched.title ? "error" : ""}`}>
+            <div
+              className={`form-group ${
+                errors.title && touched.title ? "error" : ""
+              }`}
+            >
               <label htmlFor="title">Title</label>
               <input
                 type="text"
@@ -260,7 +265,11 @@ const CreateIssueForm = ({ onSubmit,onCancel }) => {
               )}
             </div>
 
-            <div className={`form-group ${errors.courseCode && touched.courseCode ? "error" : ""}`}>
+            <div
+              className={`form-group ${
+                errors.courseCode && touched.courseCode ? "error" : ""
+              }`}
+            >
               <label htmlFor="courseCode">Course Code</label>
               <input
                 type="text"
@@ -275,7 +284,11 @@ const CreateIssueForm = ({ onSubmit,onCancel }) => {
               )}
             </div>
 
-            <div className={`form-group ${errors.category && touched.category ? "error" : ""}`}>
+            <div
+              className={`form-group ${
+                errors.category && touched.category ? "error" : ""
+              }`}
+            >
               <label htmlFor="category">Category</label>
               <select
                 id="category"
@@ -292,7 +305,11 @@ const CreateIssueForm = ({ onSubmit,onCancel }) => {
               )}
             </div>
 
-            <div className={`form-group ${errors.description && touched.description ? "error" : ""}`}>
+            <div
+              className={`form-group ${
+                errors.description && touched.description ? "error" : ""
+              }`}
+            >
               <label htmlFor="description">Description</label>
               <textarea
                 id="description"
@@ -306,8 +323,14 @@ const CreateIssueForm = ({ onSubmit,onCancel }) => {
               )}
             </div>
 
-            <div className={`form-group ${errors.attachment && touched.attachment ? "error" : ""}`}>
-              <label htmlFor="attachment">Attach Supporting File (Optional)</label>
+            <div
+              className={`form-group ${
+                errors.attachment && touched.attachment ? "error" : ""
+              }`}
+            >
+              <label htmlFor="attachment">
+                Attach Supporting File (Optional)
+              </label>
               <input
                 type="file"
                 id="attachment"
