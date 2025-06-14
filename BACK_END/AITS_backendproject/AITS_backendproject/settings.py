@@ -202,7 +202,7 @@ EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'qpttfviwmffplljn')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # ----------------------------------------------------------------------------
-# Activate Django-Heroku Settings
+# Activate Django-Heroku'S Settings
 # ----------------------------------------------------------------------------
 
 django_heroku.settings(locals())

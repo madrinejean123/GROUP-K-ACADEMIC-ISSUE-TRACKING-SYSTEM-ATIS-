@@ -13,9 +13,9 @@ import "./student-dashboard.css";
 import axios from "axios";
 
 const PROFILE_API_URL =
-  "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/profile/";
+  "https://aits-group-k-backen-edab8eb6b7d6.herokuapp.com/users/profile/";
 const ALL_ISSUES_API_URL =
-  "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/list/";
+  "https://aits-group-k-backen-edab8eb6b7d6.herokuapp.com/issues/list/";
 
 const StudentDashboard = () => {
   const [issues, setIssues] = useState([]);
