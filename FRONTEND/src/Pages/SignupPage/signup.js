@@ -34,7 +34,7 @@ const SignUp = () => {
     const fetchColleges = async () => {
       try {
         const response = await axios.get(
-          "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/department/colleges/"
+          "https://aits-group-k-backen-edab8eb6b7d6.herokuapp.com/department/colleges/"
         );
         setColleges(response.data);
       } catch (error) {
@@ -62,7 +62,7 @@ const SignUp = () => {
 
     try {
       const response = await axios.post(
-        "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/register/",
+        "https://aits-group-k-backen-edab8eb6b7d6.herokuapp.com/users/register/",
         requestData
       );
       console.log(response);

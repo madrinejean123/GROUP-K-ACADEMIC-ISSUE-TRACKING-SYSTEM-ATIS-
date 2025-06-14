@@ -52,7 +52,7 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
     try {
       const token = localStorage.getItem("access_token");
       const { data } = await axios.get(
-        "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/users/lecturers/",
+        "https://aits-group-k-backen-edab8eb6b7d6.herokuapp.com/users/users/lecturers/",
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setLecturers(data.map((l) => ({ id: l.id, name: l.user.full_name })));
@@ -74,7 +74,7 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
       if (!token) throw new Error("No auth token");
 
       const { data } = await axios.post(
-        `https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/assign/${issueId}/`,
+        `https://aits-group-k-backen-edab8eb6b7d6.herokuapp.com/issues/assign/${issueId}/`,
         { lecturer_id: lecturerId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -107,7 +107,7 @@ const IssueTable = ({ issues, onViewIssue, userRole, onAssign }) => {
       if (!token) throw new Error("No auth token");
 
       const { data } = await axios.put(
-        `https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/update-status/${issueId}/`,
+        `https://aits-group-k-backen-edab8eb6b7d6.herokuapp.com/issues/update-status/${issueId}/`,
         { status: "resolved" },
         { headers: { Authorization: `Bearer ${token}` } }
       );

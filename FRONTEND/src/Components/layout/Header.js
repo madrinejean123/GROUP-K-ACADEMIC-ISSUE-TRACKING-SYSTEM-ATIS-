@@ -187,7 +187,7 @@ const Header = ({
   useEffect(() => {
     axios
       .get(
-        "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/department/colleges/"
+        "https://aits-group-k-backen-edab8eb6b7d6.herokuapp.com/department/colleges/"
       )
       .then(({ data }) => setColleges(data))
       .catch((err) => console.error("Error fetching colleges:", err));
@@ -253,7 +253,7 @@ const Header = ({
       );
 
       await axios.put(
-        `https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/profile/update_me/`,
+        `https://aits-group-k-backen-edab8eb6b7d6.herokuapp.com/users/profile/update_me/`,
         {
           ...payload,
           college: collegeObj ? collegeObj.id : null,

@@ -27,7 +27,7 @@ const RegistrarDashboard = () => {
       if (!token) return;
       try {
         const { data } = await axios.get(
-          "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/profile/",
+          "https://aits-group-k-backen-edab8eb6b7d6.herokuapp.com/users/profile/",
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -47,7 +47,7 @@ const RegistrarDashboard = () => {
       if (!token) return;
       try {
         const { data } = await axios.get(
-          "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/issues/list/",
+          "https://aits-group-k-backen-edab8eb6b7d6.herokuapp.com/issues/list/",
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -72,7 +72,7 @@ const RegistrarDashboard = () => {
       if (!token) return;
       try {
         const { data } = await axios.get(
-          "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/users/lecturers/",
+          "https://aits-group-k-backen-edab8eb6b7d6.herokuapp.com/users/users/lecturers/",
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setLecturers(data);

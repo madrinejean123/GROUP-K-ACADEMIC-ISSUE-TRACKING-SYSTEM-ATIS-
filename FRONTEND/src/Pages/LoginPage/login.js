@@ -24,7 +24,7 @@ const LoginPage = () => {
     try {
       // Assuming the login API is at this URL
       const response = await axios.post(
-        "https://aits-group-k-backend-7ede8a18ee73.herokuapp.com/users/login/",
+        "https://aits-group-k-backen-edab8eb6b7d6.herokuapp.com/users/login/",
         data
       );
 
