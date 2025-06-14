@@ -34,7 +34,8 @@ const hierarchy = {
       "Department of Adult & Community Education (DACE)",
       "Institute of Open Distance and eLearning",
     ],
-    "The East African School of Higher Education Studies and Development (EASHESD)": [],
+    "The East African School of Higher Education Studies and Development (EASHESD)":
+      [],
   },
   CEDAT: {
     "School of Engineering": [
@@ -271,7 +272,7 @@ const Header = ({
 
   const handleLogout = () => {
     // optional cleanup: localStorage.removeItem('access_token');
-    navigate('/login');
+    navigate("/login");
   };
 
   const handleMyAccount = () => {
@@ -283,7 +284,6 @@ const Header = ({
     alert("Settings clicked");
     setProfileOpen(false);
   };
-
 
   // ——————————
   // Render
@@ -321,11 +321,11 @@ const Header = ({
                   <span className="notification-time">2 hours ago</span>
                 </div>
                 <div className="notification-item">
-                  <p>Issue #5678 has been updated</p>
+                  <p>Issue #27 has been updated</p>
                   <span className="notification-time">Yesterday</span>
                 </div>
                 <div className="notification-item">
-                  <p>Issue #9012 has been resolved</p>
+                  <p>Issue #129 has been resolved</p>
                   <span className="notification-time">2 days ago</span>
                 </div>
               </div>
@@ -352,8 +352,7 @@ const Header = ({
                   </button>
                   <button
                     className="profile-option logout-option"
-                    onClick={() => navigate('/login')}
-
+                    onClick={() => navigate("/login")}
                   >
                     <FaSignOutAlt /> Logout
                   </button>
